@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>res/icon.ico</file>
+        <file>res/logo.png</file>
+        <file>res/1.png</file>
+        <file>res/2.png</file>
+        <file>res/3.png</file>
+        <file>res/4.png</file>
+        <file>res/5.png</file>
+        <file>res/6.png</file>
+        <file>res/7.png</file>
+        <file>res/customer.png</file>
+        <file>res/customer_cross.png</file>
+        <file>res/empty.png</file>
+        <file>res/incoming.png</file>
+        <file>res/incoming_cross.png</file>
+        <file>res/ordering.png</file>
+        <file>res/outgoing_cross.png</file>
+        <file>res/ordering_cross.png</file>
+        <file>res/outgoing.png</file>
+        <file>res/unknow.png</file>
+        <file>res/warning.png</file>
+    </qresource>
+</RCC>

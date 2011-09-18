@@ -1,0 +1,2 @@
+Dieses Programm steht unter der open-source Lizenz GNU GPL v3. Die Nutzung dieses Programmes ist kostenlos. Der Autor entbindet sich von jeglicher Haftung, gleich welcher Art. Dieses Programm befindet sich im beta-Status und ist noch nicht für den produktiven Einsatz gedacht.
+
