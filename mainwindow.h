@@ -71,6 +71,7 @@ public:
     QMenu * m_pContextMenuDefault; //table context menu default(new,edit,remove)
     QMenu * m_pContextMenuTrade; //table context menu (incoming,outgoing,ordering incoming,customer outgoing,canceled
     QMenu * m_pContextMenuArticle; //table context menu article(new,edit,copy,remove)
+    QString m_sDbPath;//path for database-file
 
 protected://overload's
     virtual void resizeEvent(QResizeEvent * event);
@@ -83,6 +84,8 @@ public:
     bool open_db(void);
     bool fill_all_table(void);
     bool settings(bool bUpdate=false);
+    bool check_first_start(void);
+    bool check_run_the_program(void);
     void timerEvent(QTimerEvent *event);
 
     //waregroup

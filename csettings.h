@@ -23,8 +23,11 @@
 
 class CSettings
 {
+private:
+    QString m_sSettingsPath;
+
 public:
-    CSettings(){}
+    CSettings();
     ~CSettings(){}
     bool create_default_setting_file(void);
     bool load(QList<QString> & lsSType, QList<QString> & lsSValue);

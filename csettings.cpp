@@ -19,12 +19,18 @@
 #include "csettings.h"
 
 //------
+CSettings::CSettings()
+{
+    //settings path
+    m_sSettingsPath=QDir::homePath()+QString("/lava2/");
+}
+
 bool CSettings::create_default_setting_file(void)
 {
     bool b=true;
-    QString s;
+    QString s,sFile=m_sSettingsPath+QString("settings.txt");
     //-
-    QFile file(QString("settings.txt"));
+    QFile file(sFile);
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         b=false;
@@ -242,10 +248,10 @@ bool CSettings::load(QList<QString> & lsSType, QList<QString> & lsSValue)
 
     bool b=false;
     int i,j,iFound=0;
-    QString s,sValue;
+    QString s,sValue, sFile=m_sSettingsPath+QString("settings.txt");
     QStringList lsString;
     //-
-    QFile file(QString("settings.txt"));
+    QFile file(sFile);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
         file.close();
     else
@@ -286,10 +292,10 @@ bool CSettings::load(QString sType, QString & sValue)
 {
     bool bFound=false;
     int i;
-    QString s;
+    QString s,sFile=m_sSettingsPath+QString("settings.txt");
     QStringList lsString;
     //-
-    QFile file(QString("settings.txt"));
+    QFile file(sFile);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
         file.close();
     else
@@ -323,10 +329,10 @@ bool CSettings::write(QList<QString> & lsSType, QList<QString> & lsSValue)
 {
     int i;
     bool b=true;
-    QString s;
+    QString s,sFile=m_sSettingsPath+QString("settings.txt"),sTempFile=m_sSettingsPath+QString("settings_temp.txt");
     QStringList lsS;
-    QFile file(QString("settings.txt"));
-    QFile file_temp(QString("settings_tmp.txt"));
+    QFile file(sFile);
+    QFile file_temp(sTempFile);
     //-
     if(lsSType.count()!=lsSValue.count()) // counts of 2 lists = ?
         b=false;
@@ -384,8 +390,8 @@ bool CSettings::write(QList<QString> & lsSType, QList<QString> & lsSValue)
                 //-
                 file.close();
                 file_temp.close();
-                QFile::remove(QString("settings.txt"));//delete old
-                QFile::rename(QString("settings_tmp.txt"),QString("settings.txt")); // rename temp
+                QFile::remove(sFile);//delete old
+                QFile::rename(sTempFile,sFile); // rename temp
             }
         }
     }
@@ -774,10 +780,10 @@ bool CSettings::get_tab_order(QTabWidget * pTab, QString & sValues,QList<QWidget
 bool CSettings::remove_line(QString sType)
 {
     bool b=true,bWriteLine;
-    QString s;
+    QString s,sFile=m_sSettingsPath+QString("settings.txt"),sTempFile=m_sSettingsPath+QString("settings_temp.txt");
     QStringList lsS;
-    QFile file(QString("settings.txt"));
-    QFile file_temp(QString("settings_tmp.txt"));
+    QFile file(sFile);
+    QFile file_temp(sTempFile);
     //-
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -815,8 +821,8 @@ bool CSettings::remove_line(QString sType)
             //-
             file.close();
             file_temp.close();
-            QFile::remove(QString("settings.txt"));//delete old
-            QFile::rename(QString("settings_tmp.txt"),QString("settings.txt")); // rename temp
+            QFile::remove(sFile);//delete old
+            QFile::rename(sTempFile,sFile); // rename temp
         }
     }
     //-
@@ -871,7 +877,7 @@ QString CSettings::cast_int_list_to_string(QList<int> & lsInt, QString sType)
 
 bool CSettings::give_it_setting_file(void)
 {
-    QString sFile("settings.txt");
+    QString sFile=m_sSettingsPath+QString("settings.txt");
     bool b=QFile::exists(sFile);
     return b;
 }

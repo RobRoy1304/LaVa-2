@@ -31,12 +31,12 @@ CDbConnection::~CDbConnection()
    close_db();
 }
 
-bool CDbConnection::open_db(QString sDbName, QString sIP)
+bool CDbConnection::open_db(QString sDbName, QString sHost)
 {
     if(m_bConnect)//db open?
         close_db();
     bool b=false;
-    m_db.setHostName(sIP);
+    m_db.setHostName(sHost);
     m_db.setDatabaseName(sDbName);
     if(!m_db.open())
         b=false;

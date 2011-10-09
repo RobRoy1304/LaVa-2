@@ -21,18 +21,13 @@
 #include "csettings.h"
 #include "clogodialog.h"
 
+
 int main(int argc, char *argv[])
 {
-    bool bStart=true,bDeleteSetting=false;
+    int iReturn=0;
     QApplication a(argc, argv);
     MainWindow w;
     CLogoDialog logo_dlg;
-    QMessageBox msgError(QMessageBox::Critical,"","");
-    QMessageBox msgWarning(QMessageBox::Warning,"","");
-    QMessageBox msgAgreement(QMessageBox::Information,"","");
-    QString s;
-    QDesktopWidget desktop;
-    QRect r=desktop.availableGeometry();
 
     //plugins
     a.addLibraryPath( a.applicationDirPath() + "/plugins" );
@@ -48,87 +43,34 @@ int main(int argc, char *argv[])
     if(!ico.isNull())
         a.setWindowIcon(ico);
 
-    //settings
-    CSettings settings;
-    bool bGiveItSetting=settings.give_it_setting_file();
-    if(!bGiveItSetting)//first start?
-        settings.create_default_setting_file();//create default
-
-    if(settings.is_program_running())//run the program?
+    //start
+    if(w.check_first_start())//first start? -> agreement yes?
     {
-        msgWarning.setWindowTitle(QString("Warnung"));
-        s=QString("Das Programm läuft bereits oder wurde das letzte Mal gewaltsam beendet. Bitte überprüfen Sie das!");
-        msgWarning.setText(s);
-        msgWarning.exec();
-        settings.remove_line(QString("PROGRAM_RUNNING"));
-        bStart=false;
-    }
-    else
-    {
-        s=QString("PROGRAM_RUNNING");//set program running
-        settings.write(s,QString(""));
-
-        if(r.width()<1000 ||r.height()<600)//screen size error?(min 1000x600)
+        if(!w.check_run_the_program())//don't running?
         {
-            msgError.setWindowTitle("Fehler!");
-            s=QString("Die Bildschirmauflösung ist zu klein, das Programm setzt eine Auflösung von min. 1000x600 Px vorraus.");
-            msgError.setText(s);
-            msgError.exec();
-            bDeleteSetting=true;
-            bStart=false;
-        }
-        else
-        {
-            if(!bGiveItSetting)//first start? -> agreement
+            if(w.open_db())//open db ok?
             {
-                msgAgreement.setWindowTitle(QString("Nutzungsbedingungen:"));
-                s=QString("Dieses Programm(LaVa 2) steht unter der open-source-Lizenz GNU-GPL v3. Es entstehen für die Nutzung "
-                          "keine Kosten. Der Autor entbindet sich von jeglichen Haftungsansprüchen, gleich welcher Art. "
-                          "Das Programm befindet sich momentan noch im Beta-Status, und ist somit noch nicht für "
-                          "den produktiven Einsatz gedacht.\n\nSind Sie mit diesen Bedingungen einverstanden?");
-                msgAgreement.setText(s);
-                msgAgreement.addButton(QString("Ja"),QMessageBox::YesRole);
-                QPushButton * noButton=msgAgreement.addButton(QString("Nein"),QMessageBox::NoRole);
-                msgAgreement.exec();
-                if(msgAgreement.clickedButton()==noButton)
-                {
-                    bStart=false;
-                    bDeleteSetting=true;
-                }
-            }
+                //init
+                w.init();
 
-            //db
-            if(bStart)
-            {
-                if(!w.open_db())//open db ok?
-                    bStart=false;
-                else
-                {
-                    //init
-                    w.init();
+                //timer
+                w.startTimer(3000);//every 3sec.
 
-                    //timer
-                    w.startTimer(3000);//every 3sec.
+                //show
+                w.showMaximized();
 
-                    //show
-                    w.showMaximized();
+                //load settings
+                w.settings(false);//load settings
 
-                    //load settings
-                    w.settings(false);//load settings
+                //logo
+                logo_dlg.startTimer(2000);//start timer in 2 sec. close logo widget
+                logo_dlg.exec();
 
-                    //logo
-                    logo_dlg.startTimer(3000);//start timer in 3 sec. close logo widget
-                    logo_dlg.exec();
-                }
+                //start
+                iReturn=a.exec();
             }
         }
     }
-
-    if(bDeleteSetting)
-        QFile::remove(QString("settings.txt"));//delete default setting file)
-
-    int iReturn=0;
-    if(bStart)//start programm?
-        iReturn=a.exec();
+    //-
     return iReturn;
 }

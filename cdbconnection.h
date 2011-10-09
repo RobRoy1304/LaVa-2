@@ -33,7 +33,7 @@ public:
     //basic----------------------------------
     CDbConnection();
     ~CDbConnection();
-    bool open_db(QString sDbName=QString("lava.sqlite"), QString sIP=QString("localhost"));
+    bool open_db(QString sDbName, QString sHost=QString("localhost"));
     bool close_db(void);
     QString last_error(void);
     bool is_db_connect(void);

@@ -34,6 +34,9 @@ MainWindow::MainWindow(QWidget *parent)
     //hide statusbar
     ui->statusBar->hide();
 
+    //database path
+    m_sDbPath=QDir::homePath()+QString("/lava2/");
+
     //hide columns from tree widget
     ui->treeWidgetWaregroup->hideColumn(2);//id column
     ui->treeWidgetWaregroup->hideColumn(3);//parent_id column
@@ -482,19 +485,18 @@ bool MainWindow::open_db(void)
     QDateTime dtTi=QDateTime().currentDateTime();
     QMessageBox msg(QMessageBox::Critical,"","");
     msg.setWindowTitle(tr("Fehler!"));
-    QString s,s2;
+    QString s,s2,sFile=m_sDbPath+QString("lava.sqlite");
     bool b=false;
     //-
-    QFile file("lava.sqlite");
-    if(!file.open(QIODevice::ReadOnly))
+    if(!QFile::exists(sFile))
     {
-        msg.setText("Die Datenbank-Datei \"lava.sqlite\" befindet sich nicht in dem Programmordner!");
+        s=QString("Die Datenbank-Datei \"lava.sqlite\" befindet sich nicht in dem Ordner \"%1\"!").arg(m_sDbPath);
+        msg.setText(s);
         msg.exec();
     }
     else
     {
-        file.close();
-        if(!m_db.open_db())//open db?
+        if(!m_db.open_db(sFile,QString("localhost")))//open db?
         {
             s=m_db.last_error();
             s2=QString("Die Datenbank-Datei \"lava.sqlite\" konnte nicht geöffnet werden!\nerror:%1").arg(s);
@@ -937,6 +939,58 @@ bool MainWindow::settings(bool bUpdate)
     lsSValues.clear();
     lsPWidget.clear();
     return true;
+}
+
+bool MainWindow::check_first_start(void)
+{
+    QString s;
+    bool bReturn=true;
+    CSettings settings;
+    QPushButton * noButton=NULL;
+    QMessageBox msgAgreement(QMessageBox::Information,"","");
+    bool bGiveItSetting=settings.give_it_setting_file();
+    //-
+    if(!bGiveItSetting)//first start?
+    {
+        msgAgreement.setWindowTitle(QString("Nutzungsbedingungen:"));
+        s=QString("Dieses Programm(LaVa 2) steht unter der open-source-Lizenz GNU-GPL v3. Es entstehen für die Nutzung "
+                  "keine Kosten. Der Autor entbindet sich von jeglichen Haftungsansprüchen, gleich welcher Art. "
+                  "Das Programm befindet sich momentan noch im Beta-Status, und ist somit noch nicht für "
+                  "den produktiven Einsatz gedacht.\n\nSind Sie mit diesen Bedingungen einverstanden?");
+        msgAgreement.setText(s);
+        msgAgreement.addButton(QString("Ja"),QMessageBox::YesRole);
+        noButton=msgAgreement.addButton(QString("Nein"),QMessageBox::NoRole);
+        msgAgreement.exec();
+        if(msgAgreement.clickedButton()==noButton)
+            bReturn=false;
+        else
+            settings.create_default_setting_file();//create default
+    }
+    return bReturn;
+}
+
+bool MainWindow::check_run_the_program(void)
+{
+    QString s;
+    CSettings settings;
+    bool bReturn=false;
+    QMessageBox msgWarning(QMessageBox::Warning,"","");
+    //-
+    if(settings.is_program_running())//run the program?
+    {
+        msgWarning.setWindowTitle(QString("Warnung"));
+        s=QString("Das Programm läuft bereits oder wurde das letzte Mal gewaltsam beendet. Bitte überprüfen Sie das!");
+        msgWarning.setText(s);
+        msgWarning.exec();
+        settings.remove_line(QString("PROGRAM_RUNNING"));
+        bReturn=true;
+    }
+    else
+    {
+        s=QString("PROGRAM_RUNNING");//set program running
+        settings.write(s,QString(""));
+    }
+    return bReturn;
 }
 
 bool MainWindow::open_context_menu()
@@ -3734,60 +3788,58 @@ bool MainWindow::trade_canceled(void)
     memory.set_string(&sBookingNumber);
     memory.set_string2(&sErr);
 
-    //get selected trade
-    if(m_widgets.get_selected_table_item_value(ui->tableWidgetTrade,sBookingNumber,2))
+    if(m_widgets.get_selected_table_item_value(ui->tableWidgetTrade,sBookingNumber,2))//get selected booking number
     {
-        if(sBookingNumber.length()>0)
+        if(sBookingNumber.length()>0)//booking number set?
         {
-            b=m_thread.set_work(WORK_TRADE_CHECK_CANCEL_POSSIBLE,&memory);
-            if(!b)
-            {//canceled is not possible
-                s=QString("Die Buchung kann nicht storniert werden da es zwischenzeitlich zu negativen Bestand kommen würde,"
-                          "beachten Sie die chronologische Reihenfolge!");
-                if(sErr.length()>0)
-                    s+=QString("\n(%1)").arg(sErr);
-                msg.setWindowTitle("!");
-                msg.setText(s);
-                msg.exec();
-            }
-            if(b)
-            {//canceled is possible
-
-                //get trade
-                if(!m_db.trade_get(sBookingNumber,tr))
-                    b=false;//error
-                else
+            if(m_db.trade_get(sBookingNumber,tr))//get trade
+            {
+                if(!tr.get_canceled())//trade not canceled already?
                 {
-                    s=QString("Möchten Sie wirklich die Buchnung mit der Nummer '%1' stornieren?").arg(sBookingNumber);
-                    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-                    msg.addButton(QString("Nein"),QMessageBox::NoRole);
-                    msg.setWindowTitle("?");
-                    msg.setText(s);
-                    msg.exec();
-                    if(msg.clickedButton()==yesButton)
-                    {
-                        tr.set_canceled(true);
-                        m_db.trade_set_canceled(sBookingNumber);//set canceled in db
-                        m_widgets.trade_update_row(ui->tableWidgetTrade,tr,true);//update table item
-
-                        //update articles counts
-                        if(tr.get_type()==TYPE_INCOMING || tr.get_type()==TYPE_ORDERING_INCOMING)
-                            iSwitchType=TYPE_OUTGOING;
-                        else
-                            iSwitchType=TYPE_INCOMING;
-                        tr.get_wares(lsS);
-                        memory.clear();
-                        memory.set_string_list(&lsS);
-                        memory.set_int(&iSwitchType);
-                        if(!m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
-                            b=false;//error
-                        else
+                    b=m_thread.set_work(WORK_TRADE_CHECK_CANCEL_POSSIBLE,&memory);//check trade possible
+                    if(!b)
+                    {//canceled is not possible
+                        s=QString("Die Buchung kann nicht storniert werden da es zwischenzeitlich zu negativen Bestand kommen würde,"
+                                  "beachten Sie die chronologische Reihenfolge!");
+                        if(sErr.length()>0)
+                            s+=QString("\n(%1)").arg(sErr);
+                        msg.setWindowTitle("!");
+                        msg.setText(s);
+                        msg.exec();
+                    }
+                    if(b)
+                    {//canceled is possible
+                        s=QString("Möchten Sie wirklich die Buchnung mit der Nummer '%1' stornieren?").arg(sBookingNumber);
+                        QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
+                        msg.addButton(QString("Nein"),QMessageBox::NoRole);
+                        msg.setWindowTitle("?");
+                        msg.setText(s);
+                        msg.exec();
+                        if(msg.clickedButton()==yesButton)
                         {
-                            inventory_mask_set();//update inventory table
+                            tr.set_canceled(true);
+                            m_db.trade_set_canceled(sBookingNumber);//set canceled in db
+                            m_widgets.trade_update_row(ui->tableWidgetTrade,tr,true);//update table item
 
-                            //logbook
-                            if(m_db.logbook_create_canceled(tr,lg))
-                                logbook_insert(lg);
+                            //update articles counts
+                            if(tr.get_type()==TYPE_INCOMING || tr.get_type()==TYPE_ORDERING_INCOMING)
+                                iSwitchType=TYPE_OUTGOING;
+                            else
+                                iSwitchType=TYPE_INCOMING;
+                            tr.get_wares(lsS);
+                            memory.clear();
+                            memory.set_string_list(&lsS);
+                            memory.set_int(&iSwitchType);
+                            if(!m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
+                                b=false;//error
+                            else
+                            {
+                                inventory_mask_set();//update inventory table
+
+                                //logbook
+                                if(m_db.logbook_create_canceled(tr,lg))
+                                    logbook_insert(lg);
+                            }
                         }
                     }
                 }
@@ -4305,16 +4357,17 @@ bool MainWindow::menu_db_backup_create(void)
     QMessageBox msg(QMessageBox::Critical,"","");
     msg.setWindowTitle(QString("Fehler"));
     QDateTime dtTi=QDateTime::currentDateTime();
-    QString s,s2,sName=QDir::homePath();
-    sName+=QString("/%1.sqlite").arg(dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
-    QFile file(QString("lava.sqlite"));
-    QString sFile=QFileDialog::getSaveFileName(this,QString("Sicherung erstellen"),sName);
+    QString s,s2;
+    QString sReadFile=m_sDbPath+QString("lava.sqlite");
+    QString sWriteFile=m_sDbPath+QString("/%1.sqlite").arg(dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+    QFile file(sReadFile);
+    sWriteFile=QFileDialog::getSaveFileName(this,QString("Sicherung erstellen"),sWriteFile);
     QStringList ls;
 
-    if(sFile.length()>0)//file dialog finish with 'save'?
+    if(sWriteFile.length()>0)//file dialog finish with 'save'?
     {
         //file info (permission)
-        ls=sFile.split("/");
+        ls=sWriteFile.split("/");
         for(int i=0;i<ls.count()-1;i++)
             s+=ls[i]+QString("/");
         file_info.setFile(s);
@@ -4325,25 +4378,25 @@ bool MainWindow::menu_db_backup_create(void)
         }
         else
         {
-            //user overwrite lava2.sqlite in current dir? ->error
-            if(QDir::currentPath()+QString("/lava.sqlite") == sFile)
+            //user overwrite current db? ->error
+            if(sReadFile==sWriteFile)
             {
-                s=QString("Sie können nicht die aktuelle Datenbankdatei im Programmordner überschreiben!");
+                s=QString("Sie können nicht die aktuelle Datenbankdatei überschreiben!");
                 msg.setText(s);
                 msg.exec();
             }
             else
             {
                 //check give it file?
-                if(QFile(sFile).exists())
-                    QFile::remove(sFile);//delete old file
+                if(QFile(sWriteFile).exists())
+                    QFile::remove(sWriteFile);//delete old file
 
                 //copy
-                if(!file.copy(sFile))
+                if(!file.copy(sWriteFile))
                     s2=QString("(errorcode: %1)").arg(file.error());
 
                 //exists create file?
-                if(!QFile(sFile).exists())
+                if(!QFile(sWriteFile).exists())
                 {
                     s=QString("Fehler beim Erstellen der Sicherung, evtl. fehlen Ihnen die Schreibrechte für diesen Ort!");
                     if(s2.length()>0)
@@ -4357,7 +4410,7 @@ bool MainWindow::menu_db_backup_create(void)
                     //logbook
                     lg.set_type(LOGBOOK_TYPE_OTHER);
                     lg.set_date_time(QDateTime::currentDateTime());
-                    s=QString("Sicherung \"%1 \" erstellt").arg(sFile);
+                    s=QString("Sicherung \"%1 \" erstellt").arg(sWriteFile);
                     lg.set_text(QString(s));
                     logbook_insert(lg);
                 }
@@ -4374,131 +4427,113 @@ bool MainWindow::menu_db_backup_load(void)
     if(!m_db.is_db_connect())
         return false;
 
-    QMessageBox msg(QMessageBox::Question,"","");
-    QMessageBox msg2(QMessageBox::Critical,"","");
-    msg2.setWindowTitle(QString("Fehler"));
-    msg.setWindowTitle(QString("?"));
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    bool b;
+    QString sError,sReadFile;
+    QString sWriteFile=m_sDbPath+QString("lava.sqlite"),sWriteTempFile=m_sDbPath+QString("lava_temp.sqlite");
+    QMessageBox msgQuest(QMessageBox::Question,"","");
+    msgQuest.setText(QString("Achtung, beim Laden einer Sicherung gehen alle aktuellen Daten unwiderruflich verloren.\nMöchten Sie wirklich eine Sicherung laden?"));
+    QMessageBox msgCritical(QMessageBox::Critical,"","");
+    msgCritical.setWindowTitle(QString("Fehler"));
+    msgQuest.setWindowTitle(QString("?"));
+    QPushButton * yesButton=msgQuest.addButton(QString("Ja"),QMessageBox::YesRole);
+    msgQuest.addButton(QString("Nein"),QMessageBox::NoRole);
 
-    //file info(permission)
-    QFileInfo file_info(QDir::currentPath());
+
+    //stop db-connection & timer
+    killTimer(m_iTimerId);//stop timmer
+    m_db.close_db();//close current db connection
+
+
+    //check permission db-path
+    QFileInfo file_info(m_sDbPath);
     if(!file_info.permission(QFile::WriteUser))
+        sError=QString("Sie haben keine Schreibrechte für den  Ordner \"%1\"!").arg(m_sDbPath);//error
+    else
     {
-        msg2.setText(QString("Sie haben keine Schreibrechte im Ordner von lava2, führen Sie das Programm als admin/root aus!"));
-        return false;
-    }
-
-    bool bOk=true;
-    QFile file;
-    QString sTemp("lava_temp.sqlite");
-    QString sName("lava.sqlite");
-    QString sHome=QDir::homePath();
-    QString sCurDir=QDir::currentPath();
-    sCurDir+=QString("/");
-    QString sFile,s2,s=QString("Achtung, beim Laden einer Sicherung gehen alle aktuellen Daten unwiderruflich verloren.\nMöchten Sie wirklich eine Sicherung laden?");
-    msg.setText(s);
-    msg.exec();
-    if(msg.clickedButton()==yesButton)
-    {
-        sFile=QFileDialog::getOpenFileName(this,QString("Sicherung laden"),sHome);
-        if(sFile.length()>0)//press button load?
+        msgQuest.exec();//quest really overwrite db-file?
+        if(msgQuest.clickedButton()==yesButton)
         {
-            //stop
-            killTimer(m_iTimerId);//stop timmer
-            m_db.close_db();//close current db connection
+            sReadFile=QFileDialog::getOpenFileName(this,QString("Sicherung laden"),m_sDbPath);
+            if(sReadFile.length()>0)
+            {//load button pressed?
 
-            //check give it file?
-            file.setFileName(sFile);
-            if(file.open(QIODevice::ReadOnly))
-            {
-                if(m_db.open_db(sFile))//open db(backup) ok?
+                if(!QFile::exists(sReadFile))//check give it read file?
+                    sError=QString("Die angegebene Datei existiert nicht!");//error
+                else
                 {
-                    if(!m_db.check_database_file()) // is the backup file a lava2 sqlite db file?
-                    {
-                        s=QString("Die angegebene Datei ist keine LaVa2-Datenbankdatei!");
-                        msg2.setText(s);
-                        msg2.exec();
-                        m_db.close_db();
-                    }
+                    if(sReadFile==sWriteFile)
+                        sError=QString("Sie können die aktuelle Datenbankdatei nicht als Sicherung laden!");
                     else
                     {
-                        m_db.close_db();
-
-                        //copy file
-                        s=sCurDir+sTemp;
-
-                        if(QFile(s).exists())//exists temp-file->remove it
-                            QFile::remove(s);
-
-                        if(!file.copy(s))
-                            s2=QString("(errorcode: %1)").arg(file.error());//copy error?
-
-                        //exists copy file?
-                        if(!QFile(s).exists())
-                        {
-                            s=QString("Fehler beim Laden der Sicherung, evtl. fehlen Ihnen die Schreibrechte für den Programmordner!");
-                            if(s2.length()>0)
-                                s+=s2;
-                            else{}
-                            msg2.setText(s);
-                            msg2.exec();
-                        }
+                        if(!m_db.open_db(sReadFile))//open db(read file) ok?
+                            sError=QString("Die angegebene Datei konnte nicht geöffnet werden!");//error
                         else
                         {
-                            //delete old db file
-                            s=sCurDir+sName;
-                            QFile::remove(s);
-
-                            //rename temp
-                            if(!QFile::rename(sCurDir+sTemp,sCurDir+sName))
+                            b=m_db.check_database_file(); // is the read file a lava2 sqlite db file?
+                            m_db.close_db();//close read db
+                            if(!b)
+                                sError=QString("Die angegebene Datei ist keine LaVa2-Datenbankdatei!");//error
+                            else
                             {
-                                s=QString("Fehler beim Umbennen. Bitte die Aktion von Hand erledigen.\nlava2_temp.sqlite umbenennen zu lava2.sqlite)\nProgramm hat keine Datenbankverbindung mehr, Neustart erforderlich!");
-                                msg2.setText(s);
-                                msg2.exec();
-                                bOk=false;
+                                //save current db-file
+                                if(QFile(sWriteTempFile).exists())//exists temp-file ? ->remove it
+                                    QFile::remove(sWriteTempFile);
+                                if(!QFile::rename(sWriteFile,sWriteTempFile))//rename current db to temp
+                                    sError=QString("Fehler beim umbenennen der Datenbank-Datei!");
+                                else
+                                {
+                                    //copy file
+                                    b=QFile::copy(sReadFile,sWriteFile);//copy ok?
+                                    if(!b || !QFile::exists(sWriteFile))
+                                    {//copy error
+                                        sError=QString("Fehler beim kopieren der Datenbank-Datei!");
+                                        QFile::rename(sWriteTempFile,sWriteFile);//rename back
+                                    }
+                                    else//copy ok
+                                        QFile::remove(sWriteTempFile);//delete temp file(old db-file)
+                                }
                             }
-                        }
-                        //delete temp file
-                        if(bOk)
-                        {
-                            s=sCurDir+sTemp;
-                            QFile::remove(s);
                         }
                     }
                 }
             }
-            file.close();
         }
     }
-    //-
-    if(bOk)
+
+    //check error after copy
+    if(sError.length()>0)
     {
-        if(!m_db.open_db())
-        {
-            s=QString("Fehler beim öffnen der Datenbank.");
-            msg2.setText(s);
-            msg2.exec();
-        }
+        msgCritical.setText(sError);
+        msgCritical.exec();
+        sError=QString("");
+    }
+
+
+    //start all
+    if(!m_db.open_db(sWriteFile))
+        sError=QString("Fehler beim öffnen der Datenbank,");
+    else
+    {
+        //check + update db-file
+        if(!m_db.check_and_update_db_version())
+            sError=QString("Fehler beim update der Datenbankdatei auf Version %1,").arg(CURRENT_DB_VERSION);
         else
         {
-            //check + update db-file
-            if(!m_db.check_and_update_db_version())
-            {
-                //error
-                s=QString("Fehler beim update der Datenbankdatei auf Version %1,\nProgramm hat keine Datenbankverbindung mehr, Neustart erforderlich!").arg(CURRENT_DB_VERSION);
-                msg2.setText(s);
-                msg2.exec();
-            }
-            else
-            {
-                //update widgets
-                fill_all_table();
-                startTimer(3000);
-            }
+            //update widgets
+            fill_all_table();
+            startTimer(3000);
         }
     }
-    //-
+
+
+    //check error after start
+    if(sError.length()>0)
+    {
+        sError+=QString("\ndas Programm hat keine Datenbankverbindung mehr!!!");
+        msgCritical.setText(sError);
+        msgCritical.exec();
+    }
+
     return true;
 }
 
@@ -5000,7 +5035,10 @@ bool MainWindow::menu_about(void)
                       "\n(inventory management assistant)"
                       "\n------------------------------------------------------------------------"
                       "\ngeschrieben von/written by Robert Ewert - germany(Berlin)"
-                      "\nrobert.ewert@gmail.com - www.robert.ewert.de.vu");
+                      "\nrobert.ewert@gmail.com - www.robert.ewert.de.vu"
+                      "\n------------------------------------------------------------------------"
+                      "\nLizenz/licence: GNU GPL version 3"
+                      "\n------------------------------------------------------------------------");
     s+=QString("\n\n%1").arg(VERSION);
     QMessageBox msg(QMessageBox::Information,"","");
     msg.setWindowTitle("information:");
