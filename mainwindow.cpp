@@ -2609,6 +2609,7 @@ bool MainWindow::article_edit(void)
                     }
                     m_widgets.article_update_row(ui->tableWidgetArticle,ar,FORMAT_ONE,true);
                     //-
+                    trade_mask_set(false);//update trade table
                     ordering_mask_set();//update ordering table
                     inventory_mask_set();//update inventory table
                     ordering_update_wares_list();//update ordering articlelist
@@ -5011,14 +5012,13 @@ bool MainWindow::menu_tool_close(void)
 
 bool MainWindow::menu_help(void)
 {
+    QString s;
     QMessageBox msg(QMessageBox::Critical,"","");
     msg.setWindowTitle(QString("Fehler"));
-    QFile file(QString("doc/help_de.pdf"));
-    bool bGiveIt=file.open(QIODevice::ReadOnly);
-    file.close();
-    if(!bGiveIt)
+    if(!QFile::exists(QCoreApplication::applicationDirPath()+QString("/doc/help_de.pdf")))//help file not found
     {
-        msg.setText(QString("Die Datei 'doc/help_de.pdf' ist nicht vorhanden!"));
+        s=QString("Die Datei \"%1\" ist nicht vorhanden!").arg(QCoreApplication::applicationDirPath()+QString("/doc/help_de.pdf"));
+        msg.setText(s);
         msg.exec();
     }
     else
