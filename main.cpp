@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
     CLogoDialog logo_dlg;
 
     //plugins
-    a.addLibraryPath( a.applicationDirPath() + "/plugins" );
+    if(QFile::exists(a.applicationDirPath() + "/plugins"))
+        a.addLibraryPath( a.applicationDirPath() + "/plugins" );
 
     //languages
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));//for german spezial letter
