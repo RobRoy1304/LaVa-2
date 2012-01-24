@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
                 w.showMaximized();
 
                 //load settings
-                w.settings(false);//load settings
+                w.settings(false);
 
                 //logo
                 logo_dlg.startTimer(2000);//start timer in 2 sec. close logo widget
@@ -68,6 +68,9 @@ int main(int argc, char *argv[])
 
                 //start
                 iReturn=a.exec();
+
+                //save settings
+                w.settings(true);
             }
         }
     }

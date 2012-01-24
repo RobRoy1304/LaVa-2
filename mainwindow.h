@@ -107,6 +107,7 @@ public:
     bool customer_update_info(void);
     bool customer_check_user_input(void);
     bool customer_update_count(void);
+    bool customer_update_customernumber_trade(QString sOld, QString sNew);
 
     //article
     bool article_check_user_input(void);

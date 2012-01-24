@@ -2998,6 +2998,36 @@ bool CDbConnection::trade_is_canceled(QString sBookingNumber)
     return bReturn;
 }
 
+bool CDbConnection::trade_update_all_info(int iNumber, int iTradeType, QString sOld, QString sNew)
+{
+    if(!m_bConnect || iNumber<1 || iNumber>5)//db open?
+        return false;
+
+    CTrade trade;
+    QList<QString> ls;
+    QString sTableRowName=QString("info_%1").arg(iNumber);
+    QString sCondition=QString("type = %1").arg(iTradeType);
+    sCondition+=QString(" AND %1 = '%2'").arg(sTableRowName,sOld);
+    //-
+    if(trade_get_all(sCondition, ls))//search all trades where info = old
+    {
+        //update info
+        while(ls.count()>0)
+        {
+            if(trade_get(ls[0],trade))
+            {
+                trade.set_info(iNumber,sNew);
+                trade_update(trade);
+            }
+            //-
+            ls.removeFirst();
+        }
+    }
+    //-
+    ls.clear();
+    return true;
+}
+
 //logbook----------------------------------------------------------------------------------------------------------------------
 bool CDbConnection::logbook_add(CLogbook & lg)
 {

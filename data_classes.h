@@ -22,7 +22,7 @@
 #include <QtGui>
 
 //version
-#define VERSION "version 0.25 (BETA)"
+#define VERSION "version 0.26 (BETA)"
 #define CURRENT_DB_VERSION "1,02"
 
 //trade
@@ -399,6 +399,7 @@ class CTrade
     void set_info_3(QString s);
     void set_info_4(QString s);
     void set_info_5(QString s);
+    void set_info(int iNumber, QString s);
     void set(CTrade & trade);
 };
 

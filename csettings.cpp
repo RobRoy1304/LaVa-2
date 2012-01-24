@@ -22,7 +22,10 @@
 CSettings::CSettings()
 {
     //settings path
-    m_sSettingsPath=QDir::homePath()+QString("/lava2/");
+    if(QFile::exists(QDir::homePath()+QString("/lava2/")))//aplication(lava2) installed?
+        m_sSettingsPath=QDir::homePath()+QString("/lava2/");
+    else
+        m_sSettingsPath=QDir::currentPath()+QString("/");//not installed
 }
 
 bool CSettings::create_default_setting_file(void)

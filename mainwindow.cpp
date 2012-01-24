@@ -35,7 +35,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusBar->hide();
 
     //database path
-    m_sDbPath=QDir::homePath()+QString("/lava2/");
+    if(QFile::exists(QDir::homePath()+QString("/lava2/")))//aplication(lava2) installed?
+        m_sDbPath=QDir::homePath()+QString("/lava2/");
+    else
+        m_sDbPath=QDir::currentPath()+QString("/");//not installed
 
     //hide columns from tree widget
     ui->treeWidgetWaregroup->hideColumn(2);//id column
@@ -232,9 +235,6 @@ MainWindow::~MainWindow()
         msg.setText(s);
         msg.exec();
     }
-
-    //write(save) settings
-    settings(true);
 
     //set last session in db-
     QDateTime dtTi=QDateTime().currentDateTime();
@@ -1725,82 +1725,75 @@ bool MainWindow::maker_delete(void)
     if(!m_db.is_db_connect())
         return false;
 
-    bool b=true;
-    int i=-1,iId=-1;
-    QList <QTableWidgetItem*> ls=ui->tableWidgetMaker->selectedItems();
-    if(ls.count()<3)
-       return false;
-    //-
-    iId=ls[2]->text().toInt(&b,10);//get id
-    if(!b)
-        return false;
-    //-
+    bool b=false;
+    int i=-1,iId;
     CLogbook lg;
     CMaker mk;
-    m_db.maker_get(iId,mk);
-    m_db.logbook_create_remove(mk,lg);//create logbook
-    //-
+    QString s;
     QMessageBox msg(QMessageBox::Question,"","");
     QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
     msg.addButton(QString("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
-    CPointerMemory memory;
     QList <int> lsArIds;
-    QString s=QString("maker_id=%1").arg(iId);
+    CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int_list(&lsArIds);
-    b=m_thread.set_work(WORK_ARTICLE_GET_ALL,&memory);
-    if(!b)
-        return false;
-
-    if(lsArIds.count()>0)//article with this maker found?
-    {
-        s=QString("Es gibt %1 Artikel von dem Hersteller ").arg(lsArIds.count());
-        s+=QString("'%1' !!!").arg(ls[0]->text());
-        s+=QString("\nSoll der Hersteller wirklich gelöscht werden?");
-        msg.setText(s);
-    }
-    else
-    {
-        s=QString("Soll der Hersteller '%1' wirklich gelöscht werden?").arg(ls[0]->text());
-        msg.setText(s);
-    }
     //-
-    msg.exec();
-    if(msg.clickedButton()==yesButton)
+    m_widgets.get_selected_table_item_value(ui->tableWidgetMaker,iId);//get id
+    if(m_db.maker_get(iId,mk))//get maker
     {
-        if(!m_db.maker_remove(iId))//remove in db ok?
-            b=false;
-        else
+        m_db.logbook_create_remove(mk,lg);//create logbook
+        s=QString("maker_id=%1").arg(iId);
+
+        b=m_thread.set_work(WORK_ARTICLE_GET_ALL,&memory);
+        if(b)
         {
-            //update all article with this maker
-            if(lsArIds.count()>0)
+            if(lsArIds.count()>0)//article with this maker found?
             {
-                memory.clear();
-                memory.set_int(&iId);
-                memory.set_int2(&i);
-                b=m_thread.set_work(WORK_ARTICLE_ALL_CHANGE_MAKER,&memory);
-                if(!b)
-                {}
-                else
-                {
-                    inventory_mask_set();//update inventory table
-                    ordering_update_wares_list();//update ordering articlelist
-                    trade_update_wares_list();//update trade articlelist
-                    article_mask_set();//update article table
-                }
+                s=QString("Es gibt %1 Artikel von dem Hersteller ").arg(lsArIds.count());
+                s+=QString("'%1' !!!").arg(mk.get_name());
+                s+=QString("\nSoll der Hersteller wirklich gelöscht werden?");
+                msg.setText(s);
+            }
+            else
+            {
+                s=QString("Soll der Hersteller '%1' wirklich gelöscht werden?").arg(mk.get_name());
+                msg.setText(s);
             }
             //-
-            b=m_widgets.remove_row(ui->tableWidgetMaker,iId);
-            maker_update_info();
-            maker_update_count();
-            maker_check_user_input();
+            msg.exec();
+            if(msg.clickedButton()==yesButton)
+            {
+                if(m_db.maker_remove(iId))//remove in db ok?
+                {
+                    //update all article with this maker
+                    if(lsArIds.count()>0)
+                    {
+                        memory.clear();
+                        memory.set_int(&iId);
+                        memory.set_int2(&i);
+                        b=m_thread.set_work(WORK_ARTICLE_ALL_CHANGE_MAKER,&memory);
+                        if(b)
+                        {
+                            inventory_mask_set();//update inventory table
+                            ordering_update_wares_list();//update ordering articlelist
+                            trade_update_wares_list();//update trade articlelist
+                            article_mask_set();//update article table
+                        }
+                    }
+                    //-
+                    b=m_widgets.remove_row(ui->tableWidgetMaker,iId);
+                    maker_update_info();
+                    maker_update_count();
+                    maker_check_user_input();
 
-            //logbook insert
-            logbook_insert(lg);
+                    //logbook insert
+                    logbook_insert(lg);
+                }
+            }
         }
     }
-    ls.clear();
+    lsArIds.clear();
     return b;
 }
 
@@ -2026,77 +2019,68 @@ bool MainWindow::dealer_delete(void)
     if(!m_db.is_db_connect())
         return false;
 
-    bool b=true;
-    int i=-1,iId=-1;
-    QList <QTableWidgetItem*> ls=ui->tableWidgetDealer->selectedItems();
-    if(ls.count()<3)
-       return false;
-    //-
-    iId=ls[2]->text().toInt(&b,10);//get id
-    if(!b)
-        return false;
-    //-
-    CLogbook lg;
-    CDealer de;
-    m_db.dealer_get(iId,de);
-    m_db.logbook_create_remove(de,lg);//create logbook
-    //-
+    bool b=false;
+    int i=-1,iId;
+    QString s;
     QMessageBox msg(QMessageBox::Question,"","");
     QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
     msg.addButton(QString("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
-    CPointerMemory memory;
     QList <int> lsOrdIds;
-    QString s=QString("dealer_id=%1").arg(iId);
+    CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int_list(&lsOrdIds);
-    b=m_thread.set_work(WORK_ORDERING_GET_ALL,&memory);
-    if(!b)
-        return false;
-
-    if(lsOrdIds.count()>0)//ordering with dealer found?
-    {
-        s=QString("Es gibt %1 Bestellungen beim Händler").arg(lsOrdIds.count());
-        s+=QString(" '%1'").arg(ls[0]->text());
-        s+=QString("\nSoll der Händler wirklich gelöscht werden?");
-        msg.setText(s);
-    }
-    else
-    {
-        s=QString("Soll der Händler '%1' wirklich gelöscht werden?").arg(ls[0]->text());
-        msg.setText(s);
-    }
+    CLogbook lg;
+    CDealer de;
     //-
-    msg.exec();
-    if(msg.clickedButton()==yesButton)
+    m_widgets.get_selected_table_item_value(ui->tableWidgetDealer,iId);//get id
+    if(m_db.dealer_get(iId,de))//get dealer
     {
-        if(!m_db.dealer_remove(iId))//remove in db ok?
-            b=false;
-        else
+        s=QString("dealer_id=%1").arg(iId);
+        m_db.logbook_create_remove(de,lg);//create logbook
+        b=m_thread.set_work(WORK_ORDERING_GET_ALL,&memory);
+        if(b)
         {
-            //update all orderings with this dealer
-            if(lsOrdIds.count()>0)
+            if(lsOrdIds.count()>0)//ordering with dealer found?
             {
-                memory.clear();
-                memory.set_int(&iId);
-                memory.set_int2(&i);
-                b=m_thread.set_work(WORK_ORDERING_ALL_CHANGE_DEALER, &memory);
-                if(!b)
-                {}
-                else
-                    ordering_mask_set();//update ordering table
+                s=QString("Es gibt %1 Bestellungen beim Händler").arg(lsOrdIds.count());
+                s+=QString(" '%1'").arg(de.get_name());
+                s+=QString("\nSoll der Händler wirklich gelöscht werden?");
+                msg.setText(s);
+            }
+            else
+            {
+                s=QString("Soll der Händler '%1' wirklich gelöscht werden?").arg(de.get_name());
+                msg.setText(s);
             }
             //-
-            b=m_widgets.remove_row(ui->tableWidgetDealer,iId);
-            dealer_update_info();
-            dealer_update_count();
-            dealer_check_user_input();
+            msg.exec();
+            if(msg.clickedButton()==yesButton)
+            {
+                if(m_db.dealer_remove(iId))//remove in db ok?
+                {
+                    //update all orderings with this dealer
+                    if(lsOrdIds.count()>0)
+                    {
+                        memory.clear();
+                        memory.set_int(&iId);
+                        memory.set_int2(&i);
+                        b=m_thread.set_work(WORK_ORDERING_ALL_CHANGE_DEALER, &memory);
+                        if(b)
+                            ordering_mask_set();//update ordering table
+                    }
+                    //-
+                    b=m_widgets.remove_row(ui->tableWidgetDealer,iId);
+                    dealer_update_info();
+                    dealer_update_count();
+                    dealer_check_user_input();
 
-            //logbook
-            logbook_insert(lg);
+                    //logbook
+                    logbook_insert(lg);
+                }
+            }
         }
     }
-    ls.clear();
     lsOrdIds.clear();
     return b;
 }
@@ -2188,6 +2172,19 @@ bool MainWindow::customer_widgetitem_clicked()
     customer_check_user_input();
     customer_update_info();
     return true;
+}
+
+bool MainWindow::customer_update_customernumber_trade(QString sOld, QString sNew)
+{
+    int number=1,type=TYPE_CUSTOMER_OUTGOING;
+    CPointerMemory memory;
+    memory.set_string(&sOld);
+    memory.set_string2(&sNew);
+    memory.set_int(&number);
+    memory.set_int2(&type);
+    //-
+    bool b=m_thread.set_work(WORK_TRADE_UPDATE_ALL_INFO,&memory);
+    return b;
 }
 
 bool MainWindow::customer_mask_set(void)
@@ -2287,6 +2284,7 @@ bool MainWindow::customer_edit(void)
     CInputDialogCustomer dlg;
     bool b=true;
     int iId=-1;
+    QString sMark;
 
     if(m_widgets.get_selected_table_item_value(ui->tableWidgetCustomer,iId))//select?
     {
@@ -2294,6 +2292,9 @@ bool MainWindow::customer_edit(void)
             b=false;
         else
         {
+            //mark customernumber
+            sMark=cu.get_customernumber();
+
             //logbook - mark before
             m_db.logbook_create_edit(cu,lg,true);
             //-
@@ -2307,6 +2308,14 @@ bool MainWindow::customer_edit(void)
                     b=false;
                 else
                 {
+                    //customernumber update?
+                    if(sMark!=cu.get_customernumber())
+                    {//update all trade info by customer
+                        customer_update_customernumber_trade(sMark,cu.get_customernumber());
+                        trade_widgetitem_clicked();//update trade info
+                    }
+
+                    //-
                     b=m_widgets.customer_update_row(ui->tableWidgetCustomer,cu,true);//update table item
                     customer_update_info();
                 }
@@ -2326,45 +2335,46 @@ bool MainWindow::customer_delete(void)
     if(!m_db.is_db_connect())
         return false;
 
-    bool b=true;
-    int iId=-1;
-    QList <QTableWidgetItem*> ls=ui->tableWidgetCustomer->selectedItems();
-    if(ls.count()<5)
-       return false;
-    //-
-    iId=ls[4]->text().toInt(&b,10);//get id
-    if(!b)
-        return false;
-    //-
+    int iId;
+    bool b=false;
     CLogbook lg;
     CCustomer cu;
-    m_db.customer_get(iId,cu);
-    m_db.logbook_create_remove(cu,lg);//create logbook
-    //-
+    QString sMark,s;
     QMessageBox msg(QMessageBox::Question,"","");
     QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
     msg.addButton(QString("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
-    QString s=QString("Soll der Kunde '%1,%2' wirklich gelöscht werden?").arg(ls[1]->text(),ls[2]->text());
-    msg.setText(s);
     //-
-    msg.exec();
-    if(msg.clickedButton()==yesButton)
+    m_widgets.get_selected_table_item_value(ui->tableWidgetCustomer,iId);//get id
+    if(m_db.customer_get(iId,cu))//get customer
     {
-        if(!m_db.customer_remove(iId))//remove in db ok?
-            b=false;
-        else
-        {
-            b=m_widgets.remove_row(ui->tableWidgetCustomer,iId);
-            customer_update_count();
-            customer_update_info();
-            customer_check_user_input();
+        sMark=cu.get_customernumber();//mark number
+        m_db.logbook_create_remove(cu,lg);//create logbook
 
-            //logbook after
-            logbook_insert(lg);
+        s=QString("Soll der Kunde '%1,%2' wirklich gelöscht werden?").arg(cu.get_name(),cu.get_first_name());
+        msg.setText(s);
+        //-
+        msg.exec();
+        if(msg.clickedButton()==yesButton)//remove?
+        {
+            if(!m_db.customer_remove(iId))//remove in db ok?
+                b=false;
+            else
+            {
+                b=m_widgets.remove_row(ui->tableWidgetCustomer,iId);
+                customer_update_count();
+                customer_update_info();
+                customer_check_user_input();
+
+                //logbook after
+                logbook_insert(lg);
+
+                //update trade info by customer
+                customer_update_customernumber_trade(sMark,QString("Kunde gelöscht"));
+                trade_widgetitem_clicked();//update trade info
+            }
         }
     }
-    ls.clear();
     return b;
 }
 
@@ -3032,34 +3042,29 @@ bool MainWindow::ordering_delete(void)
     if(!m_db.is_db_connect())
         return false;
 
-    bool b=true;
-    QList <QTableWidgetItem*> ls=ui->tableWidgetOrdering->selectedItems();
-    if(ls.count()<=0)
-        return false;
-    //-
+    bool b=false;
     COrdering ord;
     CLogbook lg;
-    //-
+    QString s;
     QMessageBox msg(QMessageBox::Question,"","");
     QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
     msg.addButton(QString("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
-    QString s=QString("Soll die Bestellung Nummer '%1' wirklich gelöscht werden?").arg(ls[1]->text());
-    msg.setText(s);
     //-
-    int iId=ls[5]->text().toInt(&b,10);//get id
-    if(b)//convert to int ok?
+    int iId;
+    m_widgets.get_selected_table_item_value(ui->tableWidgetOrdering,iId);//get id
+    if(m_db.ordering_get(iId,ord))//get ordering
     {
-        m_db.ordering_get(iId,ord);
         m_db.logbook_create_remove(ord,lg);//create logbook
-        //-
+
+        s=QString("Soll die Bestellung Nummer '%1' wirklich gelöscht werden?").arg(ord.get_ordernumber());
+        msg.setText(s);
         msg.exec();
         if(msg.clickedButton()==yesButton)
         {
-            if(!m_db.ordering_remove(iId))
-                b=false;
-            else
+            if(m_db.ordering_remove(iId))
             {
+                b=true;
                 m_widgets.remove_row(ui->tableWidgetOrdering,iId);
                 ordering_update_count();
                 ordering_update_wares_list();
@@ -3071,7 +3076,6 @@ bool MainWindow::ordering_delete(void)
             }
         }
     }
-    ls.clear();
     return b;
 }
 

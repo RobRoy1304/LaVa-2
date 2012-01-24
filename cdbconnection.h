@@ -149,6 +149,7 @@ public:
     int trade_get_all_count_by_articlenumber(QString sNumber, QDate dtFrom, QDate dtTo, bool bArticlenumber1=true, bool bLike=true);
     bool trade_check_cancel_possible(QString sBookingNumber,QString & sErrorString);
     bool trade_is_canceled(QString sBookingNumber);
+    bool trade_update_all_info(int iNumber, int iTradeType, QString sOld, QString sNew);
 
     //logbook-------------------------------------------
     bool logbook_add(CLogbook & lg);

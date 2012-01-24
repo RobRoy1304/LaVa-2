@@ -1012,6 +1012,28 @@ void CTrade::set_info_5(QString s)
     m_sInfo5=s;
 }
 
+void CTrade::set_info(int iNumber, QString s)
+{
+    switch(iNumber)
+    {
+    case 1:
+        set_info_1(s);
+        break;
+    case 2:
+        set_info_2(s);
+        break;
+    case 3:
+        set_info_3(s);
+        break;
+    case 4:
+        set_info_4(s);
+        break;
+    case 5:
+        set_info_5(s);
+        break;
+    }
+}
+
 void CTrade::set(CTrade & trade)
 {
     m_iType=trade.get_type();

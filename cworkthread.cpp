@@ -417,6 +417,11 @@ void CWorkThread::run(void)
                     if(m_pMemory->get_string()!=NULL && m_pMemory->get_string2()!=NULL)
                         m_bReturn=m_pDbInterface->trade_check_cancel_possible(*m_pMemory->get_string(),*m_pMemory->get_string2());
                 }
+                if(m_iWork==WORK_TRADE_UPDATE_ALL_INFO)
+                {
+                    if(m_pMemory->get_int()!=NULL && m_pMemory->get_int2()!=NULL && m_pMemory->get_string()!=NULL && m_pMemory->get_string2()!=NULL)
+                        m_bReturn=m_pDbInterface->trade_update_all_info(*m_pMemory->get_int(),*m_pMemory->get_int2(),*m_pMemory->get_string(),*m_pMemory->get_string2());
+                }
 
                 //inventory
                 if(m_iWork==WORK_INVENTORY_UPDATE_TABLEWIDGET)
