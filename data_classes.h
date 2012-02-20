@@ -22,7 +22,7 @@
 #include <QtGui>
 
 //version
-#define VERSION "version 0.26 (BETA)"
+#define VERSION "version 0.27 (BETA)"
 #define CURRENT_DB_VERSION "1,02"
 
 //trade

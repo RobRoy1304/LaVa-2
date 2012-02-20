@@ -110,6 +110,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
@@ -132,6 +135,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="labelNameError">
@@ -230,6 +236,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditName">
    <property name="geometry">
@@ -239,6 +248,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEditFaxnumbers">
@@ -250,6 +262,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditComment">
    <property name="geometry">
@@ -260,6 +275,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditHomepage">
    <property name="geometry">
@@ -269,6 +287,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -293,6 +314,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditEmail">
    <property name="geometry">
@@ -302,6 +326,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">

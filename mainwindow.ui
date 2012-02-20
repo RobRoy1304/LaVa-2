@@ -304,6 +304,9 @@
         <height>20</height>
        </rect>
       </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
      </widget>
      <widget class="QLabel" name="labelMaskInventory">
       <property name="geometry">
@@ -446,6 +449,9 @@
         <width>251</width>
         <height>20</height>
        </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
       </property>
      </widget>
      <widget class="QComboBox" name="comboBoxMaskTrade">
@@ -968,6 +974,9 @@
         <height>20</height>
        </rect>
       </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
      </widget>
      <widget class="QPushButton" name="pushButtonOrderingDelete">
       <property name="geometry">
@@ -1241,6 +1250,9 @@
         <width>251</width>
         <height>20</height>
        </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButtonArticleDelete">
@@ -1691,6 +1703,9 @@
         <height>20</height>
        </rect>
       </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
      </widget>
      <widget class="QPushButton" name="pushButtonMakerEdit">
       <property name="geometry">
@@ -1854,6 +1869,9 @@
         <width>151</width>
         <height>20</height>
        </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
       </property>
      </widget>
      <widget class="QTableWidget" name="tableWidgetDealer">
@@ -2183,6 +2201,9 @@
         <width>251</width>
         <height>20</height>
        </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButtonMaskSetCustomer">

@@ -90,6 +90,9 @@
      <height>26</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
@@ -113,6 +116,9 @@
      <height>26</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_13">
    <property name="geometry">
@@ -135,6 +141,9 @@
      <width>891</width>
      <height>26</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButtonWaregroup">
@@ -323,6 +332,9 @@
      <height>26</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditUnit">
    <property name="geometry">
@@ -332,6 +344,9 @@
      <width>221</width>
      <height>26</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEditInventory">
@@ -421,6 +436,9 @@
      <height>26</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditValuta">
    <property name="geometry">
@@ -430,6 +448,9 @@
      <width>301</width>
      <height>26</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEditWarningLimit">
@@ -457,6 +478,9 @@
      <height>26</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QComboBox" name="comboBox">
    <property name="geometry">
@@ -479,6 +503,9 @@
      <width>301</width>
      <height>26</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>15</number>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -505,6 +532,9 @@
      <width>301</width>
      <height>26</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>15</number>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

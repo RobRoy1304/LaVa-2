@@ -58,6 +58,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
@@ -84,6 +87,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
@@ -106,6 +112,9 @@
      <width>981</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -130,6 +139,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
@@ -152,6 +164,9 @@
      <width>221</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label_6">
@@ -176,6 +191,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_7">
    <property name="geometry">
@@ -198,6 +216,9 @@
      <width>981</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="labelError">
@@ -308,6 +329,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_8">
    <property name="geometry">
@@ -331,6 +355,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_9">
    <property name="geometry">
@@ -353,6 +380,9 @@
      <width>981</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label_10">

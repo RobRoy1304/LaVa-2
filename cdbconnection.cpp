@@ -259,24 +259,15 @@ bool CDbConnection::waregroup_add(CWaregroup & wg)
         return false;
     //-
     int id=-1;
-    bool b,bToLong=false;
+    bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO waregroup (name,comment,parent_id) VALUES ('%1','%2',").arg(wg.get_name(),wg.get_comment());
-    QString s2=QString("%1)").arg(wg.get_parent_id());
-    s+=s2;
-    //-
-    if(s.length()>300)//sql-order to long?
-    {
-        s=QString("INSERT INTO waregroup (name) VALUES ('%1')").arg(wg.get_name());
-        bToLong=true;
-    }
+    s+=QString("%1)").arg(wg.get_parent_id());
     b=query.exec(s);//add ok?
     if(b)
     {
         id=query.lastInsertId().toInt();
         wg.set_id(id);
-        if(bToLong)//was sql-order to long -> update
-            b=waregroup_update(wg);//set data
     }
     //-
     return b;
@@ -297,53 +288,15 @@ bool CDbConnection::waregroup_update(CWaregroup & wg)
     if(!m_bConnect)//db open?
         return false;
 
-    //get old
-    CWaregroup wgOld;
-    if(!waregroup_get(wg.get_id(),wgOld))
-        return false;
-
-    //changes
-    QString s;
-    QStringList lsChanges;
-    if(wg.get_name()!=wgOld.get_name())
-    {
-        s=QString("name='%1'").arg(wg.get_name());
-        lsChanges.push_back(s);
-    }
-    if(wg.get_comment()!=wgOld.get_comment())
-    {
-        s=QString("comment='%1'").arg(wg.get_comment());
-        lsChanges.push_back(s);
-    }
-    if(wg.get_parent_id()!=wgOld.get_parent_id())
-    {
-        s=QString("parent_id=%1").arg(wg.get_parent_id());
-        lsChanges.push_back(s);
-    }
-
-    //split intro 300 char strings
-    QStringList lsSyntax;
-    for(int j,i=0;i<lsChanges.count();i++)
-    {
-        s=QString("UPDATE waregroup SET ");
-        for(j=0;s.length()<300 && i<lsChanges.count();j++,i++)
-        {
-            if(j!=0)
-                s+=QString(",");
-            s+=lsChanges[i];
-        }
-        s+=QString(" WHERE id=%1").arg(wg.get_id());
-        lsSyntax.push_back(s);
-    }
+    QSqlQuery query;
+    QString s=QString("UPDATE OR REPLACE waregroup SET ");
+    s+=QString("name='%1',").arg(wg.get_name());
+    s+=QString("comment='%1',").arg(wg.get_comment());
+    s+=QString("parent_id=%1").arg(wg.get_parent_id());
+    s+=QString(" WHERE id=%1").arg(wg.get_id());
 
     //exec sql-syntax
-    QSqlQuery query;
-    bool b=true;
-    for(int i=0;i<lsSyntax.count() && b==true;i++)
-        b=query.exec(s);
-    //-
-    lsSyntax.clear();
-    lsChanges.clear();
+    bool b=query.exec(s);
     return b;
 }
 
@@ -539,24 +492,16 @@ bool CDbConnection::maker_add(CMaker & mk)
         return false;
     //-
     int id=-1;
-    bool b,bToLong=false;
+    bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO maker (name,adress,call_numbers,fax_numbers,email_adress,homepage,contect_person,comment)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8')")
                     .arg(mk.get_name(),mk.get_adress(),mk.get_callnumber(),mk.get_faxnumber(),mk.get_email(),mk.get_homepage(),mk.get_contectperson(),mk.get_comment());
-    //-
-    if(s.length()>300)//sql-order to long?
-    {
-        s=QString("INSERT INTO maker (name) VALUES ('%1')").arg(mk.get_name());
-        bToLong=true;
-    }
     b=query.exec(s);//add ok?
     if(b)
     {
         id=query.lastInsertId().toInt();
         mk.set_id(id);
-        if(bToLong)//was sql-order to long -> update
-            b=maker_update(mk);//set data
     }
     //-
     return b;
@@ -577,78 +522,20 @@ bool CDbConnection::maker_update(CMaker & mk)
     if(!m_bConnect)//db open?
         return false;
 
-    //get old
-    CMaker mkOld;
-    if(!maker_get(mk.get_id(),mkOld))
-        return false;
-
-    //changes
-    QString s;
-    QStringList lsChanges;
-    if(mk.get_name()!=mkOld.get_name())
-    {
-        s=QString("name='%1'").arg(mk.get_name());
-        lsChanges.push_back(s);
-    }
-    if(mk.get_comment()!=mkOld.get_comment())
-    {
-        s=QString("comment='%1'").arg(mk.get_comment());
-        lsChanges.push_back(s);
-    }
-    if(mk.get_adress()!=mkOld.get_adress())
-    {
-        s=QString("adress='%1'").arg(mk.get_adress());
-        lsChanges.push_back(s);
-    }
-    if(mk.get_callnumber()!=mkOld.get_callnumber())
-    {
-        s=QString("call_numbers='%1'").arg(mk.get_callnumber());
-        lsChanges.push_back(s);
-    }
-    if(mk.get_faxnumber()!=mkOld.get_faxnumber())
-    {
-        s=QString("fax_numbers='%1'").arg(mk.get_faxnumber());
-        lsChanges.push_back(s);
-    }
-    if(mk.get_email()!=mkOld.get_email())
-    {
-        s=QString("email_adress='%1'").arg(mk.get_email());
-        lsChanges.push_back(s);
-    }
-    if(mk.get_homepage()!=mkOld.get_homepage())
-    {
-        s=QString("homepage='%1'").arg(mk.get_homepage());
-        lsChanges.push_back(s);
-    }
-    if(mk.get_contectperson()!=mkOld.get_contectperson())
-    {
-        s=QString("contect_person='%1'").arg(mk.get_contectperson());
-        lsChanges.push_back(s);
-    }
-
-    //split intro 300 char strings
-    QStringList lsSyntax;
-    for(int j,i=0;i<lsChanges.count();i++)
-    {
-        s=QString("UPDATE maker SET ");
-        for(j=0;s.length()<300 && i<lsChanges.count();j++,i++)
-        {
-            if(j!=0)
-                s+=QString(",");
-            s+=lsChanges[i];
-        }
-        s+=QString(" WHERE id=%1").arg(mk.get_id());
-        lsSyntax.push_back(s);
-    }
+    QSqlQuery query;
+    QString s=QString("UPDATE OR REPLACE maker SET ");
+    s+=QString("name='%1',").arg(mk.get_name());
+    s+=QString("comment='%1',").arg(mk.get_comment());
+    s+=QString("adress='%1',").arg(mk.get_adress());
+    s+=QString("call_numbers='%1',").arg(mk.get_callnumber());
+    s+=QString("fax_numbers='%1',").arg(mk.get_faxnumber());
+    s+=QString("email_adress='%1',").arg(mk.get_email());
+    s+=QString("homepage='%1',").arg(mk.get_homepage());
+    s+=QString("contect_person='%1'").arg(mk.get_contectperson());
+    s+=QString(" WHERE id=%1").arg(mk.get_id());
 
     //exec sql-syntax
-    QSqlQuery query;
-    bool b=true;
-    for(int i=0;i<lsSyntax.count() && b==true;i++)
-        b=query.exec(s);
-    //-
-    lsSyntax.clear();
-    lsChanges.clear();
+    bool b=query.exec(s);
     return b;
 }
 
@@ -768,24 +655,17 @@ bool CDbConnection::dealer_add(CDealer & de)
         return false;
     //-
     int id=-1;
-    bool b,bToLong=false;
+    bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO dealer (name,adress,call_numbers,fax_numbers,email_adress,homepage,contect_person,comment,customer_number)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8' , '%9')").arg(de.get_name(),de.get_adress(),de.get_callnumber(),
                         de.get_faxnumber(),de.get_email(),de.get_homepage(),de.get_contectperson(),de.get_comment(),de.get_customernumber());
     //-
-    if(s.length()>300)//sql-order to long?
-    {
-        s=QString("INSERT INTO dealer (name) VALUES ('%1')").arg(de.get_name());
-        bToLong=true;
-    }
     b=query.exec(s);//add ok?
     if(b)
     {
         id=query.lastInsertId().toInt();
         de.set_id(id);
-        if(bToLong)//was sql-order to long -> update
-            b=dealer_update(de);//set data
     }
     //-
     return b;
@@ -806,83 +686,22 @@ bool CDbConnection::dealer_update(CDealer & de)
     if(!m_bConnect)//db open?
         return false;
 
-    //get old
-    CDealer deOld;
-    if(!dealer_get(de.get_id(),deOld))
-        return false;
-
-    //changes
-    QString s;
-    QStringList lsChanges;
-    if(de.get_name()!=deOld.get_name())
-    {
-        s=QString("name='%1'").arg(de.get_name());
-        lsChanges.push_back(s);
-    }
-    if(de.get_comment()!=deOld.get_comment())
-    {
-        s=QString("comment='%1'").arg(de.get_comment());
-        lsChanges.push_back(s);
-    }
-    if(de.get_adress()!=deOld.get_adress())
-    {
-        s=QString("adress='%1'").arg(de.get_adress());
-        lsChanges.push_back(s);
-    }
-    if(de.get_callnumber()!=deOld.get_callnumber())
-    {
-        s=QString("call_numbers='%1'").arg(de.get_callnumber());
-        lsChanges.push_back(s);
-    }
-    if(de.get_faxnumber()!=deOld.get_faxnumber())
-    {
-        s=QString("fax_numbers='%1'").arg(de.get_faxnumber());
-        lsChanges.push_back(s);
-    }
-    if(de.get_email()!=deOld.get_email())
-    {
-        s=QString("email_adress='%1'").arg(de.get_email());
-        lsChanges.push_back(s);
-    }
-    if(de.get_homepage()!=deOld.get_homepage())
-    {
-        s=QString("homepage='%1'").arg(de.get_homepage());
-        lsChanges.push_back(s);
-    }
-    if(de.get_contectperson()!=deOld.get_contectperson())
-    {
-        s=QString("contect_person='%1'").arg(de.get_contectperson());
-        lsChanges.push_back(s);
-    }
-    if(de.get_customernumber()!=deOld.get_customernumber())
-    {
-        s=QString("customer_number='%1'").arg(de.get_customernumber());
-        lsChanges.push_back(s);
-    }
-
-    //split intro 300 char strings
-    QStringList lsSyntax;
-    for(int j,i=0;i<lsChanges.count();i++)
-    {
-        s=QString("UPDATE dealer SET ");
-        for(j=0;s.length()<300 && i<lsChanges.count();j++,i++)
-        {
-            if(j!=0)
-                s+=QString(",");
-            s+=lsChanges[i];
-        }
-        s+=QString(" WHERE id=%1").arg(de.get_id());
-        lsSyntax.push_back(s);
-    }
+    QSqlQuery query;
+    QString s=QString("UPDATE OR REPLACE dealer SET ");
+    s+=QString("name='%1',").arg(de.get_name());
+    s+=QString("comment='%1',").arg(de.get_comment());
+    s+=QString("adress='%1',").arg(de.get_adress());
+    s+=QString("call_numbers='%1',").arg(de.get_callnumber());
+    s+=QString("fax_numbers='%1',").arg(de.get_faxnumber());
+    s+=QString("email_adress='%1',").arg(de.get_email());
+    s+=QString("homepage='%1',").arg(de.get_homepage());
+    s+=QString("contect_person='%1',").arg(de.get_contectperson());
+    s+=QString("customer_number='%1'").arg(de.get_customernumber());
+    s+=QString(" WHERE id=%1").arg(de.get_id());
 
     //exec sql-syntax
-    QSqlQuery query;
-    bool b=true;
-    for(int i=0;i<lsSyntax.count() && b==true;i++)
-        b=query.exec(s);
-    //-
-    lsSyntax.clear();
-    lsChanges.clear();
+
+    bool b=query.exec(s);
     return b;
 }
 
@@ -1004,25 +823,17 @@ bool CDbConnection::customer_add(CCustomer & cu)
         return false;
     //-
     int id=-1;
-    bool b,bToLong=false;
+    bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO customer (name,comment,customer_number,first_name,city,postcode,street,call_numbers,fax_numbers,email_adress)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7',").arg(cu.get_name(),cu.get_comment(),
                         cu.get_customernumber(),cu.get_first_name(),cu.get_city(),cu.get_postcode(),cu.get_street());
     s+=QString("'%1','%2','%3')").arg(cu.get_callnumber(),cu.get_faxnumber(),cu.get_email());
-    //-
-    if(s.length()>300)//sql-order to long?
-    {
-        s=QString("INSERT INTO customer (name) VALUES ('%1')").arg(cu.get_name());
-        bToLong=true;
-    }
     b=query.exec(s);//add ok?
     if(b)
     {
         id=query.lastInsertId().toInt();
         cu.set_id(id);
-        if(bToLong)//was sql-order to long -> update
-            b=customer_update(cu);//set data
     }
     //-
     return b;
@@ -1043,88 +854,22 @@ bool CDbConnection::customer_update(CCustomer & cu)
     if(!m_bConnect)//db open?
         return false;
 
-    //get old
-    CCustomer cuOld;
-    if(!customer_get(cu.get_id(),cuOld))
-        return false;
-
-    //changes
-    QString s;
-    QStringList lsChanges;
-    if(cu.get_name()!=cuOld.get_name())
-    {
-        s=QString("name='%1'").arg(cu.get_name());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_comment()!=cuOld.get_comment())
-    {
-        s=QString("comment='%1'").arg(cu.get_comment());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_first_name()!=cuOld.get_first_name())
-    {
-        s=QString("first_name='%1'").arg(cu.get_first_name());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_street()!=cuOld.get_street())
-    {
-        s=QString("street='%1'").arg(cu.get_street());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_postcode()!=cuOld.get_postcode())
-    {
-        s=QString("postcode='%1'").arg(cu.get_postcode());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_city()!=cuOld.get_city())
-    {
-        s=QString("city='%1'").arg(cu.get_city());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_customernumber()!=cuOld.get_customernumber())
-    {
-        s=QString("customer_number='%1'").arg(cu.get_customernumber());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_callnumber()!=cuOld.get_callnumber())
-    {
-        s=QString("call_numbers='%1'").arg(cu.get_callnumber());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_faxnumber()!=cuOld.get_faxnumber())
-    {
-        s=QString("fax_numbers='%1'").arg(cu.get_faxnumber());
-        lsChanges.push_back(s);
-    }
-    if(cu.get_email()!=cuOld.get_email())
-    {
-        s=QString("email_adress='%1'").arg(cu.get_email());
-        lsChanges.push_back(s);
-    }
-
-    //split intro 300 char strings
-    QStringList lsSyntax;
-    for(int j,i=0;i<lsChanges.count();i++)
-    {
-        s=QString("UPDATE customer SET ");
-        for(j=0;s.length()<300 && i<lsChanges.count();j++,i++)
-        {
-            if(j!=0)
-                s+=QString(",");
-            s+=lsChanges[i];
-        }
-        s+=QString(" WHERE id=%1").arg(cu.get_id());
-        lsSyntax.push_back(s);
-    }
+    QSqlQuery query;
+    QString s=QString("UPDATE OR REPLACE customer SET ");
+    s+=QString("name='%1',").arg(cu.get_name());
+    s+=QString("comment='%1',").arg(cu.get_comment());
+    s+=QString("first_name='%1',").arg(cu.get_first_name());
+    s+=QString("street='%1',").arg(cu.get_street());
+    s+=QString("postcode='%1',").arg(cu.get_postcode());
+    s+=QString("city='%1',").arg(cu.get_city());
+    s+=QString("customer_number='%1',").arg(cu.get_customernumber());
+    s+=QString("call_numbers='%1',").arg(cu.get_callnumber());
+    s+=QString("fax_numbers='%1',").arg(cu.get_faxnumber());
+    s+=QString("email_adress='%1'").arg(cu.get_email());
+    s+=QString(" WHERE id=%1").arg(cu.get_id());
 
     //exec sql-syntax
-    QSqlQuery query;
-    bool b=true;
-    for(int i=0;i<lsSyntax.count() && b==true;i++)
-        b=query.exec(s);
-    //-
-    lsSyntax.clear();
-    lsChanges.clear();
+    bool b=query.exec(s);
     return b;
 }
 
@@ -1244,7 +989,7 @@ bool CDbConnection::article_add(CArticle & ar)
         return false;
     //-
     int id=-1;
-    bool b,bToLong=false;
+    bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO article (name,comment,location,articlenumber,unit,articlenumber2,valuta,inventory,max_inventory,maker_id,waregroup_id,baseprice,salesprice,warning_limit)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7',").arg(ar.get_name(),ar.get_comment(),ar.get_location(),ar.get_articlenumber(),ar.get_unit(),ar.get_articlenumber2(),ar.get_valuta());
@@ -1256,18 +1001,11 @@ bool CDbConnection::article_add(CArticle & ar)
     s+=QString("%1,").arg(ar.get_sales_price());
     s+=QString("%1)").arg(ar.get_warning_limit());
     //-
-    if(s.length()>300)//sql-order to long?
-    {
-        s=QString("INSERT INTO article (name) VALUES ('%1')").arg(ar.get_name());
-        bToLong=true;
-    }
     b=query.exec(s);//add ok?
     if(b)
     {
-        id=query.lastInsertId().toInt();
+        id=query.lastInsertId().toInt();//get id
         ar.set_id(id);
-        if(bToLong)//was sql-order to long -> update
-            b=article_update(ar);//set data
     }
     //-
     return b;
@@ -1287,18 +1025,7 @@ bool CDbConnection::article_set_delete(int id)
 {
     if(!m_bConnect)//db open?
         return false;
-    /*
-    bool b=false;
-    CArticle ar;
-    if(article_get(id,ar,true))
-    {
-        if(!ar.get_delete())
-        {
-            ar.set_delete(true);
-            b=article_update(ar);
-        }
-    }
-    */
+
     QSqlQuery query;
     QString s=QString("UPDATE article SET delete_status=1 WHERE id=%1").arg(id);
     bool b=query.exec(s);
@@ -1310,113 +1037,26 @@ bool CDbConnection::article_update(CArticle & ar)
     if(!m_bConnect)//db open?
         return false;
 
-    //get old
-    CArticle arOld;
-    if(!article_get(ar.get_id(),arOld))
-        return false;
-
-    //changes
-    QString s;
-    QStringList lsChanges;
-    if(ar.get_name()!=arOld.get_name())
-    {
-        s=QString("name='%1'").arg(ar.get_name());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_comment()!=arOld.get_comment())
-    {
-        s=QString("comment='%1'").arg(ar.get_comment());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_location()!=arOld.get_location())
-    {
-        s=QString("location='%1'").arg(ar.get_location());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_articlenumber()!=arOld.get_articlenumber())
-    {
-        s=QString("articlenumber='%1'").arg(ar.get_articlenumber());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_unit()!=arOld.get_unit())
-    {
-        s=QString("unit='%1'").arg(ar.get_unit());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_articlenumber2()!=arOld.get_articlenumber2())
-    {
-        s=QString("articlenumber2='%1'").arg(ar.get_articlenumber2());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_valuta()!=arOld.get_valuta())
-    {
-        s=QString("valuta='%1'").arg(ar.get_valuta());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_inventory()!=arOld.get_inventory())
-    {
-        s=QString("inventory=%1").arg(ar.get_inventory());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_max_inventory()!=arOld.get_max_inventory())
-    {
-        s=QString("max_inventory=%1").arg(ar.get_max_inventory());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_maker_id()!=arOld.get_maker_id())
-    {
-        s=QString("maker_id=%1").arg(ar.get_maker_id());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_base_price()!=arOld.get_base_price())
-    {
-        s=QString("baseprice=%1").arg(ar.get_base_price());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_sales_price()!=arOld.get_sales_price())
-    {
-        s=QString("salesprice=%1").arg(ar.get_sales_price());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_waregroup_id()!=arOld.get_waregroup_id())
-    {
-        s=QString("waregroup_id=%1").arg(ar.get_waregroup_id());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_warning_limit()!=arOld.get_warning_limit())
-    {
-        s=QString("warning_limit=%1").arg(ar.get_warning_limit());
-        lsChanges.push_back(s);
-    }
-    if(ar.get_delete()!=arOld.get_delete())
-    {
-        s=QString("delete_status=%1").arg(ar.get_delete());
-        lsChanges.push_back(s);
-    }
-
-    //split intro 300 char strings
-    QStringList lsSyntax;
-    for(int j,i=0;i<lsChanges.count();i++)
-    {
-        s=QString("UPDATE article SET ");
-        for(j=0;s.length()<300 && i<lsChanges.count();j++,i++)
-        {
-            if(j!=0)
-                s+=QString(",");
-            s+=lsChanges[i];
-        }
-        s+=QString(" WHERE id=%1").arg(ar.get_id());
-        lsSyntax.push_back(s);
-    }
-
-    //exec sql-syntax
     QSqlQuery query;
-    bool b=true;
-    for(int i=0;i<lsSyntax.count() && b==true;i++)
-        b=query.exec(s);
-    //-
-    lsSyntax.clear();
-    lsChanges.clear();
+    QString s=QString("UPDATE OR REPLACE article SET ");
+    s+=QString("name='%1',").arg(ar.get_name());
+    s+=QString("comment='%1',").arg(ar.get_comment());
+    s+=QString("location='%1',").arg(ar.get_location());
+    s+=QString("articlenumber='%1',").arg(ar.get_articlenumber());
+    s+=QString("unit='%1',").arg(ar.get_unit());
+    s+=QString("articlenumber2='%1',").arg(ar.get_articlenumber2());
+    s+=QString("valuta='%1',").arg(ar.get_valuta());
+    s+=QString("inventory=%1,").arg(ar.get_inventory());
+    s+=QString("max_inventory=%1,").arg(ar.get_max_inventory());
+    s+=QString("maker_id=%1,").arg(ar.get_maker_id());
+    s+=QString("baseprice=%1,").arg(ar.get_base_price());
+    s+=QString("salesprice=%1,").arg(ar.get_sales_price());
+    s+=QString("waregroup_id=%1,").arg(ar.get_waregroup_id());
+    s+=QString("warning_limit=%1,").arg(ar.get_warning_limit());
+    s+=QString("delete_status=%1").arg(ar.get_delete());
+    s+=QString(" WHERE id=%1").arg(ar.get_id());
+
+    bool b=query.exec(s);
     return b;
 }
 
@@ -1782,26 +1422,19 @@ bool CDbConnection::ordering_add(COrdering & ord)
         return false;
     //-
     int id=-1;
-    bool b,bToLong=false;
+    bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO ordering (comment,order_number,wares,dealer_id,date)"
                       "VALUES ('%1','%2','%3',").arg(ord.get_comment(),ord.get_ordernumber(),ord.get_wares());
     s+=QString("%1,").arg(ord.get_dealer_id());
     QDate dt=ord.get_date();
     s+=QString("'%1')").arg(dt.toString("yyyy-MM-dd"));
-    //-
-    if(s.length()>300)//sql-order to long?
-    {
-        s=QString("INSERT INTO ordering (comment) VALUES ('%1')").arg(ord.get_comment());
-        bToLong=true;
-    }
+
     b=query.exec(s);//add ok?
     if(b)
     {
         id=query.lastInsertId().toInt();
         ord.set_id(id);
-        if(bToLong)//was sql-order to long -> update
-            b=ordering_update(ord);//set data
     }
     //-
     return b;
@@ -1822,65 +1455,19 @@ bool CDbConnection::ordering_update(COrdering & ord)
     if(!m_bConnect)//db open?
         return false;
 
-    //get old
-    COrdering ordOld;
-    if(!ordering_get(ord.get_id(),ordOld))
-        return false;
-
-    //changes
+    QSqlQuery query;
     QDate dt;
-    QString s;
-    QStringList lsChanges;
-    if(ord.get_comment()!=ordOld.get_comment())
-    {
-        s=QString("comment='%1'").arg(ord.get_comment());
-        lsChanges.push_back(s);
-    }
-    if(ord.get_ordernumber()!=ordOld.get_ordernumber())
-    {
-        s=QString("order_number='%1'").arg(ord.get_ordernumber());
-        lsChanges.push_back(s);
-    }
-    if(ord.get_wares()!=ordOld.get_wares())
-    {
-        s=QString("wares='%1'").arg(ord.get_wares());
-        lsChanges.push_back(s);
-    }
-    if(ord.get_dealer_id()!=ordOld.get_dealer_id())
-    {
-        s=QString("dealer_id=%1").arg(ord.get_dealer_id());
-        lsChanges.push_back(s);
-    }
-    if(ord.get_date()!=ordOld.get_date())
-    {
-        dt=ord.get_date();
-        s=QString("date='%1'").arg(dt.toString("yyyy-MM-dd"));
-        lsChanges.push_back(s);
-    }
-
-    //split intro 300 char strings
-    QStringList lsSyntax;
-    for(int j,i=0;i<lsChanges.count();i++)
-    {
-        s=QString("UPDATE ordering SET ");
-        for(j=0;s.length()<300 && i<lsChanges.count();j++,i++)
-        {
-            if(j!=0)
-                s+=QString(",");
-            s+=lsChanges[i];
-        }
-        s+=QString(" WHERE id=%1").arg(ord.get_id());
-        lsSyntax.push_back(s);
-    }
+    QString s=QString("UPDATE OR REPLACE ordering SET ");
+    s+=QString("comment='%1',").arg(ord.get_comment());
+    s+=QString("order_number='%1',").arg(ord.get_ordernumber());
+    s+=QString("wares='%1',").arg(ord.get_wares());
+    s+=QString("dealer_id=%1,").arg(ord.get_dealer_id());
+    dt=ord.get_date();
+    s+=QString("date='%1'").arg(dt.toString("yyyy-MM-dd"));
+    s+=QString(" WHERE id=%1").arg(ord.get_id());
 
     //exec sql-syntax
-    QSqlQuery query;
-    bool b=true;
-    for(int i=0;i<lsSyntax.count() && b==true;i++)
-        b=query.exec(s);
-    //-
-    lsSyntax.clear();
-    lsChanges.clear();
+    bool b=query.exec(s);
     return b;
 }
 
@@ -2250,7 +1837,7 @@ bool CDbConnection::trade_add(CTrade & tr)
     if(!m_bConnect)//db open?
         return false;
     //-
-    bool b,bToLong=false;
+    bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO trade (comment,booking_number,wares,info_1,info_2,info_3,info_4,info_5,type,canceled,date)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8',").arg(tr.get_comment(),tr.get_booking_number(),tr.get_wares(),tr.get_info_1(),tr.get_info_2(),
@@ -2263,18 +1850,7 @@ bool CDbConnection::trade_add(CTrade & tr)
     QDate dt=tr.get_date();
     s+=QString("'%1')").arg(dt.toString("yyyy-MM-dd"));
     //-
-    if(s.length()>300)//sql-order to long?
-    {
-        s=QString("INSERT INTO trade (booking_number) VALUES ('%1')").arg(tr.get_booking_number());
-        bToLong=true;
-    }
     b=query.exec(s);//add ok?
-    if(b)
-    {
-        if(bToLong)//was sql-order to long -> update
-            b=trade_update(tr);//set data
-    }
-    //-
     return b;
 }
 
@@ -2283,98 +1859,28 @@ bool CDbConnection::trade_update(CTrade & tr)
     if(!m_bConnect)//db open?
         return false;
 
-    //get old
-    CTrade trOld;
-    if(!trade_get(tr.get_booking_number(),trOld))
-        return false;
-
-    //changes
+    QSqlQuery query;
     QDate dt;
-    QString s;
-    QStringList lsChanges;
-    if(tr.get_comment()!=trOld.get_comment())
-    {
-        s=QString("comment='%1'").arg(tr.get_comment());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_booking_number()!=trOld.get_booking_number())
-    {
-        s=QString("booking_number='%1'").arg(tr.get_booking_number());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_wares()!=trOld.get_wares())
-    {
-        s=QString("wares='%1'").arg(tr.get_wares());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_date()!=trOld.get_date())
-    {
-        dt=tr.get_date();
-        s=QString("date='%1'").arg(dt.toString("yyyy-MM-dd"));
-        lsChanges.push_back(s);
-    }
-    if(tr.get_info_1()!=trOld.get_info_1())
-    {
-        s=QString("info_1='%1'").arg(tr.get_info_1());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_info_2()!=trOld.get_info_2())
-    {
-        s=QString("info_2='%1'").arg(tr.get_info_2());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_info_3()!=trOld.get_info_3())
-    {
-        s=QString("info_3='%1'").arg(tr.get_info_3());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_info_4()!=trOld.get_info_4())
-    {
-        s=QString("info_4='%1'").arg(tr.get_info_4());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_info_5()!=trOld.get_info_5())
-    {
-        s=QString("info_5='%1'").arg(tr.get_info_5());
-        lsChanges.push_back(s);
-    }
-    if(tr.get_canceled()!=trOld.get_canceled())
-    {
-        if(tr.get_canceled()==false)
-            s=QString("canceled=0");
-        else
-            s=QString("canceled=1");
-        lsChanges.push_back(s);
-    }
-    if(tr.get_type()!=trOld.get_type())
-    {
-        s=QString("type=%1").arg(tr.get_type());
-        lsChanges.push_back(s);
-    }
-
-    //split intro 300 char strings
-    QStringList lsSyntax;
-    for(int j,i=0;i<lsChanges.count();i++)
-    {
-        s=QString("UPDATE trade SET ");
-        for(j=0;s.length()<300 && i<lsChanges.count();j++,i++)
-        {
-            if(j!=0)
-                s+=QString(",");
-            s+=lsChanges[i];
-        }
-        s+=QString(" WHERE booking_number='%1'").arg(tr.get_booking_number());
-        lsSyntax.push_back(s);
-    }
+    QString s=QString("UPDATE OR REPLACE trade SET ");
+    s+=QString("comment='%1',").arg(tr.get_comment());
+    s+=QString("booking_number='%1',").arg(tr.get_booking_number());
+    s+=QString("wares='%1',").arg(tr.get_wares());
+    dt=tr.get_date();
+    s+=QString("date='%1',").arg(dt.toString("yyyy-MM-dd"));
+    s+=QString("info_1='%1',").arg(tr.get_info_1());
+    s+=QString("info_2='%1',").arg(tr.get_info_2());
+    s+=QString("info_3='%1',").arg(tr.get_info_3());
+    s+=QString("info_4='%1',").arg(tr.get_info_4());
+    s+=QString("info_5='%1',").arg(tr.get_info_5());
+    if(tr.get_canceled()==false)
+        s=QString("canceled=0,");
+    else
+        s=QString("canceled=1,");
+    s+=QString("type=%1").arg(tr.get_type());
+    s+=QString(" WHERE booking_number='%1'").arg(tr.get_booking_number());
 
     //exec sql-syntax
-    QSqlQuery query;
-    bool b=true;
-    for(int i=0;i<lsSyntax.count() && b==true;i++)
-        b=query.exec(s);
-    //-
-    lsSyntax.clear();
-    lsChanges.clear();
+    bool b=query.exec(s);
     return b;
 }
 

@@ -45,6 +45,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditHomepage">
    <property name="geometry">
@@ -54,6 +57,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -91,6 +97,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditCallnumbers">
    <property name="geometry">
@@ -101,6 +110,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditContect">
    <property name="geometry">
@@ -110,6 +122,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -134,6 +149,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditFaxnumbers">
    <property name="geometry">
@@ -143,6 +161,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -192,6 +213,9 @@
      <width>981</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
    </property>
   </widget>
   <widget class="QLabel" name="labelNameError">
