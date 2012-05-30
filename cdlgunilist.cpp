@@ -87,7 +87,7 @@ bool CDlgUniList::settings(bool bUpdate)
         {
             //table width
             if(lsSValue.count()>0)
-                settings.set_table_width(ui->tableWidget,lsSValue[0],200);
+                settings.set_table_columns_width(ui->tableWidget,lsSValue[0],200);
             //table sort
             if(lsSValue.count()>1)
                 settings.set_table_sort(ui->tableWidget,lsSValue[1],0);
@@ -97,7 +97,7 @@ bool CDlgUniList::settings(bool bUpdate)
             //table width
             if(lsSValue.count()>0)
             {
-                if(settings.get_table_width(ui->tableWidget,lsSValue[0]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidget,lsSValue[0]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[0]);
                     lsSUpdateValue.push_back(lsSValue[0]);

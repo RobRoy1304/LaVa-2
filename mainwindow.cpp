@@ -220,6 +220,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->menuPrinterTradeOView,SIGNAL(triggered()),this,SLOT(menu_print_trade_overview()));
     connect(ui->menuPrinterTradeSel,SIGNAL(triggered()),this,SLOT(menu_print_trade_selection()));
     connect(ui->menuPrinterWaregroupOView,SIGNAL(triggered()),this,SLOT(menu_print_waregroup()));
+    connect(ui->menuSettingInventory,SIGNAL(triggered()),this,SLOT(menu_table_setting_inventory()));
+    connect(ui->menuSettingArticle,SIGNAL(triggered()),this,SLOT(menu_table_setting_article()));
 }
 
 MainWindow::~MainWindow()
@@ -272,7 +274,6 @@ bool MainWindow::init(void)
     m_widgets.set_db(&m_db);//set database
     m_thread.init(&m_db,&m_widgets);//init thread
     m_thread.start_thread();//start thread
-    fill_all_table();//fill tables
     return true;
 }
 
@@ -558,19 +559,25 @@ bool MainWindow::fill_all_table(void)
     ordering_mask_set();
 
     //trade
-    QDate dt=QDate().currentDate();
-    if(dt.year()>=2009)
-        trade_update_datelist(dt,dt.year());
     trade_mask_set(false);
 
     //inventory
     inventory_mask_set();
 
     //logbook
-    if(dt.year()>=2009)
-        logbook_update_datelist(dt,dt.year());
     logbook_mask_set();
     //-
+    return true;
+}
+
+bool MainWindow::fill_date_lists(void)
+{
+    QDate dt=QDate().currentDate();
+    if(dt.year()>=2009)
+    {
+        trade_update_datelist(dt,dt.year());
+        logbook_update_datelist(dt,dt.year());
+    }
     return true;
 }
 
@@ -597,6 +604,7 @@ bool MainWindow::settings(bool bUpdate)
     lsSType.push_back(QString("SORT_ORDER_INVENTORY"));
     lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_INV"));
     lsSType.push_back(QString("MASK_SELECTION_INVENTORY"));
+    lsSType.push_back(QString("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT"));
     //-
     lsSType.push_back(QString("TRADE_TABLE_COLUMNS_WIDTHS_OVIEW"));
     lsSType.push_back(QString("SORT_ORDER_TRADE_OVIEW"));
@@ -617,6 +625,7 @@ bool MainWindow::settings(bool bUpdate)
     lsSType.push_back(QString("SORT_ORDER_ARTICLE"));
     lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_ARTICLE"));
     lsSType.push_back(QString("MASK_SELECTION_ARTICLE"));
+    lsSType.push_back(QString("ARTICLE_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT"));
     //-
     lsSType.push_back(QString("WAREGROUP_TREE_COLUMNS_WIDTHS"));
     //-
@@ -651,59 +660,67 @@ bool MainWindow::settings(bool bUpdate)
             ui->tabWidget->setCurrentWidget(ui->tabInventory);
 
             //--inventory--
-            settings.set_table_width(ui->tableWidgetInventory,lsSValues[1],200);//table width+sort
+            settings.set_table_columns_width(ui->tableWidgetInventory,lsSValues[1],200);//table width+sort
             settings.set_table_sort(ui->tableWidgetInventory,lsSValues[2],0);
             settings.set_checkbox(ui->checkBoxAutoSearchInventory,lsSValues[3],false);//auto checkbox
             settings.set_combobox(ui->comboBoxMaskInventory,lsSValues[4],0);//mask selection
+            //-
+            m_widgets.m_tcInventory.set_table(ui->tableWidgetInventory);
+            m_widgets.m_tcInventory.set_id_column(ui->tableWidgetInventory->columnCount()-1);
+            settings.set_table_columns_order_visible_alignment(&m_widgets.m_tcInventory,lsSValues[5]);//table order & visible
 
             //--trade--
-            settings.set_table_width(ui->tableWidgetTrade,lsSValues[5],200);//table width+sort
-            settings.set_table_sort(ui->tableWidgetTrade,lsSValues[6],3);
-            settings.set_table_width(ui->tableWidgetTradeWareslist,lsSValues[7],200);//table 2 width+sort
-            settings.set_table_sort(ui->tableWidgetTradeWareslist,lsSValues[8],1);
-            settings.set_checkbox(ui->checkBoxAutoSearchTrade,lsSValues[9],false);//auto checkbox
-            settings.set_combobox(ui->comboBoxMaskTrade,lsSValues[10],0);//mask selection
-            settings.set_combobox(ui->comboBoxTradeMaskDate,lsSValues[11],0);//mask 2 selection
+            settings.set_table_columns_width(ui->tableWidgetTrade,lsSValues[6],200);//table width+sort
+            settings.set_table_sort(ui->tableWidgetTrade,lsSValues[7],3);
+            settings.set_table_columns_width(ui->tableWidgetTradeWareslist,lsSValues[8],200);//table 2 width+sort
+            settings.set_table_sort(ui->tableWidgetTradeWareslist,lsSValues[9],1);
+            settings.set_checkbox(ui->checkBoxAutoSearchTrade,lsSValues[10],false);//auto checkbox
+            settings.set_combobox(ui->comboBoxMaskTrade,lsSValues[11],0);//mask selection
+            settings.set_combobox(ui->comboBoxTradeMaskDate,lsSValues[12],0);//mask 2 selection
 
             //--ordering--
-            settings.set_table_width(ui->tableWidgetOrdering,lsSValues[12],200);//table width+sort
-            settings.set_table_sort(ui->tableWidgetOrdering,lsSValues[13],0);
-            settings.set_table_width(ui->tableWidgetOrderingWareslist,lsSValues[14],200);//table 2 width+sort
-            settings.set_table_sort(ui->tableWidgetOrderingWareslist,lsSValues[15],1);
-            settings.set_checkbox(ui->checkBoxAutoSearchOrdering,lsSValues[16],false);//auto checkbox
-            settings.set_combobox(ui->comboBoxMaskOrdering,lsSValues[17],0);//mask selection
+            settings.set_table_columns_width(ui->tableWidgetOrdering,lsSValues[13],200);//table width+sort
+            settings.set_table_sort(ui->tableWidgetOrdering,lsSValues[14],0);
+            settings.set_table_columns_width(ui->tableWidgetOrderingWareslist,lsSValues[15],200);//table 2 width+sort
+            settings.set_table_sort(ui->tableWidgetOrderingWareslist,lsSValues[16],1);
+            settings.set_checkbox(ui->checkBoxAutoSearchOrdering,lsSValues[17],false);//auto checkbox
+            settings.set_combobox(ui->comboBoxMaskOrdering,lsSValues[18],0);//mask selection
 
             //--article--
-            settings.set_table_width(ui->tableWidgetArticle,lsSValues[18],200);//table width+sort
-            settings.set_table_sort(ui->tableWidgetArticle,lsSValues[19],0);
-            settings.set_checkbox(ui->checkBoxAutoSearchArticle,lsSValues[20],false);//auto checkbox
-            settings.set_combobox(ui->comboBoxMaskArticle,lsSValues[21],0);//mask selection
+            settings.set_table_columns_width(ui->tableWidgetArticle,lsSValues[19],200);//table width+sort
+            settings.set_table_sort(ui->tableWidgetArticle,lsSValues[20],0);
+            settings.set_checkbox(ui->checkBoxAutoSearchArticle,lsSValues[21],false);//auto checkbox
+            settings.set_combobox(ui->comboBoxMaskArticle,lsSValues[22],0);//mask selection
+            //-
+            m_widgets.m_tcArticle.set_table(ui->tableWidgetArticle);
+            m_widgets.m_tcArticle.set_id_column(ui->tableWidgetArticle->columnCount()-1);
+            settings.set_table_columns_order_visible_alignment(&m_widgets.m_tcArticle,lsSValues[23]);//table order & visible
 
             //--waregroup--
-            settings.set_tree_width(ui->treeWidgetWaregroup,lsSValues[22],500);//tree width
+            settings.set_tree_width(ui->treeWidgetWaregroup,lsSValues[24],500);//tree width
 
             //--maker--
-            settings.set_table_width(ui->tableWidgetMaker,lsSValues[23],200);//table width+sort
-            settings.set_table_sort(ui->tableWidgetMaker,lsSValues[24],0);
-            settings.set_checkbox(ui->checkBoxAutoSearchMaker,lsSValues[25],false);//auto checkbox
-            settings.set_combobox(ui->comboBoxMaskMaker,lsSValues[26],0);//mask selection
+            settings.set_table_columns_width(ui->tableWidgetMaker,lsSValues[25],200);//table width+sort
+            settings.set_table_sort(ui->tableWidgetMaker,lsSValues[26],0);
+            settings.set_checkbox(ui->checkBoxAutoSearchMaker,lsSValues[27],false);//auto checkbox
+            settings.set_combobox(ui->comboBoxMaskMaker,lsSValues[28],0);//mask selection
 
             //--dealer--
-            settings.set_table_width(ui->tableWidgetDealer,lsSValues[27],200);//table width+sort
-            settings.set_table_sort(ui->tableWidgetDealer,lsSValues[28],0);
-            settings.set_checkbox(ui->checkBoxAutoSearchDealer,lsSValues[29],false);//auto checkbox
-            settings.set_combobox(ui->comboBoxMaskDealer,lsSValues[30],0);//mask selection
+            settings.set_table_columns_width(ui->tableWidgetDealer,lsSValues[29],200);//table width+sort
+            settings.set_table_sort(ui->tableWidgetDealer,lsSValues[30],0);
+            settings.set_checkbox(ui->checkBoxAutoSearchDealer,lsSValues[31],false);//auto checkbox
+            settings.set_combobox(ui->comboBoxMaskDealer,lsSValues[32],0);//mask selection
 
             //--customer--
-            settings.set_table_width(ui->tableWidgetCustomer,lsSValues[31],200);//table width+sort
-            settings.set_table_sort(ui->tableWidgetCustomer,lsSValues[32],1);
-            settings.set_checkbox(ui->checkBoxAutoSearchCustomer,lsSValues[33],false);//auto checkbox
-            settings.set_combobox(ui->comboBoxMaskCustomer,lsSValues[34],0);//mask selection
+            settings.set_table_columns_width(ui->tableWidgetCustomer,lsSValues[33],200);//table width+sort
+            settings.set_table_sort(ui->tableWidgetCustomer,lsSValues[34],1);
+            settings.set_checkbox(ui->checkBoxAutoSearchCustomer,lsSValues[35],false);//auto checkbox
+            settings.set_combobox(ui->comboBoxMaskCustomer,lsSValues[36],0);//mask selection
 
             //--logbook--
-            settings.set_combobox(ui->comboBoxMaskLogbook,lsSValues[35],0);//mask selection
+            settings.set_combobox(ui->comboBoxMaskLogbook,lsSValues[37],0);//mask selection
             //count
-            count=lsSValues[36].toInt(&b2,10);
+            count=lsSValues[38].toInt(&b2,10);
             if(!b2)
                 count=100;
             else
@@ -724,7 +741,7 @@ bool MainWindow::settings(bool bUpdate)
             }
 
             //--inventory--
-            if(settings.get_table_width(ui->tableWidgetInventory,lsSValues[1]))//table width+sort
+            if(settings.get_table_columns_width(ui->tableWidgetInventory,lsSValues[1]))//table width+sort
             {
                 lsSUpdateType.push_back(lsSType[1]);
                 lsSUpdateValue.push_back(lsSValues[1]);
@@ -744,183 +761,193 @@ bool MainWindow::settings(bool bUpdate)
                 lsSUpdateType.push_back(lsSType[4]);
                 lsSUpdateValue.push_back(lsSValues[4]);
             }
-
-            //--trade--
-            if(settings.get_table_width(ui->tableWidgetTrade,lsSValues[5]))//table width+sort
+            if(settings.get_table_columns_order_visible_alignment(&m_widgets.m_tcInventory,lsSValues[5]))//table order & visible
             {
                 lsSUpdateType.push_back(lsSType[5]);
                 lsSUpdateValue.push_back(lsSValues[5]);
             }
-            if(settings.get_table_sort(ui->tableWidgetTrade,lsSValues[6]))
+
+            //--trade--
+            if(settings.get_table_columns_width(ui->tableWidgetTrade,lsSValues[6]))//table width+sort
             {
                 lsSUpdateType.push_back(lsSType[6]);
                 lsSUpdateValue.push_back(lsSValues[6]);
             }
-            if(settings.get_table_width(ui->tableWidgetTradeWareslist,lsSValues[7]))//table 2 width+sort
+            if(settings.get_table_sort(ui->tableWidgetTrade,lsSValues[7]))
             {
                 lsSUpdateType.push_back(lsSType[7]);
                 lsSUpdateValue.push_back(lsSValues[7]);
             }
-            if(settings.get_table_sort(ui->tableWidgetTradeWareslist,lsSValues[8]))
+            if(settings.get_table_columns_width(ui->tableWidgetTradeWareslist,lsSValues[8]))//table 2 width+sort
             {
                 lsSUpdateType.push_back(lsSType[8]);
                 lsSUpdateValue.push_back(lsSValues[8]);
             }
-            if(settings.get_checkbox(ui->checkBoxAutoSearchTrade,lsSValues[9]))//checkbox
+            if(settings.get_table_sort(ui->tableWidgetTradeWareslist,lsSValues[9]))
             {
                 lsSUpdateType.push_back(lsSType[9]);
                 lsSUpdateValue.push_back(lsSValues[9]);
             }
-            if(settings.get_combobox(ui->comboBoxMaskTrade,lsSValues[10]))//combobox
+            if(settings.get_checkbox(ui->checkBoxAutoSearchTrade,lsSValues[10]))//checkbox
             {
                 lsSUpdateType.push_back(lsSType[10]);
                 lsSUpdateValue.push_back(lsSValues[10]);
             }
-            if(settings.get_combobox(ui->comboBoxTradeMaskDate,lsSValues[11]))//combobox 2
+            if(settings.get_combobox(ui->comboBoxMaskTrade,lsSValues[11]))//combobox
             {
                 lsSUpdateType.push_back(lsSType[11]);
                 lsSUpdateValue.push_back(lsSValues[11]);
             }
-
-            //--ordering--
-            if(settings.get_table_width(ui->tableWidgetOrdering,lsSValues[12]))//table width+sort
+            if(settings.get_combobox(ui->comboBoxTradeMaskDate,lsSValues[12]))//combobox 2
             {
                 lsSUpdateType.push_back(lsSType[12]);
                 lsSUpdateValue.push_back(lsSValues[12]);
             }
-            if(settings.get_table_sort(ui->tableWidgetOrdering,lsSValues[13]))
+
+            //--ordering--
+            if(settings.get_table_columns_width(ui->tableWidgetOrdering,lsSValues[13]))//table width+sort
             {
                 lsSUpdateType.push_back(lsSType[13]);
                 lsSUpdateValue.push_back(lsSValues[13]);
             }
-            if(settings.get_table_width(ui->tableWidgetOrderingWareslist,lsSValues[14]))//table 2 width+sort
+            if(settings.get_table_sort(ui->tableWidgetOrdering,lsSValues[14]))
             {
                 lsSUpdateType.push_back(lsSType[14]);
                 lsSUpdateValue.push_back(lsSValues[14]);
             }
-            if(settings.get_table_sort(ui->tableWidgetOrderingWareslist,lsSValues[15]))
+            if(settings.get_table_columns_width(ui->tableWidgetOrderingWareslist,lsSValues[15]))//table 2 width+sort
             {
                 lsSUpdateType.push_back(lsSType[15]);
                 lsSUpdateValue.push_back(lsSValues[15]);
             }
-            if(settings.get_checkbox(ui->checkBoxAutoSearchOrdering,lsSValues[16]))//checkbox
+            if(settings.get_table_sort(ui->tableWidgetOrderingWareslist,lsSValues[16]))
             {
                 lsSUpdateType.push_back(lsSType[16]);
                 lsSUpdateValue.push_back(lsSValues[16]);
             }
-            if(settings.get_combobox(ui->comboBoxMaskOrdering,lsSValues[17]))//combobox
+            if(settings.get_checkbox(ui->checkBoxAutoSearchOrdering,lsSValues[17]))//checkbox
             {
                 lsSUpdateType.push_back(lsSType[17]);
                 lsSUpdateValue.push_back(lsSValues[17]);
             }
-
-            //--article--
-            if(settings.get_table_width(ui->tableWidgetArticle,lsSValues[18]))//table width+sort
+            if(settings.get_combobox(ui->comboBoxMaskOrdering,lsSValues[18]))//combobox
             {
                 lsSUpdateType.push_back(lsSType[18]);
                 lsSUpdateValue.push_back(lsSValues[18]);
             }
-            if(settings.get_table_sort(ui->tableWidgetArticle,lsSValues[19]))
+
+            //--article--
+            if(settings.get_table_columns_width(ui->tableWidgetArticle,lsSValues[19]))//table width+sort
             {
                 lsSUpdateType.push_back(lsSType[19]);
                 lsSUpdateValue.push_back(lsSValues[19]);
             }
-            if(settings.get_checkbox(ui->checkBoxAutoSearchArticle,lsSValues[20]))//checkbox
+            if(settings.get_table_sort(ui->tableWidgetArticle,lsSValues[20]))
             {
                 lsSUpdateType.push_back(lsSType[20]);
                 lsSUpdateValue.push_back(lsSValues[20]);
             }
-            if(settings.get_combobox(ui->comboBoxMaskArticle,lsSValues[21]))//combobox
+            if(settings.get_checkbox(ui->checkBoxAutoSearchArticle,lsSValues[21]))//checkbox
             {
                 lsSUpdateType.push_back(lsSType[21]);
                 lsSUpdateValue.push_back(lsSValues[21]);
             }
-
-            //--waregroup--
-            if(settings.get_tree_width(ui->treeWidgetWaregroup,lsSValues[22]))//combobox
+            if(settings.get_combobox(ui->comboBoxMaskArticle,lsSValues[22]))//combobox
             {
                 lsSUpdateType.push_back(lsSType[22]);
                 lsSUpdateValue.push_back(lsSValues[22]);
             }
-
-            //--maker--
-            if(settings.get_table_width(ui->tableWidgetMaker,lsSValues[23]))//table width+sort
+            if(settings.get_table_columns_order_visible_alignment(&m_widgets.m_tcArticle,lsSValues[23]))//table order & visible
             {
                 lsSUpdateType.push_back(lsSType[23]);
                 lsSUpdateValue.push_back(lsSValues[23]);
             }
-            if(settings.get_table_sort(ui->tableWidgetMaker,lsSValues[24]))
+
+            //--waregroup--
+            if(settings.get_tree_width(ui->treeWidgetWaregroup,lsSValues[24]))//combobox
             {
                 lsSUpdateType.push_back(lsSType[24]);
                 lsSUpdateValue.push_back(lsSValues[24]);
             }
-            if(settings.get_checkbox(ui->checkBoxAutoSearchMaker,lsSValues[25]))//checkbox
+
+            //--maker--
+            if(settings.get_table_columns_width(ui->tableWidgetMaker,lsSValues[25]))//table width+sort
             {
                 lsSUpdateType.push_back(lsSType[25]);
                 lsSUpdateValue.push_back(lsSValues[25]);
             }
-            if(settings.get_combobox(ui->comboBoxMaskMaker,lsSValues[26]))//combobox
+            if(settings.get_table_sort(ui->tableWidgetMaker,lsSValues[26]))
             {
                 lsSUpdateType.push_back(lsSType[26]);
                 lsSUpdateValue.push_back(lsSValues[26]);
             }
-
-            //--dealer--
-            if(settings.get_table_width(ui->tableWidgetDealer,lsSValues[27]))//table width+sort
+            if(settings.get_checkbox(ui->checkBoxAutoSearchMaker,lsSValues[27]))//checkbox
             {
                 lsSUpdateType.push_back(lsSType[27]);
                 lsSUpdateValue.push_back(lsSValues[27]);
             }
-            if(settings.get_table_sort(ui->tableWidgetDealer,lsSValues[28]))
+            if(settings.get_combobox(ui->comboBoxMaskMaker,lsSValues[28]))//combobox
             {
                 lsSUpdateType.push_back(lsSType[28]);
                 lsSUpdateValue.push_back(lsSValues[28]);
             }
-            if(settings.get_checkbox(ui->checkBoxAutoSearchDealer,lsSValues[29]))//checkbox
+
+            //--dealer--
+            if(settings.get_table_columns_width(ui->tableWidgetDealer,lsSValues[29]))//table width+sort
             {
                 lsSUpdateType.push_back(lsSType[29]);
                 lsSUpdateValue.push_back(lsSValues[29]);
             }
-            if(settings.get_combobox(ui->comboBoxMaskDealer,lsSValues[30]))//combobox
+            if(settings.get_table_sort(ui->tableWidgetDealer,lsSValues[30]))
             {
                 lsSUpdateType.push_back(lsSType[30]);
                 lsSUpdateValue.push_back(lsSValues[30]);
             }
-
-            //--customer--
-            if(settings.get_table_width(ui->tableWidgetCustomer,lsSValues[31]))//table width+sort
+            if(settings.get_checkbox(ui->checkBoxAutoSearchDealer,lsSValues[31]))//checkbox
             {
                 lsSUpdateType.push_back(lsSType[31]);
                 lsSUpdateValue.push_back(lsSValues[31]);
             }
-            if(settings.get_table_sort(ui->tableWidgetCustomer,lsSValues[32]))
+            if(settings.get_combobox(ui->comboBoxMaskDealer,lsSValues[32]))//combobox
             {
                 lsSUpdateType.push_back(lsSType[32]);
                 lsSUpdateValue.push_back(lsSValues[32]);
             }
-            if(settings.get_checkbox(ui->checkBoxAutoSearchCustomer,lsSValues[33]))//checkbox
+
+            //--customer--
+            if(settings.get_table_columns_width(ui->tableWidgetCustomer,lsSValues[33]))//table width+sort
             {
                 lsSUpdateType.push_back(lsSType[33]);
                 lsSUpdateValue.push_back(lsSValues[33]);
             }
-            if(settings.get_combobox(ui->comboBoxMaskCustomer,lsSValues[34]))//combobox
+            if(settings.get_table_sort(ui->tableWidgetCustomer,lsSValues[34]))
             {
                 lsSUpdateType.push_back(lsSType[34]);
                 lsSUpdateValue.push_back(lsSValues[34]);
             }
-
-            //--logbook--
-            if(settings.get_combobox(ui->comboBoxMaskLogbook,lsSValues[35]))//combobox
+            if(settings.get_checkbox(ui->checkBoxAutoSearchCustomer,lsSValues[35]))//checkbox
             {
                 lsSUpdateType.push_back(lsSType[35]);
                 lsSUpdateValue.push_back(lsSValues[35]);
             }
-            //count
-            s=ui->lineEditCountItemLog->text();
-            if(s!=lsSValues[36])//update?
+            if(settings.get_combobox(ui->comboBoxMaskCustomer,lsSValues[36]))//combobox
             {
                 lsSUpdateType.push_back(lsSType[36]);
                 lsSUpdateValue.push_back(lsSValues[36]);
+            }
+
+            //--logbook--
+            if(settings.get_combobox(ui->comboBoxMaskLogbook,lsSValues[37]))//combobox
+            {
+                lsSUpdateType.push_back(lsSType[37]);
+                lsSUpdateValue.push_back(lsSValues[37]);
+            }
+            //count
+            s=ui->lineEditCountItemLog->text();
+            if(s!=lsSValues[38])//update?
+            {
+                lsSUpdateType.push_back(lsSType[38]);
+                lsSUpdateValue.push_back(lsSValues[38]);
             }
 
 
@@ -955,7 +982,7 @@ bool MainWindow::check_first_start(void)
         msgAgreement.setWindowTitle(QString("Nutzungsbedingungen:"));
         s=QString("Dieses Programm(LaVa 2) steht unter der open-source-Lizenz GNU-GPL v3. Es entstehen für die Nutzung "
                   "keine Kosten. Der Autor entbindet sich von jeglichen Haftungsansprüchen, gleich welcher Art. "
-                  "Das Programm befindet sich momentan noch im Beta-Status, und ist somit noch nicht für "
+                  "Das Programm befindet sich momentan noch im Beta-Status und ist somit noch nicht für "
                   "den produktiven Einsatz gedacht.\n\nSind Sie mit diesen Bedingungen einverstanden?");
         msgAgreement.setText(s);
         msgAgreement.addButton(QString("Ja"),QMessageBox::YesRole);
@@ -2591,6 +2618,8 @@ bool MainWindow::article_edit(void)
             dlg.set_thread(&m_thread);//set thread
             dlg.init(ar.get_waregroup_id());
             dlg.m_sMarkArticleName=ar.get_name();
+            dlg.m_sMarkArticleNumber1=ar.get_articlenumber();
+            dlg.m_sMarkArticleNumber2=ar.get_articlenumber2();
             dlg.set_data(ar);
             dlg.setWindowTitle("Artikel bearbeiten");
             if(dlg.exec())
@@ -2693,7 +2722,7 @@ bool MainWindow::article_copy(void)
         }
     }
     memory.clear();
-    return false;
+    return b;
 }
 
 bool MainWindow::article_delete(void)
@@ -4357,14 +4386,33 @@ bool MainWindow::menu_db_backup_create(void)
     if(!m_db.is_db_connect())
         return false;
 
+    //load backup-path
+    QDir dir;
+    CSettings settings;
+    QString s,s2,sBackupPath;
+    if(settings.load(QString("BACKUP_PATH"),s))//load backup path
+    {
+        if(s.length()>0)
+        {
+            dir.setPath(s);
+            if(dir.exists())
+                sBackupPath=s;
+        }
+    }
+
     QFileInfo file_info;
     CLogbook lg;
     QMessageBox msg(QMessageBox::Critical,"","");
     msg.setWindowTitle(QString("Fehler"));
     QDateTime dtTi=QDateTime::currentDateTime();
-    QString s,s2;
     QString sReadFile=m_sDbPath+QString("lava.sqlite");
-    QString sWriteFile=m_sDbPath+QString("/%1.sqlite").arg(dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+
+    QString sWriteFile;
+    if(sBackupPath.length()>0)//backup path load?
+        sWriteFile=sBackupPath+QString("/%1.sqlite").arg(dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+    else//default path
+        sWriteFile=m_sDbPath+QString("/%1.sqlite").arg(dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+
     QFile file(sReadFile);
     sWriteFile=QFileDialog::getSaveFileName(this,QString("Sicherung erstellen"),sWriteFile);
     QStringList ls;
@@ -4372,6 +4420,7 @@ bool MainWindow::menu_db_backup_create(void)
     if(sWriteFile.length()>0)//file dialog finish with 'save'?
     {
         //file info (permission)
+        s=QString("");
         ls=sWriteFile.split("/");
         for(int i=0;i<ls.count()-1;i++)
             s+=ls[i]+QString("/");
@@ -4392,6 +4441,9 @@ bool MainWindow::menu_db_backup_create(void)
             }
             else
             {
+                //save backup path
+                settings.write(QString("BACKUP_PATH"),file_info.filePath());
+
                 //check give it file?
                 if(QFile(sWriteFile).exists())
                     QFile::remove(sWriteFile);//delete old file
@@ -4432,9 +4484,25 @@ bool MainWindow::menu_db_backup_load(void)
     if(!m_db.is_db_connect())
         return false;
 
+    //load backup-path
+    QDir dir;
+    CSettings settings;
+    QString s,sPath=m_sDbPath;
+    if(settings.load(QString("BACKUP_PATH"),s))//load backup path
+    {
+        if(s.length()>0)
+        {
+            dir.setPath(s);
+            if(dir.exists())
+                sPath=s;
+        }
+    }
+
     bool b;
+    QStringList ls;
     QString sError,sReadFile;
-    QString sWriteFile=m_sDbPath+QString("lava.sqlite"),sWriteTempFile=m_sDbPath+QString("lava_temp.sqlite");
+    QString sWriteTempFile=m_sDbPath+QString("lava_temp.sqlite");
+    QString sWriteFile=m_sDbPath+QString("lava.sqlite");
     QMessageBox msgQuest(QMessageBox::Question,"","");
     msgQuest.setText(QString("Achtung, beim Laden einer Sicherung gehen alle aktuellen Daten unwiderruflich verloren.\nMöchten Sie wirklich eine Sicherung laden?"));
     QMessageBox msgCritical(QMessageBox::Critical,"","");
@@ -4458,7 +4526,7 @@ bool MainWindow::menu_db_backup_load(void)
         msgQuest.exec();//quest really overwrite db-file?
         if(msgQuest.clickedButton()==yesButton)
         {
-            sReadFile=QFileDialog::getOpenFileName(this,QString("Sicherung laden"),m_sDbPath);
+            sReadFile=QFileDialog::getOpenFileName(this,QString("Sicherung laden"),sPath);
             if(sReadFile.length()>0)
             {//load button pressed?
 
@@ -4496,6 +4564,13 @@ bool MainWindow::menu_db_backup_load(void)
                                     }
                                     else//copy ok
                                         QFile::remove(sWriteTempFile);//delete temp file(old db-file)
+
+                                    //save backup path
+                                    s=QString("");
+                                    ls=sReadFile.split("/");
+                                    for(int i=0;i<ls.count()-1;i++)
+                                        s+=ls[i]+QString("/");
+                                    settings.write(QString("BACKUP_PATH"),s);
                                 }
                             }
                         }
@@ -4538,7 +4613,8 @@ bool MainWindow::menu_db_backup_load(void)
         msgCritical.setText(sError);
         msgCritical.exec();
     }
-
+    //-
+    ls.clear();
     return true;
 }
 
@@ -5183,17 +5259,19 @@ bool MainWindow::menu_print_customer_overview(void)
 
 bool MainWindow::menu_print_article_overview(void)
 {
+    bool bAllColumns=true;
     QString s("Artikelübersicht:");
     QString sErr("Die Tabelle mit den Artrikeln ist leer!");
-    print_table(s,sErr,ui->tableWidgetArticle);
+    print_table(s,sErr,ui->tableWidgetArticle,&bAllColumns);
     return true;
 }
 
 bool MainWindow::menu_print_inventory_overview(void)
 {
+    bool bAllColumns=true;
     QString s("Lagerbestandsübersicht:");
     QString sErr("Die Tabelle mit dem Lagerbestand ist leer!");
-    print_table(s,sErr,ui->tableWidgetInventory);
+    print_table(s,sErr,ui->tableWidgetInventory,&bAllColumns);
     return true;
 }
 
@@ -5246,6 +5324,63 @@ bool MainWindow::menu_print_waregroup(void)
     QString sErr("Die Warengruppenübersicht ist leer!");
     print_tree(s,sErr,ui->treeWidgetWaregroup);
     return true;
+}
+
+//table settings
+bool MainWindow::menu_table_setting_inventory(void)
+{
+    bool bReturn=false;
+    CTableColumnsData tcd=m_widgets.m_tcInventory;
+    CTableColumnsData tcdNew=tcd;
+    QList<QString> lsHeaderNames;
+    CInputDialogTableSetting dlg;
+    dlg.setWindowTitle(QString("Tabelleneinstellung - Lagerbestand - Übersicht"));
+    dlg.set_data(tcd);
+
+    //dlg
+    if(dlg.exec())//ok
+    {
+        dlg.get_data(tcdNew,lsHeaderNames);
+        if(tcd!=tcdNew)
+        {//settings updated?
+            m_widgets.m_tcInventory=tcdNew;//set new columnsdata
+            if(m_widgets.update_table_by_tablecolumnsdata(tcd,tcdNew,lsHeaderNames))//update table settings
+            {
+                inventory_mask_set();//update table
+                bReturn=true;
+            }
+        }
+    }
+    lsHeaderNames.clear();
+    return bReturn;
+}
+
+bool MainWindow::menu_table_setting_article(void)
+{
+    bool bReturn=false;
+    CTableColumnsData tcd=m_widgets.m_tcArticle;
+    CTableColumnsData tcdNew=tcd;
+    QList<QString> lsHeaderNames;
+    CInputDialogTableSetting dlg;
+    dlg.setWindowTitle(QString("Tabelleneinstellung - Artikel - Übersicht"));
+    dlg.set_data(tcd);
+
+    //dlg
+    if(dlg.exec())//ok
+    {
+        dlg.get_data(tcdNew,lsHeaderNames);
+        if(tcd!=tcdNew)
+        {//settings updated?
+            m_widgets.m_tcArticle=tcdNew;//set new columnsdata
+            if(m_widgets.update_table_by_tablecolumnsdata(tcd,tcdNew,lsHeaderNames))//update table settings
+            {
+                article_mask_set();//update table
+                bReturn=true;
+            }
+        }
+    }
+    lsHeaderNames.clear();
+    return bReturn;
 }
 
 

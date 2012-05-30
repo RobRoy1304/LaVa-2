@@ -18,6 +18,312 @@
 
 #include "data_classes.h"
 
+//-ctableitemdata-------------------------------------------------------
+CTableItemData::CTableItemData()
+{
+    m_iAlignment=TABLE_ALIGNMENT_LEFT;
+}
+
+QString CTableItemData::get_text(void)
+{
+    return m_sText;
+}
+
+int CTableItemData::get_alignment(void)
+{
+    return m_iAlignment;
+}
+
+QIcon CTableItemData::get_icon(void)
+{
+    return m_icon;
+}
+
+void CTableItemData::set_text(QString s)
+{
+    m_sText=s;
+}
+
+void CTableItemData::set_alignment(int i)
+{
+    m_iAlignment=i;
+}
+
+void CTableItemData::set_icon(QIcon ico)
+{
+    m_icon=ico;
+}
+
+void CTableItemData::set(QString sText, int iAlignment, QIcon * pIcon)
+{
+    m_sText=sText;
+    m_iAlignment=iAlignment;
+    if(pIcon!=NULL)
+        m_icon=*pIcon;
+}
+
+void CTableItemData::clear(void)
+{
+    m_sText=QString("");
+    m_iAlignment=TABLE_ALIGNMENT_LEFT;
+    m_icon=QIcon();
+}
+
+//ctablecolumndata------------------------------------------------------------------------------------------------
+CTableColumnsData::CTableColumnsData()
+{
+    m_iIdColumn=-1;
+    m_pTable=NULL;
+}
+
+CTableColumnsData::~CTableColumnsData(void)
+{
+    m_lsColumnsOrder.clear();
+    m_lsColumnsVisible.clear();
+    m_lsColumnsAlignment.clear();
+}
+
+CTableColumnsData & CTableColumnsData::operator= (CTableColumnsData & right )
+{
+    QList<int> ls;
+    QList<bool> lsb;
+
+    if (*this != right)
+    {
+        right.get_columns_alignment(ls);
+        m_lsColumnsAlignment.clear();
+        m_lsColumnsAlignment=ls;
+
+        ls.clear();
+        right.get_columns_order(ls);
+        m_lsColumnsOrder.clear();
+        m_lsColumnsOrder=ls;
+
+        right.get_columns_visible(lsb);
+        m_lsColumnsVisible.clear();
+        m_lsColumnsVisible=lsb;
+
+        m_iIdColumn=right.get_id_column();
+        m_pTable=right.get_table();
+    }
+    ls.clear();
+    lsb.clear();
+    return *this;
+}
+
+bool CTableColumnsData::operator != (CTableColumnsData& right)
+{
+    return ! (*this==right);
+}
+
+bool CTableColumnsData::operator == (CTableColumnsData & right)
+{
+    bool b=false;
+    QList<int> ls;
+    QList<bool> lsb;
+    //-
+    if(m_pTable==right.get_table())
+    {
+        right.get_columns_alignment(ls);
+        if(m_lsColumnsAlignment==ls)
+        {
+            ls.clear();
+            right.get_columns_order(ls);
+            if(m_lsColumnsOrder==ls)
+            {
+                right.get_columns_visible(lsb);
+                if(m_lsColumnsVisible==lsb)
+                {
+                    if(m_iIdColumn==right.get_id_column())
+                        b=true;
+                }
+            }
+        }
+    }
+    ls.clear();
+    lsb.clear();
+    return b;
+}
+
+int CTableColumnsData::get_columns_count(void)
+{
+    int columns=-1;
+    if(m_pTable!=NULL)
+    {
+        columns=m_pTable->columnCount();
+        if(columns!=m_lsColumnsAlignment.count())
+            columns=m_lsColumnsAlignment.count();
+        if(columns!=m_lsColumnsOrder.count())
+            columns=m_lsColumnsOrder.count();
+        if(columns!=m_lsColumnsVisible.count())
+            columns=m_lsColumnsVisible.count();
+    }
+    return columns;
+}
+
+int CTableColumnsData::get_id_column(void)
+{
+    return m_iIdColumn;
+}
+
+QTableWidget * CTableColumnsData::get_table(void)
+{
+    return m_pTable;
+}
+
+void CTableColumnsData::get_columns_order(QList<int> & lsColumnsOrder)
+{
+    lsColumnsOrder=m_lsColumnsOrder;
+}
+
+void CTableColumnsData::get_columns_visible(QList<bool> & lsColumnsVisible)
+{
+    lsColumnsVisible=m_lsColumnsVisible;
+}
+
+void CTableColumnsData::get_columns_alignment(QList<int> & lsColumnsAlignment)
+{
+    lsColumnsAlignment=m_lsColumnsAlignment;
+}
+
+int CTableColumnsData::get_column_alignment(int iIndex)
+{
+    int agli=-1;
+    if(iIndex>=0 && iIndex<m_lsColumnsAlignment.count())
+        agli=m_lsColumnsAlignment[iIndex];
+    return agli;
+}
+
+bool CTableColumnsData::get_column_visible(int iIndex)
+{
+    bool vis=false;
+    if(iIndex>=0 && iIndex<m_lsColumnsVisible.count())
+        vis=m_lsColumnsVisible[iIndex];
+    return vis;
+}
+
+int CTableColumnsData::get_column_order(int iIndex)
+{
+    int order=-1;
+    if(iIndex>=0 && iIndex<m_lsColumnsOrder.count())
+        order=m_lsColumnsOrder[iIndex];
+    return order;
+}
+
+int CTableColumnsData::get_count_not_visible_columns(void)
+{
+    int i,iReturn=0;
+    for(i=0;i<m_lsColumnsVisible.count();i++)
+    {
+        if(m_lsColumnsVisible[i]==false)
+            iReturn++;
+    }
+    if(i!=m_lsColumnsVisible.count())
+        iReturn=-1;
+    //-
+    return iReturn;
+}
+
+void CTableColumnsData::set_id_column(int iColumn)
+{
+    m_iIdColumn=iColumn;
+}
+
+void CTableColumnsData::set_table(QTableWidget * pTable)
+{
+    m_pTable=pTable;
+}
+
+void CTableColumnsData::set_columns_visible(QList<bool> & lsColumnsVisible)
+{
+    if(lsColumnsVisible.count()==m_lsColumnsOrder.count())
+            m_lsColumnsVisible=lsColumnsVisible;
+}
+
+void CTableColumnsData::set_columns_alignment(QList<int> & lsColumnsAlignment)
+{
+    if(lsColumnsAlignment.count()==m_lsColumnsOrder.count())
+            m_lsColumnsAlignment=lsColumnsAlignment;
+}
+
+void CTableColumnsData::set_column_alignment(int iIndex, int iType)
+{
+    if(iIndex>=0 && iIndex<m_lsColumnsAlignment.count())
+    {
+        if(iType==TABLE_ALIGNMENT_LEFT || iType==TABLE_ALIGNMENT_RIGHT || iType==TABLE_ALIGNMENT_CENTER)
+            m_lsColumnsAlignment[iIndex]=iType;
+    }
+}
+
+void CTableColumnsData::set_column_visible(int iIndex, bool bVisible)
+{
+    if(iIndex>=0 && iIndex<m_lsColumnsVisible.count())
+        m_lsColumnsVisible[iIndex]=bVisible;
+}
+
+bool CTableColumnsData::set(QList<int> & lsColumnsOrder,QList<bool> & lsColumnsVisible,QList<int> & lsColumnsAlignment)
+{
+    bool b=false;
+    if(lsColumnsOrder.count()==lsColumnsVisible.count())
+    {
+        if(lsColumnsOrder.count()==lsColumnsAlignment.count())
+        {
+            m_lsColumnsOrder=lsColumnsOrder;
+            m_lsColumnsVisible=lsColumnsVisible;
+            m_lsColumnsAlignment=lsColumnsAlignment;
+            b=true;
+        }
+    }
+    return b;
+}
+
+bool CTableColumnsData::update_order(QList<int> & lsNewColumnsOrder)
+{
+    bool b=false;
+    QList<bool> lsNewColumnsVisible;
+    QList<int> lsNewColumnsAlignment;
+    //-
+    if(m_lsColumnsOrder.count()>0 && m_lsColumnsVisible.count()>0 && m_lsColumnsAlignment.count()>0)
+    {
+        if(lsNewColumnsOrder.count()==m_lsColumnsOrder.count() && lsNewColumnsOrder.count()==m_lsColumnsVisible.count() && lsNewColumnsOrder.count()==m_lsColumnsAlignment.count())
+        {
+            for(int i=0;i<lsNewColumnsOrder.count();i++)//change visible & alignment by new order
+            {
+                m_lsColumnsOrder[i]=lsNewColumnsOrder[i];
+                lsNewColumnsVisible.push_back(m_lsColumnsVisible[i]);
+                lsNewColumnsAlignment.push_back(m_lsColumnsAlignment[i]);
+            }
+            m_lsColumnsVisible.clear();
+            m_lsColumnsAlignment.clear();
+            m_lsColumnsVisible=lsNewColumnsVisible;
+            m_lsColumnsAlignment=lsNewColumnsAlignment;
+            lsNewColumnsOrder.clear();
+        }
+    }
+    return b;
+}
+
+bool CTableColumnsData::swap_columns(int iRow1, int iRow2)
+{
+    bool b,bReturn=false;
+    int i,columns_count=get_columns_count();
+    if(iRow1>=0 && iRow2>=0 && iRow1<columns_count && iRow2<columns_count)
+    {
+        i=m_lsColumnsAlignment[iRow2];
+        m_lsColumnsAlignment[iRow2]=m_lsColumnsAlignment[iRow1];
+        m_lsColumnsAlignment[iRow1]=i;
+
+        i=m_lsColumnsOrder[iRow2];
+        m_lsColumnsOrder[iRow2]=m_lsColumnsOrder[iRow1];
+        m_lsColumnsOrder[iRow1]=i;
+
+        b=m_lsColumnsVisible[iRow2];
+        m_lsColumnsVisible[iRow2]=m_lsColumnsVisible[iRow1];
+        m_lsColumnsVisible[iRow1]=b;
+    }
+    return bReturn;
+}
+
 //memory----------------------------------------------------------------------------------------------------------
 CPointerMemory::CPointerMemory()
 {

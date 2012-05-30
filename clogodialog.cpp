@@ -39,19 +39,21 @@ CLogoDialog::~CLogoDialog()
 
 void CLogoDialog::timerEvent(QTimerEvent *event)
 {
-    event=NULL;
-    close();
+    if(event!=NULL)
+        close();
 }
 
 void CLogoDialog::paintEvent(QPaintEvent * event)
 {
-    event=NULL;
-    QPainter painter(this);
-    QRect r=rect();
-    if(!m_image.isNull())
+    if(event!=NULL)
     {
-        painter.setPen(QColor(128,128,128));
-        painter.drawImage(0,0,m_image);
-        painter.drawText(20,r.height()-40,VERSION);
+        QPainter painter(this);
+        QRect r=rect();
+        if(!m_image.isNull())
+        {
+            painter.setPen(QColor(128,128,128));
+            painter.drawImage(0,0,m_image);
+            painter.drawText(20,r.height()-40,VERSION);
+        }
     }
 }

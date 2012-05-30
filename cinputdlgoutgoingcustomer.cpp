@@ -178,13 +178,13 @@ bool CInputDlgOutgoingCustomer::settings(bool bUpdate)
         {
             //table width
             if(lsSValue.count()>0)
-                settings.set_table_width(ui->tableWidgetCustomer,lsSValue[0],200);
+                settings.set_table_columns_width(ui->tableWidgetCustomer,lsSValue[0],200);
             //table sort
             if(lsSValue.count()>1)
                 settings.set_table_sort(ui->tableWidgetCustomer,lsSValue[1],1);
             //table2 width
             if(lsSValue.count()>2)
-                settings.set_table_width(ui->tableWidgetWares,lsSValue[2],200);
+                settings.set_table_columns_width(ui->tableWidgetWares,lsSValue[2],200);
             //table2 sort
             if(lsSValue.count()>3)
                 settings.set_table_sort(ui->tableWidgetWares,lsSValue[3],1);
@@ -200,7 +200,7 @@ bool CInputDlgOutgoingCustomer::settings(bool bUpdate)
             //table width
             if(lsSValue.count()>0)
             {
-                if(settings.get_table_width(ui->tableWidgetCustomer,lsSValue[0]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidgetCustomer,lsSValue[0]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[0]);
                     lsSUpdateValue.push_back(lsSValue[0]);
@@ -218,7 +218,7 @@ bool CInputDlgOutgoingCustomer::settings(bool bUpdate)
             //table2 width
             if(lsSValue.count()>2)
             {
-                if(settings.get_table_width(ui->tableWidgetWares,lsSValue[2]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidgetWares,lsSValue[2]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[2]);
                     lsSUpdateValue.push_back(lsSValue[2]);
@@ -387,16 +387,39 @@ bool CInputDlgOutgoingCustomer::add_ware(void)
     QString s;
     bool b;
     QDate dt=ui->dateEdit->date();//get selected date
-    CInputDialogArticleAllowance dlg;
-    dlg.set(m_pThread,ui->tableWidgetWares,0,5,ARTICLE_DLG_TYPE_OUTGOING,-1,dt);
-    dlg.setWindowTitle("hinzufügen");
-    b=dlg.exec();
-    if(b)
+
+    //do -> user quit the article allowance dialog
+    QRect rMarkDlgGeometry(0,0,0,0);
+    CInputDialogArticleAllowance * pDlg=NULL;
+    do
     {
-        if(dlg.get_data(s))
-            insert_ware_at_table(s,false,true);
-        check_user_input();
-    }
+        pDlg=new CInputDialogArticleAllowance;
+        if(pDlg==NULL)
+            break;
+        if(rMarkDlgGeometry!=QRect(0,0,0,0))
+            pDlg->setGeometry(rMarkDlgGeometry);
+        pDlg->set(m_pThread,ui->tableWidgetWares,0,5,ARTICLE_DLG_TYPE_OUTGOING,-1,dt);
+        pDlg->setWindowTitle("hinzufügen");
+        b=pDlg->exec();
+        if(b)
+        {
+            if(pDlg->get_data(s))
+                insert_ware_at_table(s,false,true);
+            else
+                b=false;
+        }
+        if(!pDlg->get_checkbox_not_close_the_dialog())//dialog not close? (easy to add many article)
+            b=false;
+        if(pDlg!=NULL)
+        {
+            rMarkDlgGeometry=pDlg->geometry();
+            delete pDlg;
+            pDlg=NULL;
+        }
+    }while(b);
+    //-
+    check_user_input();
+    //-
     return b;
 }
 

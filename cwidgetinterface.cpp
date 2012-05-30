@@ -492,17 +492,20 @@ bool CWidgetInterface::fill_row(QTableWidget * pTable,int iRow,QList<CTableItemD
     QIcon ico;
     int iColumn;
     bool b=true;
-    QTableWidgetItem * pItem=NULL;
+    CMyTableWidgetItem * pItem=NULL;
     //-
     for(iColumn=0;iColumn<pTable->columnCount() && iColumn<lsData.count();iColumn++)
     {
-        pItem=new QTableWidgetItem(lsData[iColumn].get_text());
+        pItem=new CMyTableWidgetItem;
         if(pItem!=NULL)
         {
-            if(lsData[iColumn].get_alignment()==TABLE_ALIGMNENT_LEFT)
+            pItem->setText(lsData[iColumn].get_text());
+            if(lsData[iColumn].get_alignment()==TABLE_ALIGNMENT_LEFT)
                 pItem->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-            else
+            else if(lsData[iColumn].get_alignment()==TABLE_ALIGNMENT_RIGHT)
                 pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+            else
+                pItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
             //-
             //icon?
             ico=lsData[iColumn].get_icon();
@@ -518,6 +521,54 @@ bool CWidgetInterface::fill_row(QTableWidget * pTable,int iRow,QList<CTableItemD
         }
     }
     return b;
+}
+
+bool CWidgetInterface::update_table_by_tablecolumnsdata(CTableColumnsData & tcdOld,CTableColumnsData & tcdNew, QList<QString> & lsHeaderNames)
+{
+    int i,pos,w,o;
+    bool bReturn=false;
+    QTableWidget * pTable=tcdOld.get_table();
+
+    if(tcdOld.get_table()!=NULL && tcdNew.get_table()==tcdOld.get_table() && lsHeaderNames.count()>0)
+    {
+        if(tcdOld!=tcdNew)
+        {//settings updated?
+
+            //swap columns widths(old & new pos)
+            for(i=0;i<pTable->columnCount();i++)
+            {
+                w=pTable->columnWidth(i);
+                o=tcdOld.get_column_order(i);
+                if(o>=0 && o<pTable->columnCount())//index in range?
+                {
+                    for(pos=0;pos<pTable->columnCount();pos++)//find new pos
+                    {
+                        if(tcdNew.get_column_order(pos)==o)
+                            break;
+                    }
+                    if(pos>=0 && pos<pTable->columnCount())//found
+                    {
+                        if(tcdNew.get_column_visible(pos)==false)//not visible?
+                            w=0;
+                        else
+                        {
+                            if(w<=0)//now visible?
+                                w=100;
+                        }
+                        pTable->setColumnWidth(pos,w);
+                    }
+                }
+            }
+
+            //update table headers
+            for(i=0;i<pTable->columnCount() && i<lsHeaderNames.count();i++)
+                pTable->horizontalHeaderItem(i)->setText(lsHeaderNames[i]);
+
+            //-
+            bReturn=true;
+        }
+    }
+    return bReturn;
 }
 
 
@@ -1294,7 +1345,7 @@ bool CWidgetInterface::article_update_tablewidget_wares_list(QTableWidget * pTab
                     if(ar.get_unit().length()>0)
                         s+=QString(" %1").arg(ar.get_unit());
                     ti.set_text(s);
-                    ti.set_aligment(TABLE_ALIGMNENT_RIGHT);
+                    ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
                     lsData.push_back(ti);
                     b=article_format(ar,lsData,FORMAT_FOUR);
                 }
@@ -1313,13 +1364,13 @@ bool CWidgetInterface::article_update_tablewidget_wares_list(QTableWidget * pTab
                     {
                         s=QString("%1").arg(iCount);
                         ti.set_text(s);
-                        ti.set_aligment(TABLE_ALIGMNENT_RIGHT);
+                        ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
                         lsData.push_back(ti);
                     }
                     //-
                     s=QString("%1").arg(iArticleId);
                     ti.set_text(s);
-                    ti.set_aligment(TABLE_ALIGMNENT_LEFT);
+                    ti.set_alignment(TABLE_ALIGNMENT_LEFT);
                     lsData.push_back(ti);
                 }
                 //-
@@ -1382,95 +1433,109 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
 {
     if(m_pDb==NULL)
         return false;
-    if(!m_pDb->is_db_connect())
+    if(m_tcArticle.get_table()==NULL || !m_pDb->is_db_connect())
         return false;
 
-    int i;
+    int i,j;
     QString s;
     float f1,f2;
     CTableItemData ti;
+    QTableWidget * pTable=m_tcArticle.get_table();
+    QList<int> lsOrder,lsAlignment;
+    m_tcArticle.get_columns_order(lsOrder);
+    m_tcArticle.get_columns_alignment(lsAlignment);
 
     if(iFormatType==FORMAT_ONE)
     {//all
-        //column 0
-        ti.set_text(ar.get_name());
-        lsData.push_back(ti);
-        //-column 1
-        ti.set_text(ar.get_articlenumber());
-        lsData.push_back(ti);
-        //-column 2
-        ti.set_text(ar.get_articlenumber2());
-        lsData.push_back(ti);
-        //-column 3
-        s=m_pDb->maker_get_name(ar.get_maker_id());
-        ti.set_text(s);
-        lsData.push_back(ti);
-        //-column 4
-        s=m_pDb->waregroup_get_path(ar.get_waregroup_id(),3);
-        ti.set_text(s);
-        lsData.push_back(ti);
-        //-
-        ti.set_aligment(TABLE_ALIGMNENT_RIGHT);
-        //-column 5
-        s=QString("");
-        if(ar.get_warning_limit()>=0)
+        if(lsOrder.count()==pTable->columnCount() && lsAlignment.count()==pTable->columnCount())
         {
-            s=QString("%1").arg(ar.get_warning_limit());
-            if(ar.get_unit().length()>0)//unit set?
-                s+=QString(" %1").arg(ar.get_unit());
+            for(j=0;j<pTable->columnCount();j++)
+            {
+                if(lsOrder[j]==0)//default column 0
+                    ti.set_text(ar.get_name());
+                if(lsOrder[j]==1)//d.column 1
+                    ti.set_text(ar.get_articlenumber());
+                if(lsOrder[j]==2)//d.column 2
+                    ti.set_text(ar.get_articlenumber2());
+                if(lsOrder[j]==3)//d.column 3
+                {
+                    s=m_pDb->maker_get_name(ar.get_maker_id());
+                    ti.set_text(s);
+                }
+                if(lsOrder[j]==4)//d.column 4
+                {
+                    s=m_pDb->waregroup_get_path(ar.get_waregroup_id(),3);
+                    ti.set_text(s);
+                }
+                if(lsOrder[j]==5)//d.column 5
+                {
+                    s=QString("");
+                    if(ar.get_warning_limit()>=0)
+                    {
+                        s=QString("%1").arg(ar.get_warning_limit());
+                        if(ar.get_unit().length()>0)//unit set?
+                            s+=QString(" %1").arg(ar.get_unit());
+                    }
+                    ti.set_text(s);
+                }
+                if(lsOrder[j]==6)//d.column 6
+                {
+                    f1=ar.get_base_price();
+                    if(f1>0.0)
+                    {
+                        s=QString("%1").arg(f1);
+                        if(ar.get_valuta().length()>0)//valuta set?
+                            s+=QString(" %1").arg(ar.get_valuta());
+                    }
+                    ti.set_text(s);
+                }
+                if(lsOrder[j]==7)//d.column 7
+                {
+                    f1=ar.get_sales_price();
+                    if(f1>0.0)
+                    {
+                        s=QString("%1").arg(f1);
+                        if(ar.get_valuta().length()>0)//valuta set?
+                            s+=QString(" %1").arg(ar.get_valuta());
+                    }
+                    ti.set_text(s);
+                }
+                if(lsOrder[j]==8)//d.column 8
+                {
+                    f1=ar.get_base_price();
+                    f2=ar.get_sales_price();
+                    if(f1>0.0 && f2>0.0)
+                    {
+                        s=QString("%1 ").arg(f2-f1);
+                        if(ar.get_valuta().length()>0)//valuta set?
+                            s+=ar.get_valuta();
+                    }
+                    ti.set_text(s);
+                }
+                if(lsOrder[j]==9)//d.column 9
+                     ti.set_text(ar.get_location());
+                if(lsOrder[j]==10)//d.column 10
+                    ti.set_text(ar.get_comment());
+                if(lsOrder[j]==11)//d.column 11
+                {
+                    s=QString("%1").arg(ar.get_id());
+                    ti.set_text(s);
+                }
+                //-
+                ti.set_alignment(lsAlignment[j]);//alignment
+                lsData.push_back(ti);//add
+                //-
+                ti.clear();
+                s=QString("");
+            }
         }
-        ti.set_text(s);
-        lsData.push_back(ti);
-        //-column 6
-        f1=ar.get_base_price();
-        if(f1>0.0)
-        {
-            s=QString("%1").arg(f1);
-            if(ar.get_valuta().length()>0)//valuta set?
-                s+=QString(" %1").arg(ar.get_valuta());
-        }
-        ti.set_text(s);
-        lsData.push_back(ti);
-        //-column 7
-        f1=ar.get_sales_price();
-        if(f1>0.0)
-        {
-            s=QString("%1").arg(f1);
-            if(ar.get_valuta().length()>0)//valuta set?
-                s+=QString(" %1").arg(ar.get_valuta());
-        }
-        ti.set_text(s);
-        lsData.push_back(ti);
-        //-column 8
-        f1=ar.get_base_price();
-        f2=ar.get_sales_price();
-        if(f1>0.0 && f2>0.0)
-        {
-            s=QString("%1 ").arg(f2-f1);
-            if(ar.get_valuta().length()>0)//valuta set?
-                s+=ar.get_valuta();
-        }
-        ti.set_text(s);
-        lsData.push_back(ti);
-        //-
-        ti.set_aligment(TABLE_ALIGMNENT_LEFT);
-        //-column 9
-        ti.set_text(ar.get_location());
-        lsData.push_back(ti);
-        //-column 10
-        ti.set_text(ar.get_comment());
-        lsData.push_back(ti);
-        //-column 11
-        s=QString("%1").arg(ar.get_id());
-        ti.set_text(s);
-        lsData.push_back(ti);
     }
     //---
     if(iFormatType==FORMAT_TWO || iFormatType==FORMAT_THREE || iFormatType==FORMAT_FOUR)
     {
         if(iFormatType==FORMAT_TWO)
         {
-            ti.set_aligment(TABLE_ALIGMNENT_RIGHT);
+            ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
             s=QString("%1 / ").arg(ar.get_inventory());
             i=m_pDb->ordering_get_count_by_article(ar.get_id());//count of article by wares
             if(i<0)
@@ -1483,7 +1548,7 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
             lsData.push_back(ti);
         }
         //-
-        ti.set_aligment(TABLE_ALIGMNENT_LEFT);
+        ti.set_alignment(TABLE_ALIGNMENT_LEFT);
         //-
         ti.set_text(ar.get_name());
         lsData.push_back(ti);
@@ -1518,6 +1583,9 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
         ti.set_text(s);
         lsData.push_back(ti);
     }
+    //-
+    lsOrder.clear();
+    lsAlignment.clear();
     return true;
 }
 
@@ -1552,7 +1620,7 @@ bool CWidgetInterface::article_update_row_wareslist(QTableWidget * pTable,QStrin
             //-insert new at table-
             s=QString("%1").arg(iCount);
             ti.set_text(s);
-            ti.set_aligment(TABLE_ALIGMNENT_RIGHT);
+            ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
             lsData.push_back(ti);
             b=article_format(ar,lsData,FORMAT_THREE);
             if(b)
@@ -1874,7 +1942,7 @@ bool CWidgetInterface::trade_format(CTrade & trade, QList<CTableItemData> & lsDa
 
     //-column 0
     lsData.push_back(ti);
-    trade_get_icon(trade,lsData[0],TABLE_ALIGMNENT_LEFT);
+    trade_get_icon(trade,lsData[0],TABLE_ALIGNMENT_LEFT);
     ti.clear();
     //-column 1
     if(trade.get_canceled())
@@ -2393,73 +2461,92 @@ bool CWidgetInterface::inventory_update_row(QTableWidget * pTable, CArticle & ar
 
 bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & lsData)
 {
-    int i;
+    if(m_pDb==NULL)
+        return false;
+    if(m_tcInventory.get_table()==NULL || !m_pDb->is_db_connect())
+        return false;
+
+    int i,j;
     QString s;
     CTableItemData ti;
-    //-column 0
-    lsData.push_back(ti);
-    inventory_get_icon_and_precent(ar,lsData[0]);
-    //-column 1
-    ti.clear();
-    lsData.push_back(ti);
-    inventory_get_icon_and_warning_limit(ar,lsData[1]);
-    //-column 2
-    s=QString("%1").arg(ar.get_inventory());
-    if(ar.get_unit().length()>0)//unit set?
-        s+=QString(" %1").arg(ar.get_unit());
-    ti.set_aligment(TABLE_ALIGMNENT_RIGHT);
-    ti.set_text(s);
-    lsData.push_back(ti);
-    //-column 3
-    s=QString("");
-    i=m_pDb->ordering_get_count_by_article(ar.get_id());
-    if(i>0)
+    QTableWidget * pTable=m_tcInventory.get_table();
+    QList<int> lsOrder,lsAlignment;
+    m_tcInventory.get_columns_order(lsOrder);
+    m_tcInventory.get_columns_alignment(lsAlignment);
+
+    if(lsOrder.count()==pTable->columnCount() && lsAlignment.count()==pTable->columnCount())
     {
-        s=QString("%1").arg(i);
-        if(ar.get_unit().length()>0)
-            s+=QString(" %1").arg(ar.get_unit());
-        i=m_pDb->ordering_get_ordering_count_by_article(ar.get_id());
-        if(i>0)
-            s+=QString(" / %1").arg(i);
+        for(j=0;j<pTable->columnCount();j++)
+        {
+            if(lsOrder[j]==0)//default column 0
+                inventory_get_icon_and_precent(ar,ti);
+            if(lsOrder[j]==1)//d.column 1
+                inventory_get_icon_and_warning_limit(ar,ti);
+            if(lsOrder[j]==2)//d.column 2
+            {
+                s=QString("%1").arg(ar.get_inventory());
+                if(ar.get_unit().length()>0)//unit set?
+                    s+=QString(" %1").arg(ar.get_unit());
+                ti.set_text(s);
+            }
+            if(lsOrder[j]==3)//d.column 3
+            {
+                i=m_pDb->ordering_get_count_by_article(ar.get_id());
+                if(i>0)
+                {
+                    s=QString("%1").arg(i);
+                    if(ar.get_unit().length()>0)
+                        s+=QString(" %1").arg(ar.get_unit());
+                    i=m_pDb->ordering_get_ordering_count_by_article(ar.get_id());
+                    if(i>0)
+                        s+=QString(" / %1").arg(i);
+                }
+                ti.set_text(s);
+            }
+            if(lsOrder[j]==4)//d.column 4
+            {
+                if(ar.get_max_inventory()>0)
+                {
+                    s=QString("%1").arg(ar.get_max_inventory());
+                    if(ar.get_unit().length()>0)//unit set?
+                        s+=QString(" %1").arg(ar.get_unit());
+                }
+                ti.set_text(s);
+            }
+            if(lsOrder[j]==5)//d.column 5
+                ti.set_text(ar.get_name());
+            if(lsOrder[j]==6)//d.column 6
+                ti.set_text(ar.get_articlenumber());
+            if(lsOrder[j]==7)//d.column 7
+                ti.set_text(ar.get_articlenumber2());
+            if(lsOrder[j]==8)//d.column 8
+            {
+                s=m_pDb->maker_get_name(ar.get_maker_id());
+                ti.set_text(s);
+            }
+            if(lsOrder[j]==9)//d.column 9
+            {
+                s=m_pDb->waregroup_get_path(ar.get_waregroup_id(),3);
+                ti.set_text(s);
+            }
+            if(lsOrder[j]==10)//d.column 10
+                ti.set_text(ar.get_comment());
+            if(lsOrder[j]==11)//d.column 11
+            {
+                s=QString("%1").arg(ar.get_id());
+                ti.set_text(s);
+            }
+            //-
+            ti.set_alignment(lsAlignment[j]);//alignment
+            lsData.push_back(ti);//add
+            //-
+            ti.clear();
+            s=QString("");
+        }
     }
-    ti.set_text(s);
-    lsData.push_back(ti);
-    //-column 4
-    s=QString("");
-    if(ar.get_max_inventory()>0)
-    {
-        s=QString("%1").arg(ar.get_max_inventory());
-        if(ar.get_unit().length()>0)//unit set?
-            s+=QString(" %1").arg(ar.get_unit());
-    }
-    ti.set_text(s);
-    lsData.push_back(ti);
-    //-column 5
-    ti.set_text(ar.get_name());
-    ti.set_aligment(TABLE_ALIGMNENT_LEFT);
-    lsData.push_back(ti);
-    //-column 6
-    ti.set_text(ar.get_articlenumber());
-    lsData.push_back(ti);
-    //-column 7
-    ti.set_text(ar.get_articlenumber2());
-    lsData.push_back(ti);
-    //-column 8
-    s=m_pDb->maker_get_name(ar.get_maker_id());
-    ti.set_text(s);
-    lsData.push_back(ti);
-    //-column 9
-    s=m_pDb->waregroup_get_path(ar.get_waregroup_id(),3);
-    ti.set_text(s);
-    lsData.push_back(ti);
-    //-column 10
-    ti.set_text(ar.get_comment());
-    lsData.push_back(ti);
-    //-column 11
-    s=QString("%1").arg(ar.get_id());
-    ti.set_text(s);
-    lsData.push_back(ti);
     //-
+    lsOrder.clear();
+    lsAlignment.clear();
     return true;
 }
 
@@ -2498,12 +2585,7 @@ void CWidgetInterface::inventory_get_icon_and_precent(CArticle & ar, CTableItemD
     if(ar.get_max_inventory()>0)
     {
         i=(int)((float)ar.get_inventory())/((float)ar.get_max_inventory())*((float)100);
-        if(i>=100)
-            sText=QString("%1 %").arg(i);
-        else if(i>=10)
-            sText=QString(" %1 %").arg(i);
-        else
-            sText=QString("  %1 %").arg(i);
+        sText=QString("%1 %").arg(i);
     }
     //-
     if(icon_index==0)

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CInputDialogTableSetting</class>
+ <widget class="QDialog" name="CInputDialogTableSetting">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>493</width>
+    <height>470</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>430</y>
+     <width>481</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+   <property name="centerButtons">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonUp">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>370</y>
+     <width>30</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="lava2res.qrc">
+     <normaloff>:/images/res/up.png</normaloff>:/images/res/up.png</iconset>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonDown">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>370</y>
+     <width>30</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="lava2res.qrc">
+     <normaloff>:/images/res/down.png</normaloff>:/images/res/down.png</iconset>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonAligLeft">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>370</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>links</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonAligCenter">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>370</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>mitte</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonAligRight">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>370</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>rechts</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonVisible">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>370</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>sichtbar</string>
+   </property>
+  </widget>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>410</y>
+     <width>471</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>0</y>
+     <width>471</width>
+     <height>341</height>
+    </rect>
+   </property>
+   <property name="alternatingRowColors">
+    <bool>true</bool>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <column>
+    <property name="text">
+     <string>Spalte</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Textausrichtung</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>sichtbar</string>
+    </property>
+   </column>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>tableWidget</tabstop>
+  <tabstop>pushButtonUp</tabstop>
+  <tabstop>pushButtonDown</tabstop>
+  <tabstop>pushButtonAligLeft</tabstop>
+  <tabstop>pushButtonAligCenter</tabstop>
+  <tabstop>pushButtonAligRight</tabstop>
+  <tabstop>pushButtonVisible</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="lava2res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>CInputDialogTableSetting</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>CInputDialogTableSetting</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

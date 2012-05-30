@@ -41,6 +41,7 @@
 #include "csettings.h"
 #include "cdlgbalancelist.h"
 #include "cdlgunilist.h"
+#include "cinputdialogtablesetting.h"
 
 namespace Ui
 {
@@ -83,6 +84,7 @@ public:
     bool widgets_position(QSize szScreen);
     bool open_db(void);
     bool fill_all_table(void);
+    bool fill_date_lists(void);
     bool settings(bool bUpdate=false);
     bool check_first_start(void);
     bool check_run_the_program(void);
@@ -262,6 +264,8 @@ public slots:
     bool menu_print_trade_overview(void);
     bool menu_print_trade_selection(void);
     bool menu_print_waregroup(void);
+    bool menu_table_setting_inventory(void);
+    bool menu_table_setting_article(void);
 
     //print
     bool print(QPrinter * printer);

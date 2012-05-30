@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     cinputdialogmaker.cpp \
     cinputdialogordering.cpp \
     cinputdialogwaregroup.cpp \
-    cprintjob.cpp
+    cprintjob.cpp \
+    cinputdialogtablesetting.cpp
 HEADERS += mainwindow.h \
     data_classes.h \
     cinputdialogbrowsewaregroup.h \
@@ -50,7 +51,8 @@ HEADERS += mainwindow.h \
     cinputdialogmaker.h \
     cinputdialogordering.h \
     cinputdialogwaregroup.h \
-    cprintjob.h
+    cprintjob.h \
+    cinputdialogtablesetting.h
 FORMS += mainwindow.ui \
     cinputdialogbrowsewaregroup.ui \
     cinputdialogcustomer.ui \
@@ -66,7 +68,8 @@ FORMS += mainwindow.ui \
     cinputdialogdealer.ui \
     cinputdialogmaker.ui \
     cinputdialogordering.ui \
-    cinputdialogwaregroup.ui
+    cinputdialogwaregroup.ui \
+    cinputdialogtablesetting.ui
 
 RESOURCES += \
     lava2res.qrc

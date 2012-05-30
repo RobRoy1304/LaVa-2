@@ -60,7 +60,7 @@ bool CPrintJob::check_text_space(QString & sText, QFontMetrics * pMetric, QRectF
                 break;
             sText.remove(i,1);
         }
-        if(s!=sText)//change?
+        if(s!=sText && sText.length()>0)//change?
             sText+=QString("...");
         b=true;
     }
@@ -117,7 +117,7 @@ bool CPrintJob::print_list(void)
     bool b=false;
     QRectF rF;
     QString s;
-    int i,row=0,count,row_space,copies_count,copies=0;
+    int i,row=0,count,row_space,copies_count,page,copies=0;
     QFont font("Sans",8,0,0);
     qreal marginLeft,marginTop,marginRight,marginBottom;
     QRect paper = m_pPrinter->pageRect();
@@ -147,6 +147,7 @@ bool CPrintJob::print_list(void)
         while(copies<copies_count)
         {
             row=0;
+            page=1;
 
             //first row(title)
             if(m_sFirstRow.length()>0)
@@ -165,7 +166,17 @@ bool CPrintJob::print_list(void)
             for(i=0;i<count;i++,row++)
             {
                 rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),fillRect.top()+((row+1)*row_space));
-                if(fillRect.top()+((row+1)*row_space)>fillRect.bottom())
+                //-
+                if(i+1==count || fillRect.top()+((row+2)*row_space)>fillRect.bottom())//last row on page? ->print page count
+                {
+                    //print page / column count(center)
+                    s=QString("Seite %1").arg(page);
+                    rF=QRectF(fillRect.left()+((fillRect.right()-fillRect.left()-metric.width(s))/2),fillRect.bottom()-row_space,(fillRect.right()-fillRect.left())/2,row_space);
+                    draw_text(&painter,&font,rF,s,false,false,false);
+                    page++;
+                }
+                //-
+                if(fillRect.top()+((row+2)*row_space)>fillRect.bottom())
                 {
                     m_pPrinter->newPage();
                     row=-1;
@@ -198,22 +209,22 @@ bool CPrintJob::print_list(void)
 
 bool CPrintJob::print_table(void)
 {
+
     if(m_pPrinter==NULL)
         return false;
 
-    bool bRightAli=false,b=false;
+    bool b=false;
     QList<int> lsColumnsWidth;
     QRectF rF;
     QString s;
     bool bFirst=true;
-    int wAll,i,j,z,x,l,row=0,count,row_space,copies_count,copies=0;
+    int wAll,i,j,z,x,l,row=0,count,row_space,distTopLeftCorner,page,copies_count,copies=0,dx,iAliRight=Qt::AlignRight|Qt::AlignVCenter,iAliCenter=Qt::AlignHCenter|Qt::AlignVCenter;
     QFont font("Sans",8,0,0);
     qreal marginLeft,marginTop,marginRight,marginBottom;
     QRect paper = m_pPrinter->pageRect();
     QTableWidget * pTable=m_memory.get_tablewidget();
     QTableWidgetItem * pItem=NULL;
-    int iDiff=1;
-    int iRightAli=Qt::AlignRight|Qt::AlignVCenter;
+    int iDiff=1,iDiff2=0;
     if(m_memory.get_bool()!=NULL)//all columns?
     {
         if(*m_memory.get_bool()==true)
@@ -242,7 +253,8 @@ bool CPrintJob::print_table(void)
         //font
         painter.setFont(font);
         QFontMetrics metric(painter.fontMetrics());
-        row_space=metric.height();
+        distTopLeftCorner=metric.height()/4;
+        row_space=metric.height()+(2*distTopLeftCorner);
 
         //columns width
         for(wAll=0,i=0;i<pTable->columnCount();i++)
@@ -254,6 +266,8 @@ bool CPrintJob::print_table(void)
             z=((fillRect.right()-fillRect.left())/100)*j;// calc % of printer (px)
             if(z<0)
                 z=0;
+            if(z==0)
+                iDiff2++;//mark columns not visible(width=0)
             lsColumnsWidth.push_back(z); //mark
             x+=z;//mark all
         }
@@ -262,14 +276,26 @@ bool CPrintJob::print_table(void)
         j=fillRect.right()-fillRect.left();
         if(x<j && lsColumnsWidth.count()>1)
         {
-            z=(j-x)/(pTable->columnCount()-iDiff);
+            z=(j-x)/(pTable->columnCount()-iDiff-iDiff2);
             for(x=0,i=0;x<pTable->columnCount()-iDiff;x++)
             {
-                lsColumnsWidth[x]+=z;
-                i+=lsColumnsWidth[x];
+                if(lsColumnsWidth[x]>0)//column visible?
+                {
+                    lsColumnsWidth[x]+=z;
+                    i+=lsColumnsWidth[x];
+                }
             }
             if(i<j)
-               lsColumnsWidth[lsColumnsWidth.count()-(1+iDiff)]+=(j-i);
+            {
+                for(x=lsColumnsWidth.count()-(1+iDiff);x>=0 && x<pTable->columnCount();x--)//search last visible column
+                {
+                    if(lsColumnsWidth[x]>0)
+                    {
+                        lsColumnsWidth[x]+=j-i;//add the rest
+                        break;
+                    }
+                }
+            }
         }
 
 
@@ -277,6 +303,7 @@ bool CPrintJob::print_table(void)
         while(copies<copies_count && pTable->columnCount()>0)
         {
             row=0;
+            page=1;
 
             //first row(title)
             if(m_sFirstRow.length()>0)
@@ -296,60 +323,86 @@ bool CPrintJob::print_table(void)
             {
                 if(bFirst)//header?
                 {
-                    rF=QRectF(fillRect.left()+1,fillRect.top()+(row*row_space)+1,fillRect.right()-fillRect.left()-2,row_space-2);
+                    rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),row_space);
                     painter.fillRect(rF,QColor(200,200,200));
                 }
                 else if(i%2!=0)//table items - all 2. row light grey
                 {
-                    rF=QRectF(fillRect.left()+1,fillRect.top()+(row*row_space)+1,fillRect.right()-fillRect.left()-2,row_space-2);
+                    rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),row_space);
                     painter.fillRect(rF,QColor(235,235,235));
                 }
 
                 for(l=0,x=0;x<lsColumnsWidth.count()-iDiff;x++)//last column is id(not print)
                 {
-                    //rect
-                    rF=QRectF(fillRect.left()+l,fillRect.top()+(row*row_space),lsColumnsWidth[x],row_space);
-                    painter.drawRect(rF);
+                    if(lsColumnsWidth[x]>0)//column visible?
+                    {
+                        //draw border rect
+                        rF=QRectF(fillRect.left()+l,fillRect.top()+(row*row_space),lsColumnsWidth[x],row_space);
+                        painter.drawRect(rF);
 
-                    if(bFirst)//header?
-                    {
-                        bRightAli=false;
-                        pItem=pTable->horizontalHeaderItem(x);
-                        if(pItem!=NULL)
-                            s=pItem->text();
-                        else{}
-                    }
-                    else
-                    {
-                        pItem=pTable->item(i,x);
-                        if(pItem!=NULL)
+                        //get text
+                        if(bFirst)//header?
                         {
-                            s=pItem->text();
-                            if(pItem->textAlignment()==iRightAli)
-                                bRightAli=true;
-                            else
-                                bRightAli=false;
+                            pItem=pTable->horizontalHeaderItem(x);
+                            if(pItem!=NULL)
+                                s=pItem->text();
+                            else{}
                         }
-                        else{}
+                        else
+                        {
+                            pItem=pTable->item(i,x);
+                            if(pItem!=NULL)
+                                s=pItem->text();
+                        }
+
+                        //get dist. by aglinment
+                        dx=distTopLeftCorner;//left=fefault
+                        if(pItem!=NULL && bFirst==false)
+                        {
+                            if(lsColumnsWidth[x] > get_text_width(s,&metric))
+                            {
+                                if(pItem->textAlignment()==iAliRight)//right
+                                    dx=lsColumnsWidth[x]-(get_text_width(s,&metric)+(2*distTopLeftCorner));
+                                else if(pItem->textAlignment()==iAliCenter)//center
+                                    dx=(lsColumnsWidth[x]-(get_text_width(s,&metric)+(2*distTopLeftCorner)))/2;
+                                //-
+                                if(dx<distTopLeftCorner)
+                                    dx=distTopLeftCorner;
+                            }
+                        }
+                        pItem=NULL;
+
+                        //calc draw rect
+                        rF=QRectF(fillRect.left()+l+dx,fillRect.top()+(row*row_space)+distTopLeftCorner,lsColumnsWidth[x]-(2*distTopLeftCorner),row_space-(2*distTopLeftCorner));
+
+                        //draw text
+                        if(bFirst)//header?
+                            draw_text(&painter,&font,rF,s,true,false,false);
+                        else
+                            draw_text(&painter,&font,rF,s,false,false,false);
+
+                        //-
+                        l+=lsColumnsWidth[x];
                     }
-                    if(bRightAli==false)//left?
-                        rF=QRectF(fillRect.left()+l+(row_space/4),fillRect.top()+(row*row_space),lsColumnsWidth[x]-(row_space/4),row_space);
-                    else//right?
-                        rF=QRectF((fillRect.left()+l+lsColumnsWidth[x])-(metric.width(s)+(row_space/4)),fillRect.top()+(row*row_space),lsColumnsWidth[x]-(row_space/4),row_space);
-                    if(bFirst)//header?
-                        draw_text(&painter,&font,rF,s,true,false,false);
-                    else
-                        draw_text(&painter,&font,rF,s,false,false,false);
-                    l+=lsColumnsWidth[x];
                 }
                 if(bFirst)
                 {
                     bFirst=false;
                     i--;
                 }
-                //-
-                if(fillRect.top()+((row+1)*row_space)>fillRect.bottom())//new page?
+
+                if(i+1==count || fillRect.top()+((row+3)*row_space)>fillRect.bottom())//last row on page? ->print page count
                 {
+                    //print page / column count(center)
+                    s=QString("Seite %1").arg(page);
+                    rF=QRectF(fillRect.left()+((fillRect.right()-fillRect.left()-metric.width(s))/2),fillRect.bottom()-(row_space-(2*distTopLeftCorner)),fillRect.right()-fillRect.left(),row_space);
+                    draw_text(&painter,&font,rF,s,false,false,false);
+                    page++;
+                }
+
+                if(fillRect.top()+((row+3)*row_space)>fillRect.bottom())//new page?
+                {
+                    //next page
                     m_pPrinter->newPage();
                     bFirst=true;
                     row=-1;
@@ -374,13 +427,12 @@ bool CPrintJob::print_table_and_list(void)
     if(m_pPrinter==NULL)
         return false;
 
-    int iRightAli=Qt::AlignRight|Qt::AlignVCenter;
-    bool bRightAli=false,b=false;
+    bool b=false;
     QList<int> lsColumnsWidth;
     QRectF rF;
     QString s;
     bool bFirst=true;
-    int wAll,i,j,z,x,l,row=0,count,row_space,copies_count,copies=0;
+    int wAll,i,j,z,x,l,row=0,count,row_space,distTopLeftCorner,copies_count,page,copies=0,dx,iAliRight=Qt::AlignRight|Qt::AlignVCenter,iAliCenter=Qt::AlignHCenter|Qt::AlignVCenter;
     QFont font("Sans",8,0,0);
     qreal marginLeft,marginTop,marginRight,marginBottom;
     QRect paper = m_pPrinter->pageRect();
@@ -419,7 +471,8 @@ bool CPrintJob::print_table_and_list(void)
         //font
         painter.setFont(font);
         QFontMetrics metric(painter.fontMetrics());
-        row_space=metric.height();
+        distTopLeftCorner=metric.height()/4;
+        row_space=metric.height()+(2*distTopLeftCorner);
 
         //columns width
         for(wAll=0,i=0;i<pTable->columnCount();i++)
@@ -453,6 +506,7 @@ bool CPrintJob::print_table_and_list(void)
         while(copies<copies_count && pTable->columnCount()>0)
         {
             row=0;
+            page=1;
 
             //first row(title)
             if(m_sFirstRow.length()>0)
@@ -565,12 +619,12 @@ bool CPrintJob::print_table_and_list(void)
             {
                 if(bFirst)//header?
                 {
-                    rF=QRectF(fillRect.left()+1,fillRect.top()+(row*row_space)+1,fillRect.right()-fillRect.left()-2,row_space-2);
+                    rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),row_space);
                     painter.fillRect(rF,QColor(200,200,200));
                 }
                 else if(i%2!=0)//table items - all 2. row light grey
                 {
-                    rF=QRectF(fillRect.left()+1,fillRect.top()+(row*row_space)+1,fillRect.right()-fillRect.left()-2,row_space-2);
+                    rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),row_space);
                     painter.fillRect(rF,QColor(235,235,235));
                 }
 
@@ -580,10 +634,9 @@ bool CPrintJob::print_table_and_list(void)
                     rF=QRectF(fillRect.left()+l,fillRect.top()+(row*row_space),lsColumnsWidth[x],row_space);
                     painter.drawRect(rF);
 
-                    s=QString("");
+                    //get text
                     if(bFirst)//header?
                     {
-                        bRightAli=false;
                         pItem=pTable->horizontalHeaderItem(x);
                         if(pItem!=NULL)
                             s=pItem->text();
@@ -593,19 +646,30 @@ bool CPrintJob::print_table_and_list(void)
                     {
                         pItem=pTable->item(i,x);
                         if(pItem!=NULL)
-                        {
                             s=pItem->text();
-                            if(pItem->textAlignment()==iRightAli)
-                                bRightAli=true;
-                            else
-                                bRightAli=false;
-                        }
-                        else{}
                     }
-                    if(bRightAli==false)//left?
-                        rF=QRectF(fillRect.left()+l+(row_space/4),fillRect.top()+(row*row_space),lsColumnsWidth[x]-(row_space/4),row_space);
-                    else//right?
-                        rF=QRectF((fillRect.left()+l+lsColumnsWidth[x])-(metric.width(s)+(row_space/4)),fillRect.top()+(row*row_space),lsColumnsWidth[x]-(row_space/4),row_space);
+
+                    //get dist. by aglinment
+                    dx=distTopLeftCorner;//left=fefault
+                    if(pItem!=NULL && bFirst==false)
+                    {
+                        if(lsColumnsWidth[x] > get_text_width(s,&metric))
+                        {
+                            if(pItem->textAlignment()==iAliRight)//right
+                                dx=lsColumnsWidth[x]-(get_text_width(s,&metric)+(2*distTopLeftCorner));
+                            else if(pItem->textAlignment()==iAliCenter)//center
+                                dx=(lsColumnsWidth[x]-(get_text_width(s,&metric)+(2*distTopLeftCorner)))/2;
+                            //-
+                            if(dx<distTopLeftCorner)
+                                dx=distTopLeftCorner;
+                        }
+                    }
+                    pItem=NULL;
+
+                    //calc draw rect
+                    rF=QRectF(fillRect.left()+l+dx,fillRect.top()+(row*row_space)+distTopLeftCorner,lsColumnsWidth[x]-(2*distTopLeftCorner),row_space-(2*distTopLeftCorner));
+
+                    //draw text
                     if(bFirst)//header?
                         draw_text(&painter,&font,rF,s,true,false,false);
                     else
@@ -618,7 +682,16 @@ bool CPrintJob::print_table_and_list(void)
                     i--;
                 }
                 //-
-                if(fillRect.top()+((row+1)*row_space)>fillRect.bottom())//new page?
+                if(i+1==count || fillRect.top()+((row+3)*row_space)>fillRect.bottom())//last row on page? ->print page count
+                {
+                    //print page / column count(center)
+                    s=QString("Seite %1").arg(page);
+                    rF=QRectF(fillRect.left()+((fillRect.right()-fillRect.left()-metric.width(s))/2),fillRect.bottom()-(row_space-(2*distTopLeftCorner)),fillRect.right()-fillRect.left(),row_space);
+                    draw_text(&painter,&font,rF,s,false,false,false);
+                    page++;
+                }
+                //-
+                if(fillRect.top()+((row+3)*row_space)>fillRect.bottom())//new page?
                 {
                     m_pPrinter->newPage();
                     bFirst=true;

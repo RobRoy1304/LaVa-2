@@ -149,13 +149,13 @@ bool CInputDlgOrderingIncoming::settings(bool bUpdate)
         {
             //table width
             if(lsSValue.count()>0)
-                settings.set_table_width(ui->tableWidgetOrdering,lsSValue[0],200);
+                settings.set_table_columns_width(ui->tableWidgetOrdering,lsSValue[0],200);
             //table sort
             if(lsSValue.count()>1)
                 settings.set_table_sort(ui->tableWidgetOrdering,lsSValue[1],0);
             //table2 width
             if(lsSValue.count()>2)
-                settings.set_table_width(ui->tableWidgetWares,lsSValue[2],200);
+                settings.set_table_columns_width(ui->tableWidgetWares,lsSValue[2],200);
             //table2 sort
             if(lsSValue.count()>3)
                 settings.set_table_sort(ui->tableWidgetWares,lsSValue[3],0);
@@ -171,7 +171,7 @@ bool CInputDlgOrderingIncoming::settings(bool bUpdate)
             //table width
             if(lsSValue.count()>0)
             {
-                if(settings.get_table_width(ui->tableWidgetOrdering,lsSValue[0]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidgetOrdering,lsSValue[0]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[0]);
                     lsSUpdateValue.push_back(lsSValue[0]);
@@ -189,7 +189,7 @@ bool CInputDlgOrderingIncoming::settings(bool bUpdate)
             //table2 width
             if(lsSValue.count()>2)
             {
-                if(settings.get_table_width(ui->tableWidgetWares,lsSValue[2]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidgetWares,lsSValue[2]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[2]);
                     lsSUpdateValue.push_back(lsSValue[2]);

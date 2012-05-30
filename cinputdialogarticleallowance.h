@@ -46,6 +46,7 @@ public:
     bool set_count(int iCount);
     int get_count_on_date(int iArticleId);
     bool settings(bool bUpdate=false);
+    bool get_checkbox_not_close_the_dialog(void);
 
 protected:
     void changeEvent(QEvent *e);

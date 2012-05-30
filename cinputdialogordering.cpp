@@ -164,7 +164,7 @@ bool CInputDialogOrdering::settings(bool bUpdate)
         {
             //table width
             if(lsSValue.count()>0)
-                settings.set_table_width(ui->tableWidgetWares,lsSValue[0],200);
+                settings.set_table_columns_width(ui->tableWidgetWares,lsSValue[0],200);
             //table sort
             if(lsSValue.count()>1)
                 settings.set_table_sort(ui->tableWidgetWares,lsSValue[1],1);
@@ -174,7 +174,7 @@ bool CInputDialogOrdering::settings(bool bUpdate)
             //table width
             if(lsSValue.count()>0)
             {
-                if(settings.get_table_width(ui->tableWidgetWares,lsSValue[0]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidgetWares,lsSValue[0]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[0]);
                     lsSUpdateValue.push_back(lsSValue[0]);
@@ -312,6 +312,42 @@ bool CInputDialogOrdering::add_ware(void)
 {
     QString s;
     bool b;
+
+    //do -> user quit the article allowance dialog
+    QRect rMarkDlgGeometry(0,0,0,0);
+    CInputDialogArticleAllowance * pDlg=NULL;
+    do
+    {
+        pDlg=new CInputDialogArticleAllowance;
+        if(pDlg==NULL)
+            break;
+        if(rMarkDlgGeometry!=QRect(0,0,0,0))
+            pDlg->setGeometry(rMarkDlgGeometry);
+        pDlg->set(m_pThread,ui->tableWidgetWares,0,5,ARTICLE_DLG_TYPE_ORDERING,-1);
+        pDlg->setWindowTitle("hinzufügen");
+        b=pDlg->exec();
+        if(b)
+        {
+            if(pDlg->get_data(s))
+                insert_ware_at_table(s,false,true);
+            else
+                b=false;
+        }
+        if(!pDlg->get_checkbox_not_close_the_dialog())//dialog not close? (easy to add many article)
+            b=false;
+        if(pDlg!=NULL)
+        {
+            rMarkDlgGeometry=pDlg->geometry();
+            delete pDlg;
+            pDlg=NULL;
+        }
+    }while(b);
+    //-
+    check_user_input();
+    //-
+    return b;
+
+    /*
     CInputDialogArticleAllowance dlg;
     dlg.set(m_pThread,ui->tableWidgetWares,0,5,ARTICLE_DLG_TYPE_ORDERING,-1);
     dlg.setWindowTitle("hinzufügen");
@@ -323,6 +359,7 @@ bool CInputDialogOrdering::add_ware(void)
         check_user_input();
     }
     return b;
+    */
 }
 
 bool CInputDialogOrdering::delete_ware(void)

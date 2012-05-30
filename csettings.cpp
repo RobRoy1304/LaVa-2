@@ -42,7 +42,7 @@ bool CSettings::create_default_setting_file(void)
     else
     {
         //main
-        s=QString("###MAINWINDOW###\n");
+        s=QString("//MAINWINDOW\n");
         file.write(s.toAscii());
         s=QString("TAB_ORDER#0,1,2,3,4,5,6,7,8\n");
         file.write(s.toAscii());
@@ -54,6 +54,8 @@ bool CSettings::create_default_setting_file(void)
         s=QString("AUTO_CHECKBOX_MAIN_INV#0\n");
         file.write(s.toAscii());
         s=QString("MASK_SELECTION_INVENTORY#0\n");
+        file.write(s.toAscii());
+        s=QString("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,1,2,1,1,3,1,1,4,1,1,5,1,0,6,1,0,7,1,0,8,1,0,9,1,0,10,1,0,11,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
         file.write(s.toAscii());
         //-
         s=QString("TRADE_TABLE_COLUMNS_WIDTHS_OVIEW#200,200,200,200,200,200,200\n");
@@ -92,6 +94,8 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
         s=QString("MASK_SELECTION_ARTICLE#0\n");
         file.write(s.toAscii());
+        s=QString("ARTICLE_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,0,2,1,0,3,1,0,4,1,0,5,1,1,6,1,1,7,1,1,8,1,1,9,1,0,10,1,0,11,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
+        file.write(s.toAscii());
         //-
         s=QString("WAREGROUP_TREE_COLUMNS_WIDTHS#500,500,0,0\n");
         file.write(s.toAscii());
@@ -129,7 +133,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg trade in/out
-        s=QString("###DLG_TRADE###\n");
+        s=QString("//DLG_TRADE\n");
         file.write(s.toAscii());
         s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_IN_OUT_WARES#120,200,250,200,200,0\n");
         file.write(s.toAscii());
@@ -137,7 +141,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg ordering incoming
-        s=QString("###DLG_TRADE_ORDERING_INCOMING###\n");
+        s=QString("//DLG_TRADE_ORDERING_INCOMING\n");
         file.write(s.toAscii());
         s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_ORD_IN_ORD#230,230,230,230,0\n");
         file.write(s.toAscii());
@@ -153,7 +157,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg customer outgoing
-        s=QString("###DLG_TRADE_CUSTOMER_OUTGOING###\n");
+        s=QString("//DLG_TRADE_CUSTOMER_OUTGOING\n");
         file.write(s.toAscii());
         s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_CUS_OUT_CUS#140,250,280,280,0\n");
         file.write(s.toAscii());
@@ -169,7 +173,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg ordering
-        s=QString("###DLG_ORDERING###\n");
+        s=QString("//DLG_ORDERING\n");
         file.write(s.toAscii());
         s=QString("DLG_ORDERING_TABLE_COLUMNS_WIDTHS_WARES#120,200,250,200,200,0\n");
         file.write(s.toAscii());
@@ -177,7 +181,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg article browse
-        s=QString("###DLG_ARTICLE_BROWSE###\n");
+        s=QString("//DLG_ARTICLE_BROWSE\n");
         file.write(s.toAscii());
         s=QString("DLG_ARTICLE_BROWSE_TABLE_COLUMNS_WIDTHS#210,210,210,210,0\n");
         file.write(s.toAscii());
@@ -189,7 +193,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg article allowance
-        s=QString("###DLG_ARTICLE_ALLOWANCE###\n");
+        s=QString("//DLG_ARTICLE_ALLOWANCE\n");
         file.write(s.toAscii());
         s=QString("DLG_ARTICLE_ALLOWANCE_TABLE_COLUMNS_WIDTHS#230,160,160,160,160,0\n");
         file.write(s.toAscii());
@@ -201,13 +205,13 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg browse waregroup
-        s=QString("###DLG_BROWSE_WAREGROUP###\n");
+        s=QString("//DLG_BROWSE_WAREGROUP\n");
         file.write(s.toAscii());
         s=QString("DLG_WAREGROUP_TREE#300,300,0,0\n");
         file.write(s.toAscii());
 
         //dlg uni list
-        s=QString("###DLG_UNI_LIST###\n");
+        s=QString("//DLG_UNI_LIST\n");
         file.write(s.toAscii());
         s=QString("DLG_ARTICLE_UNDER_WARNLIMIT_TABLE_COLUMNS_WIDTHS#230,140,140,130,130,100,100\n");
         file.write(s.toAscii());
@@ -219,13 +223,21 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
 
         //dlg balance list
-        s=QString("###DLG_BALANCE_LIST###\n");
+        s=QString("//DLG_BALANCE_LIST\n");
         file.write(s.toAscii());
         s=QString("DLG_BALANCE_LIST_TABLE_COLUMNS_WIDTHS#160,160,160,160,150,150\n");
         file.write(s.toAscii());
 
-        //end
-        s=QString("###END###\n");
+        //etc.
+        s=QString("//ETC\n");
+        file.write(s.toAscii());
+
+        //warelist
+        s=QString("WARELIST_DLG_NOT_CLOSE_BY_ADD#0\n");
+        file.write(s.toAscii());
+
+        //backup path
+        s=QString("BACKUP_PATH#\n");
         file.write(s.toAscii());
 
         //-
@@ -286,46 +298,23 @@ bool CSettings::load(QList<QString> & lsSType, QList<QString> & lsSValue)
         file.close();
     }
     //-
-    if(iFound==lsSType.count())
+    if(iFound>0)//one find?
         b=true;
     return b;
 }
 
 bool CSettings::load(QString sType, QString & sValue)
 {
-    bool bFound=false;
-    int i;
-    QString s,sFile=m_sSettingsPath+QString("settings.txt");
-    QStringList lsString;
-    //-
-    QFile file(sFile);
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        file.close();
-    else
-    {
-        while (!file.atEnd())
-        {
-            s=QString(file.readLine());
-            lsString=s.split("#");
-            if(lsString.count()>1)
-            {
-                if(lsString[0]==sType)//found
-                {
-                    for(i=1;i<lsString.count();i++)
-                        sValue+=lsString[i];
-                    lsString.clear();
-                    sValue.remove(QChar('\n'),Qt::CaseSensitive);
-                    bFound=true;
-                }
-            }
-            if(bFound)
-                break;
-        }
-        //-
-        file.close();
-    }
-    //-
-    return bFound;
+    QList<QString> lsSType;
+    lsSType.push_back(sType);
+    QList<QString> lsSValue;
+    lsSValue.push_back(QString(""));
+    bool b=load(lsSType,lsSValue);
+    if(lsSValue.count()> 0)
+        sValue=lsSValue[0];
+    lsSType.clear();
+    lsSValue.clear();
+    return b;
 }
 
 bool CSettings::write(QList<QString> & lsSType, QList<QString> & lsSValue)
@@ -414,7 +403,7 @@ bool CSettings::write(QString sType,QString sValue)
     return b;
 }
 
-bool CSettings::set_table_width(QTableWidget * pTable, QString sValues, int iDefaultValue)
+bool CSettings::set_table_columns_width(QTableWidget * pTable, QString sValues, int iDefaultValue)
 {
     if(pTable==NULL || sValues.length()<=0)
         return false;
@@ -475,6 +464,148 @@ bool CSettings::set_table_sort(QTableWidget * pTable, QString sValues, int iDefa
         b=true;
     }
     lsValues.clear();
+    return b;
+}
+
+bool CSettings::set_table_columns_order_visible_alignment(CTableColumnsData * pColumnsData, QString sValues)
+{
+    if(pColumnsData==NULL)
+        return false;
+    if(pColumnsData->get_table()==NULL)
+        return false;
+    //-
+    int i,j;
+    bool b=false;
+    QTableWidgetItem * pItem=NULL;
+    QTableWidget * pTable=pColumnsData->get_table();
+    QList<int> lsIntMissing,lsIntFound,lsValues,lsOrder,lsAlignment;
+    QList<bool> lsVisible;
+    QList<QString> lsS;
+
+    if(sValues.length()<=0)//setting missing?
+    {//default
+        for(i=0;i<pTable->columnCount();i++)
+        {
+            lsOrder.push_back(i);
+            lsAlignment.push_back(TABLE_ALIGNMENT_LEFT);
+            if(i<pTable->columnCount()-1)
+                lsVisible.push_back(true);
+            else
+                lsVisible.push_back(false); //last column(id column) default not visible
+        }
+        pColumnsData->set(lsOrder,lsVisible,lsAlignment);
+    }
+    else
+    {
+        //mark columns header name
+        for(i=0;i<pTable->columnCount();i++)
+        {
+            pItem=pTable->horizontalHeaderItem(i);
+            if(pItem!=NULL)
+                lsS.push_back(pItem->text());
+        }
+
+        b=cast_string_to_int_list(sValues,lsValues);
+        if(b)
+        {//check
+
+            //split values
+            for(i=0;i<lsValues.count();i++)
+            {
+                if(i%3==0)//order
+                    lsOrder.push_back(lsValues[i]);
+                else if(i%3==1)//visible
+                {
+                    if(lsValues[i]==0)
+                        lsVisible.push_back(false);
+                    else
+                        lsVisible.push_back(true);
+                }
+                else//alignment
+                {
+                    if(lsValues[i]>=0 && lsValues[i]<=2)//0=left 1=right 2=center
+                        lsAlignment.push_back(lsValues[i]);
+                    else
+                        lsAlignment.push_back(0);//push back default
+                }
+            }
+
+            //missing values?
+            while(pTable->columnCount()>lsOrder.count())
+                lsOrder.push_back(0);//push back default
+            while(pTable->columnCount()>lsVisible.count())
+                lsVisible.push_back(true);//push back default
+            while(pTable->columnCount()>lsAlignment.count())
+                lsAlignment.push_back(0);//push back default(0=left)
+
+            //to many?
+            while(lsOrder.count()>pTable->columnCount())
+                lsOrder.removeLast();
+            while(lsVisible.count()>pTable->columnCount())
+                lsVisible.removeLast();
+            while(lsAlignment.count()>pTable->columnCount())
+                lsAlignment.removeLast();
+
+
+            //---order---
+            //for mark
+            for(i=0;i<lsOrder.count();i++)
+                lsIntFound.push_back(-1);
+
+            //check index missing?
+            for(i=0;i<lsOrder.count();i++)
+            {
+                for(j=0;j<lsOrder.count();j++)
+                {
+                    if(lsOrder[j]==i)//index found
+                    {
+                        lsIntFound[j]=i;
+                        break;
+                    }
+                }
+                //-
+                if(j>=lsOrder.count())//index not found?
+                    lsIntMissing.push_back(i);
+            }
+
+            //set missing index
+            for(i=0;i<lsIntFound.count() && lsIntMissing.count()>0;i++)
+            {
+                if(lsIntFound[i]==-1)
+                {
+                    lsIntFound[i]=lsIntMissing[0];
+                    lsIntMissing.removeFirst();
+                }
+            }
+
+            //copy mark
+            lsOrder=lsIntFound;
+            //---
+
+
+            //set columns header name by order & visible
+            for(i=0;i<pTable->columnCount();i++)
+            {
+                pItem=pTable->horizontalHeaderItem(i);
+                if(pItem!=NULL)
+                    pItem->setText(lsS[lsOrder[i]]);
+                //-
+                if(!lsVisible[i])//hide?
+                    pTable->setColumnWidth(i,0);
+            }
+
+            //set
+            pColumnsData->set(lsOrder,lsVisible,lsAlignment);
+        }
+    }
+    //-
+    lsS.clear();
+    lsOrder.clear();
+    lsVisible.clear();
+    lsIntMissing.clear();
+    lsIntFound.clear();
+    lsValues.clear();
+    lsAlignment.clear();
     return b;
 }
 
@@ -630,7 +761,7 @@ bool CSettings::set_tab_order(QTabWidget * pTab, QString sValues)
     return b;
 }
 
-bool CSettings::get_table_width(QTableWidget * pTable, QString & sValues)
+bool CSettings::get_table_columns_width(QTableWidget * pTable, QString & sValues)
 {
     if(pTable==NULL)
         return false;
@@ -667,6 +798,42 @@ bool CSettings::get_table_sort(QTableWidget * pTable, QString & sValues)
 
     sNew+=QString("%1").arg(pTable->horizontalHeader()->sortIndicatorSection());
     sNew+=QString(",%1").arg(pTable->horizontalHeader()->sortIndicatorOrder());
+
+    //check update?
+    if(sValues!=sNew)
+    {
+        bUpdate=true;
+        sValues=sNew;
+    }
+    //-
+    return bUpdate;
+}
+
+bool CSettings::get_table_columns_order_visible_alignment(CTableColumnsData * pColumnsData, QString & sValues)
+{
+    if(pColumnsData==NULL)
+        return false;
+
+    QList<int> lsOrder,lsAlignment;
+    QList<bool> lsVisible;
+    bool bUpdate=false;
+    QString sNew;
+
+    pColumnsData->get_columns_order(lsOrder);
+    pColumnsData->get_columns_visible(lsVisible);
+    pColumnsData->get_columns_alignment(lsAlignment);
+    sNew=QString("");
+    while(lsOrder.count()>0 && lsVisible.count()>0 && lsAlignment.count()>0)
+    {
+        if(sNew.length()>0)
+            sNew+=QString(",");
+        sNew+=QString("%1,").arg(lsOrder[0]);
+        sNew+=QString("%1,").arg(lsVisible[0]);
+        sNew+=QString("%1").arg(lsAlignment[0]);
+        lsOrder.removeFirst();
+        lsVisible.removeFirst();
+        lsAlignment.removeFirst();
+    }
 
     //check update?
     if(sValues!=sNew)
@@ -876,6 +1043,108 @@ QString CSettings::cast_int_list_to_string(QList<int> & lsInt, QString sType)
             sReturn+=QString(",");
     }
     return sReturn;
+}
+
+bool CSettings::cast_table_columns_order_visible_alignment(QString & sValues, CTableColumnsData * p_tcdData)
+{
+    if(p_tcdData==NULL || sValues.length()<=0)
+        return false;
+
+    QTableWidget * pTable=p_tcdData->get_table();
+    if(pTable==NULL)
+        return false;
+    //-
+    int i,j;
+    QList<int> lsIntMissing,lsIntFound,lsValues,lsOrder,lsAlignment;
+    QList<bool> lsVisible;
+
+    bool b=cast_string_to_int_list(sValues,lsValues);
+    if(b)
+    {//check
+
+        //split values
+        for(i=0;i<lsValues.count();i++)
+        {
+            if(i%3==0)//order
+                lsOrder.push_back(lsValues[i]);
+            else if(i%3==1)//visible
+            {
+                if(lsValues[i]==0)
+                    lsVisible.push_back(false);
+                else
+                    lsVisible.push_back(true);
+            }
+            else//alignment
+            {
+                if(lsValues[i]>=0 && lsValues[i]<=2)//0=left 1=right 2=center
+                    lsAlignment.push_back(lsValues[i]);
+                else
+                    lsAlignment.push_back(0);//push back default
+            }
+        }
+
+        //missing values?
+        while(pTable->columnCount()>lsOrder.count())
+            lsOrder.push_back(0);//push back default
+        while(pTable->columnCount()>lsVisible.count())
+            lsVisible.push_back(true);//push back default
+        while(pTable->columnCount()>lsAlignment.count())
+            lsAlignment.push_back(0);//push back default(0=left)
+
+        //to many?
+        while(lsOrder.count()>pTable->columnCount())
+            lsOrder.removeLast();
+        while(lsVisible.count()>pTable->columnCount())
+            lsVisible.removeLast();
+        while(lsAlignment.count()>pTable->columnCount())
+            lsAlignment.removeLast();
+
+
+        //---order---
+        //for mark
+        for(i=0;i<lsOrder.count();i++)
+            lsIntFound.push_back(-1);
+
+        //check index missing?
+        for(i=0;i<lsOrder.count();i++)
+        {
+            for(j=0;j<lsOrder.count();j++)
+            {
+                if(lsOrder[j]==i)//index found
+                {
+                    lsIntFound[j]=i;
+                    break;
+                }
+            }
+            //-
+            if(j>=lsOrder.count())//index not found?
+                lsIntMissing.push_back(i);
+        }
+
+        //set missing index
+        for(i=0;i<lsIntFound.count() && lsIntMissing.count()>0;i++)
+        {
+            if(lsIntFound[i]==-1)
+            {
+                lsIntFound[i]=lsIntMissing[0];
+                lsIntMissing.removeFirst();
+            }
+        }
+
+        //copy mark
+        lsOrder=lsIntFound;
+
+        //set
+        p_tcdData->set(lsOrder,lsVisible,lsAlignment);
+    }
+    //-
+    lsOrder.clear();
+    lsVisible.clear();
+    lsIntMissing.clear();
+    lsIntFound.clear();
+    lsValues.clear();
+    lsAlignment.clear();
+    return b;
 }
 
 bool CSettings::give_it_setting_file(void)

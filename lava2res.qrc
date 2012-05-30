@@ -20,5 +20,7 @@
         <file>res/outgoing.png</file>
         <file>res/unknow.png</file>
         <file>res/warning.png</file>
+        <file>res/up.png</file>
+        <file>res/down.png</file>
     </qresource>
 </RCC>

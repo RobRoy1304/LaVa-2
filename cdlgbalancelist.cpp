@@ -70,14 +70,14 @@ bool CDlgBalanceList::settings(bool bUpdate)
         {
             //table width
             if(lsSValue.count()>0)
-                settings.set_table_width(ui->tableWidgetList,lsSValue[0],200);
+                settings.set_table_columns_width(ui->tableWidgetList,lsSValue[0],200);
         }
         if(bUpdate)//write
         {
             //table width
             if(lsSValue.count()>0)
             {
-                if(settings.get_table_width(ui->tableWidgetList,lsSValue[0]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidgetList,lsSValue[0]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[0]);
                     lsSUpdateValue.push_back(lsSValue[0]);

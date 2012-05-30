@@ -22,7 +22,7 @@
 #include <QtGui>
 
 //version
-#define VERSION "version 0.27 (BETA)"
+#define VERSION "version 0.28 (BETA)"
 #define CURRENT_DB_VERSION "1,02"
 
 //trade
@@ -59,9 +59,11 @@
 #define LOGBOOK_TYPE_CUSTOMER_REMOVE 62
 #define LOGBOOK_TYPE_OTHER 70
 
+
 //table item data
-#define TABLE_ALIGMNENT_LEFT 0
-#define TABLE_ALIGMNENT_RIGHT 1
+#define TABLE_ALIGNMENT_LEFT 0
+#define TABLE_ALIGNMENT_RIGHT 1
+#define TABLE_ALIGNMENT_CENTER 2
 class CTableItemData
 {
 private:
@@ -69,26 +71,52 @@ private:
     int m_iAlignment;
     QIcon m_icon;
 public:
-    CTableItemData(){m_iAlignment=TABLE_ALIGMNENT_LEFT;}
-    QString get_text(void){return m_sText;}
-    int get_alignment(void){return m_iAlignment;}
-    QIcon get_icon(void){return m_icon;}
-    void set_text(QString s){m_sText=s;}
-    void set_aligment(int i){m_iAlignment=i;}
-    void set_icon(QIcon ico){m_icon=ico;}
-    void set(QString sText, int iAlignment, QIcon * pIcon=NULL)
-    {
-        m_sText=sText;
-        m_iAlignment=iAlignment;
-        if(pIcon!=NULL)
-            m_icon=*pIcon;
-    }
-    void clear(void)
-    {
-        m_sText=QString("");
-        m_iAlignment=TABLE_ALIGMNENT_LEFT;
-        m_icon=QIcon();
-    }
+    CTableItemData();
+    QString get_text(void);
+    int get_alignment(void);
+    QIcon get_icon(void);
+    void set_text(QString s);
+    void set_alignment(int i);
+    void set_icon(QIcon ico);
+    void set(QString sText, int iAlignment, QIcon * pIcon=NULL);
+    void clear(void);
+};
+
+//table column data
+class CTableColumnsData
+{
+private:
+    int m_iIdColumn;
+    QTableWidget * m_pTable;
+    QList<int> m_lsColumnsOrder;
+    QList<bool> m_lsColumnsVisible;
+    QList<int> m_lsColumnsAlignment;
+
+public:
+    CTableColumnsData();
+    ~CTableColumnsData(void);
+    CTableColumnsData & operator= (CTableColumnsData & right );
+    bool operator != (CTableColumnsData & right);
+    bool operator == (CTableColumnsData & right);
+    int get_columns_count(void);
+    int get_id_column(void);
+    QTableWidget * get_table(void);
+    void get_columns_order(QList<int> & lsColumnsOrder);
+    void get_columns_visible(QList<bool> & lsColumnsVisible);
+    void get_columns_alignment(QList<int> & lsColumnsAlignment);
+    int get_column_alignment(int iIndex);
+    bool get_column_visible(int iIndex);
+    int get_column_order(int iIndex);
+    int get_count_not_visible_columns(void);
+    void set_id_column(int iColumn);
+    void set_table(QTableWidget * pTable);
+    void set_columns_visible(QList<bool> & lsColumnsVisible);
+    void set_columns_alignment(QList<int> & lsColumnsAlignment);
+    void set_column_alignment(int iIndex, int iType);
+    void set_column_visible(int iIndex, bool bVisible);
+    bool set(QList<int> & lsColumnsOrder,QList<bool> & lsColumnsVisible,QList<int> & lsColumnsAlignment);
+    bool update_order(QList<int> & lsNewColumnsOrder);
+    bool swap_columns(int iRow1, int iRow2);
 };
 
 //memory

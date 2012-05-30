@@ -54,14 +54,20 @@ int main(int argc, char *argv[])
                 //init
                 w.init();
 
+                //fill lists
+                w.fill_date_lists();
+
+                //load settings
+                w.settings(false);
+
+                //fill tables
+                w.fill_all_table();
+
                 //timer
                 w.startTimer(3000);//every 3sec.
 
                 //show
                 w.showMaximized();
-
-                //load settings
-                w.settings(false);
 
                 //logo
                 logo_dlg.startTimer(2000);//start timer in 2 sec. close logo widget

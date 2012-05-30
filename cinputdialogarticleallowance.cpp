@@ -75,6 +75,11 @@ void CInputDialogArticleAllowance::keyPressEvent(QKeyEvent * event)
     }
 }
 
+bool CInputDialogArticleAllowance::get_checkbox_not_close_the_dialog(void)
+{
+    return ui->checkBoxNotCloseTheDialog->isChecked();
+}
+
 bool CInputDialogArticleAllowance::settings(bool bUpdate)
 {
     bool b;
@@ -84,6 +89,7 @@ bool CInputDialogArticleAllowance::settings(bool bUpdate)
     lsSType.push_back(QString("TABLE_SORT_ORDER_DLG_ALLOWANCE"));
     lsSType.push_back(QString("AUTO_CHECKBOX_ARTICLE_ALLOWANCE"));
     lsSType.push_back(QString("MASK_SELECTION_DLG_ALLOWANCE"));
+    lsSType.push_back(QString("WARELIST_DLG_NOT_CLOSE_BY_ADD"));
     //-
     b=settings.load(lsSType,lsSValue);//load all settings
     if(b)
@@ -92,7 +98,7 @@ bool CInputDialogArticleAllowance::settings(bool bUpdate)
         {
             //table width
             if(lsSValue.count()>0)
-                settings.set_table_width(ui->tableWidgetArticle,lsSValue[0],200);
+                settings.set_table_columns_width(ui->tableWidgetArticle,lsSValue[0],200);
             //table sort
             if(lsSValue.count()>1)
                 settings.set_table_sort(ui->tableWidgetArticle,lsSValue[1],0);
@@ -102,13 +108,16 @@ bool CInputDialogArticleAllowance::settings(bool bUpdate)
             //mask selection
             if(lsSValue.count()>3)
                 settings.set_combobox(ui->comboBoxMask,lsSValue[3],0);
+            //warelist not close by add
+            if(lsSValue.count()>4)
+                settings.set_checkbox(ui->checkBoxNotCloseTheDialog,lsSValue[4],false);
         }
         if(bUpdate)//write
         {
             //table width
             if(lsSValue.count()>0)
             {
-                if(settings.get_table_width(ui->tableWidgetArticle,lsSValue[0]))//setting change?
+                if(settings.get_table_columns_width(ui->tableWidgetArticle,lsSValue[0]))//setting change?
                 {
                     lsSUpdateType.push_back(lsSType[0]);
                     lsSUpdateValue.push_back(lsSValue[0]);
@@ -123,7 +132,7 @@ bool CInputDialogArticleAllowance::settings(bool bUpdate)
                     lsSUpdateValue.push_back(lsSValue[1]);
                 }
             }
-            //checkbox
+            //checkbox auto
             if(lsSValue.count()>2)
             {
                 if(settings.get_checkbox(ui->checkBoxAuto,lsSValue[2]))//setting change?
@@ -139,6 +148,15 @@ bool CInputDialogArticleAllowance::settings(bool bUpdate)
                 {
                     lsSUpdateType.push_back(lsSType[3]);
                     lsSUpdateValue.push_back(lsSValue[3]);
+                }
+            }
+            //checkbox warelist
+            if(lsSValue.count()>4)
+            {
+                if(settings.get_checkbox(ui->checkBoxNotCloseTheDialog,lsSValue[4]))//setting change?
+                {
+                    lsSUpdateType.push_back(lsSType[4]);
+                    lsSUpdateValue.push_back(lsSValue[4]);
                 }
             }
 
@@ -167,6 +185,10 @@ bool CInputDialogArticleAllowance::set(CWorkThread * pThread, QTableWidget * pPa
 
     //update article table with article
     update_table();
+
+    //not add ware
+    if(iArticleId!=-1)
+        ui->checkBoxNotCloseTheDialog->setVisible(false);
 
     //find & select article with article id
     if(m_pThread!=NULL)

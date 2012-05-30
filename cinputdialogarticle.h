@@ -37,6 +37,8 @@ public:
     int m_iNewMakerId;
     int m_iNewWaregroupId;
     QString m_sMarkArticleName;//for edit
+    QString m_sMarkArticleNumber1;//for edit
+    QString m_sMarkArticleNumber2;//for edit
 
     explicit CInputDialogArticle(QWidget *parent = 0);
     ~CInputDialogArticle();

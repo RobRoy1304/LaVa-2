@@ -33,6 +33,48 @@
 #define FORMAT_THREE 2
 #define FORMAT_FOUR 3
 
+
+//item for better sort----------------------------------------------
+class CMyTableWidgetItem: public QTableWidgetItem
+ {
+ public:
+     bool operator< ( const QTableWidgetItem & other ) const
+     {
+         double d1,d2;
+         QStringList ls;
+         bool b1,b2,bReturn=false;
+         QString s1=this->text();
+         QString s2=other.text();
+         //-
+         ls=s1.split(" ");
+         if(ls.count()>0)
+            s1=ls[0];
+         ls.clear();
+         ls=s2.split(" ");
+         if(ls.count()>0)
+            s2=ls[0];
+         ls.clear();
+         //-
+         d1=s1.toDouble(&b1);
+         d2=s2.toDouble(&b2);
+         //-
+         if(b1==true && b2==true)//2* number?
+         {
+             if(d1<d2)
+                 bReturn=true;
+             else{}
+         }
+         else
+             bReturn=QTableWidgetItem::operator<(other);
+
+         //-
+         return bReturn;
+     }
+ };
+
+
+
+//---------------------------------------------------------
 class CWidgetInterface
 {
 
@@ -45,6 +87,8 @@ private:
     QIcon m_icoWarning;
 
 public:
+    CTableColumnsData m_tcInventory;
+    CTableColumnsData m_tcArticle;
 
     //basic
     CWidgetInterface();
@@ -76,6 +120,7 @@ public:
     bool mod_row(QTableWidget * pTable, QList<CTableItemData> & lsData, int iPosition=ITEM_POSITION_BOTTOM, bool bBlock=false, bool bUpdate=false, int iSelectId=-1,int iIdColumn=-1);//bUpdate=false->insert,true->update | iSelectId=-1 -> no select  |  iIdColumn=-1 -> last column
     bool mod_row(QTableWidget * pTable, QList<CTableItemData> & lsData, int iPosition=ITEM_POSITION_BOTTOM, bool bBlock=false, bool bUpdate=false, QString sSelectValue=QString(""),int iIdColumn=-1);//bUpdate=false->insert,true->update | iSelectValue="" -> no select  |  iIdColumn=-1 -> last column
     bool fill_row(QTableWidget * pTable,int iRow,QList<CTableItemData> & lsData);
+    bool update_table_by_tablecolumnsdata(CTableColumnsData & tcdOld,CTableColumnsData & tcdNew, QList<QString> & lsHeaderNames);
 
     //waregroup
     bool waregroup_update_treewidget(QTreeWidget * pTree, int iSelectedID=-1);
@@ -137,7 +182,7 @@ public:
     bool trade_insert_row(QTableWidget * pTable, CTrade & trade, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
     bool trade_update_row(QTableWidget * pTable, CTrade & trade, bool bSelect=false);
     bool trade_format(CTrade & trade, QList<CTableItemData> & lsData);
-    void trade_get_icon(CTrade & trade, CTableItemData & ti, int iAlignment=TABLE_ALIGMNENT_LEFT);
+    void trade_get_icon(CTrade & trade, CTableItemData & ti, int iAlignment=TABLE_ALIGNMENT_LEFT);
     //trade -list-
     bool trade_update_list_info(QListWidget * pList, CTrade & tr);
     bool trade_update_list_date(QListWidget * pList, int iYear, int iIndexDate, QString sTextMask, int iIndexMask, QDate dtSelect=QDate(0,0,0));
@@ -151,8 +196,8 @@ public:
     bool inventory_insert_row(QTableWidget * pTable, CArticle & ar, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
     bool inventory_update_row(QTableWidget * pTable, CArticle & ar, bool bSelect=false);
     bool inventory_format(CArticle & ar, QList<CTableItemData> & lsData);
-    void inventory_get_icon_and_warning_limit(CArticle & ar, CTableItemData & ti, int iAlignment=TABLE_ALIGMNENT_LEFT);
-    void inventory_get_icon_and_precent(CArticle & ar, CTableItemData & ti, int iAlignment=TABLE_ALIGMNENT_LEFT);
+    void inventory_get_icon_and_warning_limit(CArticle & ar, CTableItemData & ti, int iAlignment=TABLE_ALIGNMENT_LEFT);
+    void inventory_get_icon_and_precent(CArticle & ar, CTableItemData & ti, int iAlignment=TABLE_ALIGNMENT_LEFT);
 
 
     //logbook -lists-

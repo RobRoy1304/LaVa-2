@@ -57,7 +57,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>3</number>
     </property>
     <property name="movable">
      <bool>true</bool>
@@ -2610,7 +2610,7 @@
     </property>
     <addaction name="menuQuit"/>
    </widget>
-   <widget class="QMenu" name="menuHilfe">
+   <widget class="QMenu" name="menuOver">
     <property name="title">
      <string>Hilfe</string>
     </property>
@@ -2618,7 +2618,7 @@
     <addaction name="separator"/>
     <addaction name="menuAbout"/>
    </widget>
-   <widget class="QMenu" name="menuDrucker">
+   <widget class="QMenu" name="menuPrinter">
     <property name="title">
      <string>Druck</string>
     </property>
@@ -2692,7 +2692,7 @@
     <addaction name="menuPrinterCustomer"/>
     <addaction name="menuLogbuch"/>
    </widget>
-   <widget class="QMenu" name="menuListen">
+   <widget class="QMenu" name="menuList">
     <property name="title">
      <string>Listen</string>
     </property>
@@ -2700,7 +2700,7 @@
     <addaction name="menuListUnderWarnLimit"/>
     <addaction name="menuListInventoryDate"/>
    </widget>
-   <widget class="QMenu" name="menuDatenbank">
+   <widget class="QMenu" name="menuDatabase">
     <property name="title">
      <string>Datenbank</string>
     </property>
@@ -2709,11 +2709,19 @@
     <addaction name="menuDbImportFromLava1"/>
     <addaction name="menuDbClear"/>
    </widget>
+   <widget class="QMenu" name="menuSetting">
+    <property name="title">
+     <string>Einstellungen</string>
+    </property>
+    <addaction name="menuSettingInventory"/>
+    <addaction name="menuSettingArticle"/>
+   </widget>
    <addaction name="menuInfo"/>
-   <addaction name="menuDrucker"/>
-   <addaction name="menuListen"/>
-   <addaction name="menuDatenbank"/>
-   <addaction name="menuHilfe"/>
+   <addaction name="menuPrinter"/>
+   <addaction name="menuList"/>
+   <addaction name="menuDatabase"/>
+   <addaction name="menuSetting"/>
+   <addaction name="menuOver"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="menuQuit">
@@ -2844,6 +2852,16 @@
   <action name="menuListInventoryDate">
    <property name="text">
     <string>Artikelbestände(Datum)</string>
+   </property>
+  </action>
+  <action name="menuSettingInventory">
+   <property name="text">
+    <string>Tabelle Lagerbestand-Übersicht</string>
+   </property>
+  </action>
+  <action name="menuSettingArticle">
+   <property name="text">
+    <string>Tabelle Artikel-Übersicht</string>
    </property>
   </action>
  </widget>

@@ -30,6 +30,8 @@ CInputDialogArticle::CInputDialogArticle(QWidget *parent) :
     ui->lineEditName->setFocus();
     ui->buttonBox->setEnabled(false);
     m_sMarkArticleName=QString("");
+    m_sMarkArticleNumber1=QString("");
+    m_sMarkArticleNumber2=QString("");
 
     ui->lineEditInventory->setMaxLength(9);
     ui->lineEditMaxInventory->setMaxLength(9);
@@ -46,6 +48,8 @@ CInputDialogArticle::CInputDialogArticle(QWidget *parent) :
     connect(ui->lineEditBaseprice,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     connect(ui->lineEditSalesprice,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     connect(ui->lineEditName,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
+    connect(ui->lineEditArticlenumber,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
+    connect(ui->lineEditArticlenumber_2,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     //-
     setMinimumSize(width(),height());
     setMaximumSize(width(),height());
@@ -373,7 +377,7 @@ bool CInputDialogArticle::checkbox_warning(void)
 
 bool CInputDialogArticle::check_user_input(void)
 {
-    int count=-1,id;
+    int i,count=-1,id;
     unsigned int uiInput=0,uiMaxInventory=0;
     bool bWarning=false,b=true;
     QString s3,s2,s,sError;
@@ -500,6 +504,44 @@ bool CInputDialogArticle::check_user_input(void)
                 if(count<=0)
                 {
                     sError=QString("Warnung: Warengruppe existiert nicht im Hauptverzeichnis");
+                    bWarning=true;
+                }
+            }
+        }
+
+        //articlenumbers
+        if(!bWarning)
+        {
+            s2=ui->lineEditArticlenumber->text();
+            if(s2.length()>0)
+            {
+                if(m_sMarkArticleNumber1!=s2)//edit?
+                    i=0;
+                else
+                    i=1;
+                s=QString("articlenumber='%1'").arg(s2);
+                m_pThread->set_work(WORK_ARTICLE_GET_COUNT,&memory);
+                if(count>i)//articlenumber found? (edit ? >1)
+                {
+                    sError=QString("Warnung: 1.Artikelnummer ist bereits vergeben");
+                    bWarning=true;
+                }
+            }
+        }
+        if(!bWarning)
+        {
+            s2=ui->lineEditArticlenumber_2->text();
+            if(s2.length()>0)
+            {
+                if(m_sMarkArticleNumber2!=s2)//edit?
+                    i=0;
+                else
+                    i=1;
+                s=QString("articlenumber2='%1'").arg(s2);
+                m_pThread->set_work(WORK_ARTICLE_GET_COUNT,&memory);
+                if(count>i)//articlenumber2 found? (edit ? >1)
+                {
+                    sError=QString("Warnung: 2.Artikelnummer ist bereits vergeben");
                     bWarning=true;
                 }
             }

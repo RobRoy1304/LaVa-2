@@ -20,6 +20,7 @@
 #define CSETTINGS_H
 
 #include <QtGui>
+#include "data_classes.h"
 
 class CSettings
 {
@@ -34,14 +35,16 @@ public:
     bool load(QString sType, QString & sValue);
     bool write(QList<QString> & lsSType, QList<QString> & lsSValue);
     bool write(QString sType, QString sValue);
-    bool set_table_width(QTableWidget * pTable, QString sValues, int iDefaultValue);
+    bool set_table_columns_width(QTableWidget * pTable, QString sValues, int iDefaultValue);
     bool set_table_sort(QTableWidget * pTable, QString sValues, int iDefaultValue);
+    bool set_table_columns_order_visible_alignment(CTableColumnsData * pColumnsData, QString sValues);
     bool set_checkbox(QCheckBox * pCheckBox,QString sValue, bool bDefaultValue);
     bool set_combobox(QComboBox * pComboBox, QString sValue, int iDefaultValue);
     bool set_tree_width(QTreeWidget * pTree,QString sValues, int iDefaultValue);
     bool set_tab_order(QTabWidget * pTab, QString sValues);
-    bool get_table_width(QTableWidget * pTable, QString & sValues);
+    bool get_table_columns_width(QTableWidget * pTable, QString & sValues);
     bool get_table_sort(QTableWidget * pTable, QString & sValues);
+    bool get_table_columns_order_visible_alignment(CTableColumnsData * pColumnsData, QString & sValues);
     bool get_checkbox(QCheckBox * pCheckBox,QString & sValue);
     bool get_combobox(QComboBox * pComboBox, QString & sValue);
     bool get_tree_width(QTreeWidget * pTree, QString & sValues);
@@ -49,6 +52,7 @@ public:
     bool remove_line(QString sType);
     bool cast_string_to_int_list(QString s, QList<int> & lsInt, bool bWithType=false);
     QString cast_int_list_to_string(QList<int> & lsInt, QString sType=QString(""));
+    bool cast_table_columns_order_visible_alignment(QString & sValues, CTableColumnsData * p_tcdData);
     bool give_it_setting_file(void);
     bool is_program_running(void);
 };
