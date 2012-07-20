@@ -36,6 +36,7 @@ CDlgUniList::CDlgUniList(QWidget *parent) :
 
     //connect
     connect(ui->pushButtonPrint,SIGNAL(clicked()),this,SLOT(print_button_press()));
+    connect(ui->pushButtonExport,SIGNAL(clicked()),this,SLOT(export_button_press()));
     connect(ui->dateEditFrom,SIGNAL(dateChanged(QDate)),this,SLOT(date_changed()));
 }
 
@@ -128,10 +129,11 @@ bool CDlgUniList::settings(bool bUpdate)
 
 bool CDlgUniList::check_user_input(void)
 {
-    if(ui->tableWidget->rowCount()>0)
-        ui->pushButtonPrint->setEnabled(true);
-    else
-        ui->pushButtonPrint->setEnabled(false);
+    bool b=true;
+    if(ui->tableWidget->rowCount()<=0)
+        b=false;
+    ui->pushButtonPrint->setEnabled(b);
+    ui->pushButtonExport->setEnabled(b);
     return true;
 }
 
@@ -228,6 +230,19 @@ bool CDlgUniList::print_button_press(void)
         previewDlg.exec();
     }
     return b;
+}
+
+bool CDlgUniList::export_button_press(void)
+{
+    QString s;
+    if(m_iType==TYPE_WARN_LIST)
+        s=QString("Liste-Warnlimit");
+    if(m_iType==TYPE_INVENTORYS_ON_DATE)
+        s=QString("Liste-Lagerbestand_%1").arg(ui->dateEditFrom->date().toString(QString("dd.MM.yyyy")));
+    QString sTitle=QString("%1 (erstellt %2)").arg(s,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+
+    CExportCVS exportCVS;
+    return exportCVS.write_data_table(this,ui->tableWidget,s,sTitle,true);
 }
 
 bool CDlgUniList::print(QPrinter * pPrinter)

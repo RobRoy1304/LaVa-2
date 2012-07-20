@@ -24,6 +24,37 @@ CTableItemData::CTableItemData()
     m_iAlignment=TABLE_ALIGNMENT_LEFT;
 }
 
+CTableItemData::~CTableItemData()
+{
+}
+
+bool CTableItemData::set(CTableItemData & right )
+{
+    m_sText=right.get_text();
+    m_iAlignment=right.get_alignment();
+    m_icon=right.get_icon();
+    return true;
+}
+
+bool CTableItemData::operator != (CTableItemData & right)
+{
+    return ! (*this==right);
+}
+
+bool CTableItemData::operator == (CTableItemData & right)
+{
+    bool b=false;
+    if(m_sText==right.get_text())
+    {
+        if(m_iAlignment==right.get_alignment())
+        {
+            if(m_icon.name()==right.get_icon().name())
+                b=true;
+        }
+    }
+    return b;
+}
+
 QString CTableItemData::get_text(void)
 {
     return m_sText;
@@ -1455,7 +1486,7 @@ QString CLogbook::get_output_string(void)
     else if(m_iType==LOGBOOK_TYPE_OTHER)
         sType=QString("sonstiges");
     //-
-    s=QString("%1 %2 Uhr - %3 - %4").arg(m_dt_tiDateTime.date().toString("yyyy-MM-dd"),m_dt_tiDateTime.time().toString("hh:mm:ss"),sType,m_sText);
+    s=QString("%1 Uhr - %2 - %3").arg(m_dt_tiDateTime.time().toString("hh:mm:ss"),sType,m_sText);
     //-
     return s;
 }

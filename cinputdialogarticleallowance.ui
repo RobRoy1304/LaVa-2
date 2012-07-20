@@ -70,6 +70,11 @@
      <string>Warengruppe</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>Standort</string>
+    </property>
+   </item>
   </widget>
   <widget class="QCheckBox" name="checkBoxAuto">
    <property name="geometry">
@@ -170,6 +175,11 @@
    <column>
     <property name="text">
      <string>Warengruppe</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Standort</string>
     </property>
    </column>
    <column>

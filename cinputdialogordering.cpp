@@ -323,7 +323,7 @@ bool CInputDialogOrdering::add_ware(void)
             break;
         if(rMarkDlgGeometry!=QRect(0,0,0,0))
             pDlg->setGeometry(rMarkDlgGeometry);
-        pDlg->set(m_pThread,ui->tableWidgetWares,0,5,ARTICLE_DLG_TYPE_ORDERING,-1);
+        pDlg->set(m_pThread,ui->tableWidgetWares,0,6,ARTICLE_DLG_TYPE_ORDERING,-1);
         pDlg->setWindowTitle("hinzufügen");
         b=pDlg->exec();
         if(b)
@@ -346,20 +346,6 @@ bool CInputDialogOrdering::add_ware(void)
     check_user_input();
     //-
     return b;
-
-    /*
-    CInputDialogArticleAllowance dlg;
-    dlg.set(m_pThread,ui->tableWidgetWares,0,5,ARTICLE_DLG_TYPE_ORDERING,-1);
-    dlg.setWindowTitle("hinzufügen");
-    b=dlg.exec();
-    if(b)
-    {
-        if(dlg.get_data(s))
-            insert_ware_at_table(s,false,true);
-        check_user_input();
-    }
-    return b;
-    */
 }
 
 bool CInputDialogOrdering::delete_ware(void)
@@ -389,7 +375,7 @@ bool CInputDialogOrdering::edit_ware(void)
         if(m_pThread->m_pWidgets->get_selected_table_item_value(ui->tableWidgetWares,iArticleId))//get article id from selected row
         {
             dlg.set_count(iCount);
-            dlg.set(m_pThread,ui->tableWidgetWares,0,5,ARTICLE_DLG_TYPE_ORDERING,iArticleId);
+            dlg.set(m_pThread,ui->tableWidgetWares,0,6,ARTICLE_DLG_TYPE_ORDERING,iArticleId);
             dlg.setWindowTitle("bearbeiten");
             b=dlg.exec();
             if(b)
@@ -448,7 +434,7 @@ bool CInputDialogOrdering::get_data(COrdering & ord)
     QString sWares;
     for(int i=0;i<ui->tableWidgetWares->rowCount();i++)
     {
-        sWares=QString("%1x%2").arg(ui->tableWidgetWares->item(i,0)->text(),ui->tableWidgetWares->item(i,5)->text());//how many x article_id
+        sWares=QString("%1x%2").arg(ui->tableWidgetWares->item(i,0)->text(),ui->tableWidgetWares->item(i,6)->text());//how many x article_id
         lsWares.push_back(sWares);
     }
     ord.set_wares(lsWares);

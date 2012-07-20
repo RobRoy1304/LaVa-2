@@ -22,7 +22,7 @@
 #include <QtGui>
 
 //version
-#define VERSION "version 0.28 (BETA)"
+#define VERSION "version 0.29 (BETA)"
 #define CURRENT_DB_VERSION "1,02"
 
 //trade
@@ -72,6 +72,10 @@ private:
     QIcon m_icon;
 public:
     CTableItemData();
+    ~CTableItemData();
+    bool set(CTableItemData & right );
+    bool operator != (CTableItemData & right);
+    bool operator == (CTableItemData & right);
     QString get_text(void);
     int get_alignment(void);
     QIcon get_icon(void);

@@ -48,6 +48,7 @@ CDlgBalanceList::CDlgBalanceList(QWidget *parent) :
     connect(ui->dateEditFrom,SIGNAL(dateChanged(QDate)),this,SLOT(dates_changed()));
     connect(ui->dateEditTo,SIGNAL(dateChanged(QDate)),this,SLOT(dates_changed()));
     connect(ui->pushButtonPrint,SIGNAL(clicked()),this,SLOT(print_button_press()));
+    connect(ui->pushButtonExport,SIGNAL(clicked()),this,SLOT(export_button_press()));
 }
 
 CDlgBalanceList::~CDlgBalanceList()
@@ -99,10 +100,11 @@ bool CDlgBalanceList::settings(bool bUpdate)
 
 bool CDlgBalanceList::check_user_input(void)
 {
+    bool b=true;
     if(ui->tableWidgetList->rowCount()<=0)//nothing in table
-        ui->pushButtonPrint->setEnabled(false);
-    else
-        ui->pushButtonPrint->setEnabled(true);
+        b=false;
+    ui->pushButtonPrint->setEnabled(b);
+    ui->pushButtonExport->setEnabled(b);
     return true;
 }
 
@@ -235,6 +237,14 @@ bool CDlgBalanceList::print_button_press(void)
         previewDlg.exec();
     }
     return b;
+}
+
+bool CDlgBalanceList::export_button_press(void)
+{
+    QString s=QString("Artikelsaldenliste_%1-%2").arg(ui->dateEditFrom->date().toString(QString("dd.MM.yyyy")),ui->dateEditTo->date().toString(QString("dd.MM.yyyy")));
+    QString sTitle=QString("%1 (erstellt %2)").arg(s,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    CExportCVS exportCVS;
+    return exportCVS.write_data_list_table(this,ui->listWidgetArticle,ui->tableWidgetList,s,sTitle,true);
 }
 
 bool CDlgBalanceList::print(QPrinter * pPrinter)

@@ -57,7 +57,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>2</number>
     </property>
     <property name="movable">
      <bool>true</bool>
@@ -253,6 +253,11 @@
       <item>
        <property name="text">
         <string>Warengruppe</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Standort</string>
        </property>
       </item>
       <item>
@@ -756,6 +761,11 @@
         <string>Warengruppe</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Standort</string>
+       </property>
+      </column>
      </widget>
      <widget class="QComboBox" name="comboBoxTradeMaskYear">
       <property name="geometry">
@@ -1098,6 +1108,11 @@
       <column>
        <property name="text">
         <string>Warengruppe</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Standort</string>
        </property>
       </column>
      </widget>
@@ -2716,11 +2731,26 @@
     <addaction name="menuSettingInventory"/>
     <addaction name="menuSettingArticle"/>
    </widget>
+   <widget class="QMenu" name="menuExport">
+    <property name="title">
+     <string>Export</string>
+    </property>
+    <addaction name="menuExportInventory"/>
+    <addaction name="menuExportTrade"/>
+    <addaction name="menuExportOrdering"/>
+    <addaction name="menuExportArticle"/>
+    <addaction name="menuExportWaregroup"/>
+    <addaction name="menuExportMaker"/>
+    <addaction name="menuExportDealer"/>
+    <addaction name="menuExportCustomer"/>
+    <addaction name="menuExportLogbook"/>
+   </widget>
    <addaction name="menuInfo"/>
    <addaction name="menuPrinter"/>
    <addaction name="menuList"/>
    <addaction name="menuDatabase"/>
    <addaction name="menuSetting"/>
+   <addaction name="menuExport"/>
    <addaction name="menuOver"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -2856,12 +2886,57 @@
   </action>
   <action name="menuSettingInventory">
    <property name="text">
-    <string>Tabelle Lagerbestand-Übersicht</string>
+    <string>Tabelle Lagerbestand</string>
    </property>
   </action>
   <action name="menuSettingArticle">
    <property name="text">
-    <string>Tabelle Artikel-Übersicht</string>
+    <string>Tabelle Artikel</string>
+   </property>
+  </action>
+  <action name="menuExportInventory">
+   <property name="text">
+    <string>Lagerbestände</string>
+   </property>
+  </action>
+  <action name="menuExportArticle">
+   <property name="text">
+    <string>Artikel</string>
+   </property>
+  </action>
+  <action name="menuExportMaker">
+   <property name="text">
+    <string>Hersteller</string>
+   </property>
+  </action>
+  <action name="menuExportDealer">
+   <property name="text">
+    <string>Händler</string>
+   </property>
+  </action>
+  <action name="menuExportCustomer">
+   <property name="text">
+    <string>Kunde(n)</string>
+   </property>
+  </action>
+  <action name="menuExportLogbook">
+   <property name="text">
+    <string>Logbuch</string>
+   </property>
+  </action>
+  <action name="menuExportWaregroup">
+   <property name="text">
+    <string>Warengruppen</string>
+   </property>
+  </action>
+  <action name="menuExportOrdering">
+   <property name="text">
+    <string>Bestellung(en)</string>
+   </property>
+  </action>
+  <action name="menuExportTrade">
+   <property name="text">
+    <string>Warenein-/ausgang</string>
    </property>
   </action>
  </widget>

@@ -206,7 +206,7 @@ public:
     bool logbook_update_list_date(QListWidget * pList, int iYear, int iIndex, QDate dtSelect=QDate(0,0,0));
     bool logbook_refresh_list_date(QListWidget * pList, int iIndex);
     bool logbook_get_selecteted_mask_date(QString sDateItem, QDate & dtDate);
-    bool get_mask_condition_logbook(QDate dt,int iIndex,QString & sCondition);
+    bool logbook_get_mask_condition(QDate dt,int iIndex,QString & sCondition);
 
 
     //tables (lists)

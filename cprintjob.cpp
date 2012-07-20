@@ -165,23 +165,15 @@ bool CPrintJob::print_list(void)
             count=pList->count();
             for(i=0;i<count;i++,row++)
             {
-                rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),fillRect.top()+((row+1)*row_space));
-                //-
-                if(i+1==count || fillRect.top()+((row+2)*row_space)>fillRect.bottom())//last row on page? ->print page count
-                {
-                    //print page / column count(center)
-                    s=QString("Seite %1").arg(page);
-                    rF=QRectF(fillRect.left()+((fillRect.right()-fillRect.left()-metric.width(s))/2),fillRect.bottom()-row_space,(fillRect.right()-fillRect.left())/2,row_space);
-                    draw_text(&painter,&font,rF,s,false,false,false);
-                    page++;
-                }
-                //-
                 if(fillRect.top()+((row+2)*row_space)>fillRect.bottom())
                 {
                     m_pPrinter->newPage();
                     row=-1;
+                    i-=1;
                     continue;
                 }
+                //-
+                rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),fillRect.top()+((row+1)*row_space));
                 pItem=pList->item(i);
                 if(pItem!=NULL)
                 {
@@ -193,6 +185,15 @@ bool CPrintJob::print_list(void)
                         else
                             draw_text(&painter,&font,rF,s,false,false,false);//normal
                     }
+                }
+                //-
+                if(i+1==count || fillRect.top()+((row+2)*row_space)>fillRect.bottom())//last row on page? ->print page count
+                {
+                    //print page / column count(center)
+                    s=QString("Seite %1").arg(page);
+                    rF=QRectF(fillRect.left()+((fillRect.right()-fillRect.left()-metric.width(s))/2),fillRect.bottom()-row_space,(fillRect.right()-fillRect.left())/2,row_space);
+                    draw_text(&painter,&font,rF,s,false,false,false);
+                    page++;
                 }
             }
             //-
@@ -584,7 +585,6 @@ bool CPrintJob::print_table_and_list(void)
                 count=pList->count();
                 for(i=0;i<count;i++,row++)
                 {
-                    rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),fillRect.top()+((row+1)*row_space));
                     if(fillRect.top()+((row+1)*row_space)>fillRect.bottom())
                     {
                         m_pPrinter->newPage();
@@ -592,6 +592,8 @@ bool CPrintJob::print_table_and_list(void)
                         i--;
                         continue;
                     }
+                    //-
+                    rF=QRectF(fillRect.left(),fillRect.top()+(row*row_space),fillRect.right()-fillRect.left(),fillRect.top()+((row+1)*row_space));
                     pListItem=pList->item(i);
                     if(pListItem!=NULL)
                     {

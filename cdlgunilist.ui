@@ -20,7 +20,7 @@
   <widget class="QPushButton" name="pushButtonPrint">
    <property name="geometry">
     <rect>
-     <x>450</x>
+     <x>380</x>
      <y>550</y>
      <width>101</width>
      <height>27</height>
@@ -76,6 +76,19 @@
    </property>
    <property name="calendarPopup">
     <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonExport">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>550</y>
+     <width>101</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Export</string>
    </property>
   </widget>
  </widget>

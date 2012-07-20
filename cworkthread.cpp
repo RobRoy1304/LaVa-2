@@ -39,7 +39,7 @@ bool CWorkThread::start_thread(void)
         return false;
     clear();
     //start thread
-    start(QThread::HighPriority);
+    start(QThread::HighestPriority);
     return true;
 }
 
@@ -75,7 +75,7 @@ bool CWorkThread::set_work(int iWork, CPointerMemory * pMemory)
         return false;
 
     //thread in work?? -> wait
-    while(m_bWork) {usleep(100);}
+    while(m_bWork) {usleep(25);}
 
     //set
     clear();
@@ -84,7 +84,7 @@ bool CWorkThread::set_work(int iWork, CPointerMemory * pMemory)
     m_bWork=true;
 
     //waiting for finish
-    while(m_bWork) {usleep(100);}
+    while(m_bWork) {usleep(25);}
 
     return m_bReturn;
 }
@@ -95,6 +95,8 @@ void CWorkThread::run(void)
     int i;
     if(m_pDbInterface!=NULL && m_pWidgets!=NULL)
     {
+        m_bReturn=true;
+
         while(m_bBreakThread==false)
         {
             //wait for work

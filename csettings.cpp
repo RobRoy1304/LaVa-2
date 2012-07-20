@@ -62,7 +62,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
         s=QString("SORT_ORDER_TRADE_OVIEW#3,0\n");
         file.write(s.toAscii());
-        s=QString("TRADE_TABLE_COLUMNS_WIDTHS_WARES#90,170,130,130,130,130\n");
+        s=QString("TRADE_TABLE_COLUMNS_WIDTHS_WARES#90,170,130,130,130,130,130\n");
         file.write(s.toAscii());
         s=QString("SORT_ORDER_TRADE_WARES#1,0\n");
         file.write(s.toAscii());
@@ -77,7 +77,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
         s=QString("SORT_ORDER_ORDERING_OVIEW#0,0\n");
         file.write(s.toAscii());
-        s=QString("ORDERING_TABLE_COLUMNS_WIDTHS_WARES#100,200,180,180,180,180\n");
+        s=QString("ORDERING_TABLE_COLUMNS_WIDTHS_WARES#100,200,180,180,180,180,180\n");
         file.write(s.toAscii());
         s=QString("SORT_ORDER_ORDERING_WARES#1,0\n");
         file.write(s.toAscii());
@@ -135,7 +135,7 @@ bool CSettings::create_default_setting_file(void)
         //dlg trade in/out
         s=QString("//DLG_TRADE\n");
         file.write(s.toAscii());
-        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_IN_OUT_WARES#120,200,250,200,200,0\n");
+        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_IN_OUT_WARES#120,200,250,200,200,200,0\n");
         file.write(s.toAscii());
         s=QString("TABLE_SORT_ORDER_DLG_TRADE_IN_OUT_WARES#1,0\n");
         file.write(s.toAscii());
@@ -163,7 +163,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
         s=QString("TABLE_SORT_ORDER_DLG_TRADE_CUSTOMER_CUS#1,0\n");
         file.write(s.toAscii());
-        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_CUS_OUT_WARES#120,200,250,200,200,0\n");
+        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_CUS_OUT_WARES#120,200,250,200,200,200,0\n");
         file.write(s.toAscii());
         s=QString("TABLE_SORT_ORDER_DLG_TRADE_CUSTOMER_WARES#1,0\n");
         file.write(s.toAscii());
@@ -175,7 +175,7 @@ bool CSettings::create_default_setting_file(void)
         //dlg ordering
         s=QString("//DLG_ORDERING\n");
         file.write(s.toAscii());
-        s=QString("DLG_ORDERING_TABLE_COLUMNS_WIDTHS_WARES#120,200,250,200,200,0\n");
+        s=QString("DLG_ORDERING_TABLE_COLUMNS_WIDTHS_WARES#120,200,250,200,200,200,0\n");
         file.write(s.toAscii());
         s=QString("TABLE_SORT_ORDER_DLG_ORDERING#1,0\n");
         file.write(s.toAscii());
@@ -183,7 +183,7 @@ bool CSettings::create_default_setting_file(void)
         //dlg article browse
         s=QString("//DLG_ARTICLE_BROWSE\n");
         file.write(s.toAscii());
-        s=QString("DLG_ARTICLE_BROWSE_TABLE_COLUMNS_WIDTHS#210,210,210,210,0\n");
+        s=QString("DLG_ARTICLE_BROWSE_TABLE_COLUMNS_WIDTHS#210,210,210,210,200,0\n");
         file.write(s.toAscii());
         s=QString("TABLE_SORT_ORDER_DLG_ARTICLE_BROWSE#0,0\n");
         file.write(s.toAscii());
@@ -195,7 +195,7 @@ bool CSettings::create_default_setting_file(void)
         //dlg article allowance
         s=QString("//DLG_ARTICLE_ALLOWANCE\n");
         file.write(s.toAscii());
-        s=QString("DLG_ARTICLE_ALLOWANCE_TABLE_COLUMNS_WIDTHS#230,160,160,160,160,0\n");
+        s=QString("DLG_ARTICLE_ALLOWANCE_TABLE_COLUMNS_WIDTHS#230,160,160,160,160,160,0\n");
         file.write(s.toAscii());
         s=QString("TABLE_SORT_ORDER_DLG_ALLOWANCE#1,0\n");
         file.write(s.toAscii());
@@ -236,8 +236,11 @@ bool CSettings::create_default_setting_file(void)
         s=QString("WARELIST_DLG_NOT_CLOSE_BY_ADD#0\n");
         file.write(s.toAscii());
 
-        //backup path
+        //path's
         s=QString("BACKUP_PATH#\n");
+        file.write(s.toAscii());
+
+        s=QString("EXPORT_PATH#\n");
         file.write(s.toAscii());
 
         //-

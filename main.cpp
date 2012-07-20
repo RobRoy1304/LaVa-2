@@ -51,6 +51,10 @@ int main(int argc, char *argv[])
         {
             if(w.open_db())//open db ok?
             {
+                //logo
+                logo_dlg.startTimer(1500);//start timer to close logo widget
+                logo_dlg.exec();
+
                 //init
                 w.init();
 
@@ -61,17 +65,16 @@ int main(int argc, char *argv[])
                 w.settings(false);
 
                 //fill tables
-                w.fill_all_table();
+                w.fill_all_table(true);
+
+                //warnlinit
+                w.inventory_check_article_under_warnlimit();
 
                 //timer
                 w.startTimer(3000);//every 3sec.
 
                 //show
                 w.showMaximized();
-
-                //logo
-                logo_dlg.startTimer(2000);//start timer in 2 sec. close logo widget
-                logo_dlg.exec();
 
                 //start
                 iReturn=a.exec();

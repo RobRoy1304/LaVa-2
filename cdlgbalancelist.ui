@@ -147,7 +147,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>430</x>
+     <x>360</x>
      <y>540</y>
      <width>131</width>
      <height>27</height>
@@ -211,6 +211,22 @@
      <width>591</width>
      <height>91</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonExport">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>540</y>
+     <width>131</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Export</string>
    </property>
   </widget>
  </widget>

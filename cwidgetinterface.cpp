@@ -1272,45 +1272,178 @@ bool CWidgetInterface::customer_update_list(QListWidget * pList, int iID)
 
 //article-------------------------------------------------------------------------------------
 
-bool CWidgetInterface::article_update_tablewidget(QTableWidget * pTable, QList<int> & lsIds, int iFormatType, int iSelectedID)
+bool CWidgetInterface::article_update_tablewidget(QTableWidget * pTable, QList<int> & lsNewIds, int iFormatType, int iSelectedID)
 {
     if(pTable==NULL || m_pDb==NULL || iFormatType<0)
         return false;
-    if(!m_pDb->is_db_connect())
+    if(!m_pDb->is_db_connect() || pTable->columnCount()<=0)
         return false;
-    //-
-    bool b=true;
+
+    bool b;
+    QString s;
+    QIcon ico;
     CArticle ar;
-    QList<CTableItemData> ls;
-    //-
+    CTableItemData taDa;
+    QList<int> lsOldIds,lsRowNum;
+    QTableWidgetItem * pItem;
+    QList<CTableItemData> lsDataOld,lsDataNew;
+    int i,pos,x,y,id,id_c=pTable->columnCount()-1,a_left=Qt::AlignLeft|Qt::AlignVCenter,a_right=Qt::AlignRight|Qt::AlignVCenter;
+
+    //block
     set_block_signal_and_sort(pTable,true,false);//faster
-    remove_all_rows(pTable);//delete all rows
-    //-
-    while(lsIds.count()>0)
+
+    if(lsNewIds.count()<=0)
+        remove_all_rows(pTable);//delete all rows
+
+    //fill table new
+    if(pTable->rowCount()<=0)
     {
-        if(!m_pDb->article_get(lsIds[0],ar))//get data
+        //insert article by new ids
+        while(lsNewIds.count()>0)
         {
-            b=false;
-            break;
-        }
-        else
-        {
-            article_format(ar,ls,iFormatType);
-            if(!mod_row(pTable,ls,ITEM_POSITION_BOTTOM,false,false,-1))
+            if(m_pDb->article_get(lsNewIds[0],ar))//get data
             {
-                b=false;
-                break;
+                article_format(ar,lsDataNew,iFormatType);
+                mod_row(pTable,lsDataNew,ITEM_POSITION_BOTTOM,false,false,-1);
+                lsDataNew.clear();
             }
-            ls.clear();
+            else{}
+            lsNewIds.removeFirst();
         }
-        lsIds.removeFirst();
     }
-    lsIds.clear();
-    //-
+    else
+    {
+        //sort new ids
+        qSort(lsNewIds);
+
+        //get old id's + row number from table
+        for(y=0;y<pTable->rowCount();y++)
+        { 
+            pItem=pTable->item(y,id_c);
+            if(pItem!=NULL)
+            {
+                s=pItem->text();
+                id=s.toInt(&b,10);
+                if(b)
+                {
+                    //insert (sort)
+                    for(i=0;i<lsOldIds.count();i++)
+                    {
+                        if(id<lsOldIds[i])
+                            break;
+                    }
+                    if(i<lsOldIds.count())
+                    {
+                        lsOldIds.insert(i,id);
+                        lsRowNum.insert(i,y);
+                    }
+                    else
+                    {
+                        lsOldIds.push_back(id);
+                        lsRowNum.push_back(y);
+                    }
+                }
+            }
+
+        }
+
+        //check & update
+        while(lsNewIds.count()>0)
+        {
+            if(m_pDb->article_get(lsNewIds[0],ar))//get article data
+            {
+                //new data
+                article_format(ar,lsDataNew,iFormatType);
+
+                //search in new id list
+                pos=lsOldIds.indexOf(lsNewIds[0]);
+                if(pos<0)//not found
+                    mod_row(pTable,lsDataNew,ITEM_POSITION_BOTTOM,false,false,-1);//new row
+                else//found
+                {
+                    //old data
+                    for(x=0;x<pTable->columnCount();x++)
+                    {
+                        pItem=pTable->item(lsRowNum[pos],x);
+                        if(pItem!=NULL)
+                        {
+                            //alignment
+                            if(pItem->textAlignment()==a_left)
+                                i=TABLE_ALIGNMENT_LEFT;
+                            else if(pItem->textAlignment()==a_right)
+                                i=TABLE_ALIGNMENT_RIGHT;
+                            else
+                                i=TABLE_ALIGNMENT_CENTER;
+                            //icon
+                            ico=pItem->icon();
+                            //set
+                            taDa.set(pItem->text(),i,&ico);
+                            lsDataOld.push_back(taDa);
+                        }
+                    }
+
+                    //check for update
+                    b=false;
+                    for(x=0;lsDataNew.count()>0 && lsDataOld.count()>0;x++)
+                    {
+                        if(lsDataNew[0]!=lsDataOld[0])
+                        {
+                            pItem=new CMyTableWidgetItem;
+                            if(pItem!=NULL)
+                            {
+                                pItem->setText(lsDataNew[0].get_text());
+                                if(lsDataNew[0].get_alignment()==TABLE_ALIGNMENT_LEFT)
+                                    pItem->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+                                else if(lsDataNew[0].get_alignment()==TABLE_ALIGNMENT_RIGHT)
+                                    pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+                                else
+                                    pItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+
+                                //icon?
+                                ico=lsDataNew[0].get_icon();
+                                if(!ico.isNull())
+                                    pItem->setIcon(ico);
+
+                                //set
+                                pTable->setItem(lsRowNum[0],x,pItem);
+                            }
+
+                        }
+                        lsDataNew.removeFirst();
+                        lsDataOld.removeFirst();
+                    }
+
+                    //-
+                    lsOldIds.removeAt(pos);
+                    lsRowNum.removeAt(pos);
+                }
+                lsDataNew.clear();
+                lsDataOld.clear();
+            }
+            lsNewIds.removeFirst();
+        }
+
+        //remove not use old rows
+        qSort(lsRowNum);//sort row positions
+        while(lsRowNum.count()>0)
+        {
+            pTable->removeRow(lsRowNum.last());
+            lsRowNum.removeLast();
+        }
+    }
+
+    //unblock + select
     set_block_signal_and_sort(pTable,false,true);
     if(iSelectedID!=-1)
         select_row(pTable,iSelectedID);
-    return b;
+
+    //clear
+    lsNewIds.clear();
+    lsOldIds.clear();
+    lsRowNum.clear();
+    lsDataNew.clear();
+    lsDataOld.clear();
+    return true;
 }
 
 bool CWidgetInterface::article_update_tablewidget_wares_list(QTableWidget * pTable,QList<QString> & lsWares,int iFormatType)
@@ -1576,6 +1709,10 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
         lsData.push_back(ti);
         //-
         s=m_pDb->waregroup_get_path(ar.get_waregroup_id(),3);
+        ti.set_text(s);
+        lsData.push_back(ti);
+        //-
+        s=ar.get_location();
         ti.set_text(s);
         lsData.push_back(ti);
         //-
@@ -2378,8 +2515,181 @@ bool CWidgetInterface::trade_get_selecteted_mask_date(QString sDateItem, int iIn
 
 //inventory-------------------------------------------------------------------------------------
 
-bool CWidgetInterface::inventory_update_tablewidget(QTableWidget * pTable, QList<int> & lsIds, int iSelectedID)
+bool CWidgetInterface::inventory_update_tablewidget(QTableWidget * pTable, QList<int> & lsNewIds, int iSelectedID)
 {
+    if(pTable==NULL || m_pDb==NULL)
+        return false;
+    if(!m_pDb->is_db_connect() || pTable->columnCount()<=0)
+        return false;
+
+    bool b;
+    QString s;
+    QIcon ico;
+    CArticle ar;
+    CTableItemData taDa;
+    QList<int> lsOldIds,lsRowNum;
+    QTableWidgetItem * pItem;
+    QList<CTableItemData> lsDataOld,lsDataNew;
+    int i,pos,x,y,id,id_c=pTable->columnCount()-1,a_left=Qt::AlignLeft|Qt::AlignVCenter,a_right=Qt::AlignRight|Qt::AlignVCenter;
+
+    //block
+    set_block_signal_and_sort(pTable,true,false);//faster
+
+    if(lsNewIds.count()<=0)
+        remove_all_rows(pTable);//delete all rows
+
+    //fill table new
+    if(pTable->rowCount()<=0)
+    {
+        //insert article by new ids
+        while(lsNewIds.count()>0)
+        {
+            if(m_pDb->article_get(lsNewIds[0],ar))//get data
+            {
+                inventory_format(ar,lsDataNew);
+                mod_row(pTable,lsDataNew,ITEM_POSITION_BOTTOM,false,false,-1);
+                lsDataNew.clear();
+            }
+            else{}
+            lsNewIds.removeFirst();
+        }
+    }
+    else
+    {
+        //sort new ids
+        qSort(lsNewIds);
+
+        //get old id's + row number from table
+        for(y=0;y<pTable->rowCount();y++)
+        {
+            pItem=pTable->item(y,id_c);
+            if(pItem!=NULL)
+            {
+                s=pItem->text();
+                id=s.toInt(&b,10);
+                if(b)
+                {
+                    //insert (sort)
+                    for(i=0;i<lsOldIds.count();i++)
+                    {
+                        if(id<lsOldIds[i])
+                            break;
+                    }
+                    if(i<lsOldIds.count())
+                    {
+                        lsOldIds.insert(i,id);
+                        lsRowNum.insert(i,y);
+                    }
+                    else
+                    {
+                        lsOldIds.push_back(id);
+                        lsRowNum.push_back(y);
+                    }
+                }
+            }
+
+        }
+
+        //check & update
+        while(lsNewIds.count()>0)
+        {
+            if(m_pDb->article_get(lsNewIds[0],ar))//get article data
+            {
+                //new data
+                inventory_format(ar,lsDataNew);
+
+                //search in new id list
+                pos=lsOldIds.indexOf(lsNewIds[0]);
+                if(pos<0)//not found
+                    mod_row(pTable,lsDataNew,ITEM_POSITION_BOTTOM,false,false,-1);//new row
+                else//found
+                {
+                    //old data
+                    for(x=0;x<pTable->columnCount();x++)
+                    {
+                        pItem=pTable->item(lsRowNum[pos],x);
+                        if(pItem!=NULL)
+                        {
+                            //alignment
+                            if(pItem->textAlignment()==a_left)
+                                i=TABLE_ALIGNMENT_LEFT;
+                            else if(pItem->textAlignment()==a_right)
+                                i=TABLE_ALIGNMENT_RIGHT;
+                            else
+                                i=TABLE_ALIGNMENT_CENTER;
+                            //icon
+                            ico=pItem->icon();
+                            //set
+                            taDa.set(pItem->text(),i,&ico);
+                            lsDataOld.push_back(taDa);
+                        }
+                    }
+
+                    //check for update
+                    b=false;
+                    for(x=0;lsDataNew.count()>0 && lsDataOld.count()>0;x++)
+                    {
+                        if(lsDataNew[0]!=lsDataOld[0])
+                        {
+                            pItem=new CMyTableWidgetItem;
+                            if(pItem!=NULL)
+                            {
+                                pItem->setText(lsDataNew[0].get_text());
+                                if(lsDataNew[0].get_alignment()==TABLE_ALIGNMENT_LEFT)
+                                    pItem->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+                                else if(lsDataNew[0].get_alignment()==TABLE_ALIGNMENT_RIGHT)
+                                    pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+                                else
+                                    pItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+
+                                //icon?
+                                ico=lsDataNew[0].get_icon();
+                                if(!ico.isNull())
+                                    pItem->setIcon(ico);
+
+                                //set
+                                pTable->setItem(lsRowNum[0],x,pItem);
+                            }
+
+                        }
+                        lsDataNew.removeFirst();
+                        lsDataOld.removeFirst();
+                    }
+
+                    //-
+                    lsOldIds.removeAt(pos);
+                    lsRowNum.removeAt(pos);
+                }
+                lsDataNew.clear();
+                lsDataOld.clear();
+            }
+            lsNewIds.removeFirst();
+        }
+
+        //remove not use old rows
+        qSort(lsRowNum);//sort row positions
+        while(lsRowNum.count()>0)
+        {
+            pTable->removeRow(lsRowNum.last());
+            lsRowNum.removeLast();
+        }
+    }
+
+    //unblock + select
+    set_block_signal_and_sort(pTable,false,true);
+    if(iSelectedID!=-1)
+        select_row(pTable,iSelectedID);
+
+    //clear
+    lsNewIds.clear();
+    lsOldIds.clear();
+    lsRowNum.clear();
+    lsDataNew.clear();
+    lsDataOld.clear();
+    return true;
+
+
+    /*
     if(pTable==NULL || m_pDb==NULL)
         return false;
     if(!m_pDb->is_db_connect())
@@ -2417,6 +2727,7 @@ bool CWidgetInterface::inventory_update_tablewidget(QTableWidget * pTable, QList
     if(iSelectedID!=-1)
         select_row(pTable,iSelectedID);
     return b;
+    */
 }
 
 bool CWidgetInterface::inventory_insert_row(QTableWidget * pTable, CArticle & ar, int iPosition, bool bSelect)
@@ -2676,7 +2987,7 @@ bool CWidgetInterface::logbook_insert_item(QListWidget * pList, CLogbook & lg, i
     return b;
 }
 
-bool CWidgetInterface::get_mask_condition_logbook(QDate dt,int iIndex,QString & sCondition)
+bool CWidgetInterface::logbook_get_mask_condition(QDate dt,int iIndex,QString & sCondition)
 {
     int typeF,typeT;
     //-
@@ -2770,7 +3081,7 @@ bool CWidgetInterface::logbook_update_list_date(QListWidget * pList, int iYear, 
         //count of trade's in this time
         if(m_pDb!=NULL)
         {
-            if(!get_mask_condition_logbook(dtMark,iIndex,sCondition))
+            if(!logbook_get_mask_condition(dtMark,iIndex,sCondition))
             {
                 b=false;
                 break;
@@ -2825,7 +3136,7 @@ bool CWidgetInterface::logbook_refresh_list_date(QListWidget * pList, int iIndex
             s=pItem->text();
             if(logbook_get_selecteted_mask_date(s,dt))
             {
-                if(!get_mask_condition_logbook(dt,iIndex,sCondition))
+                if(!logbook_get_mask_condition(dt,iIndex,sCondition))
                 {
                     b=false;
                     break;

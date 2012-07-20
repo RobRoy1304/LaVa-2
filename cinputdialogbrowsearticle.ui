@@ -64,6 +64,11 @@
      <string>Warengruppe</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>Standort</string>
+    </property>
+   </item>
   </widget>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -126,6 +131,11 @@
    <column>
     <property name="text">
      <string>Warengruppe</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Standort</string>
     </property>
    </column>
    <column>

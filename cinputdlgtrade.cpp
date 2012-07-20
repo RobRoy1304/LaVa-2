@@ -327,7 +327,7 @@ bool CInputDlgTrade::add_ware(void)
             break;
         if(rMarkDlgGeometry!=QRect(0,0,0,0))
             pDlg->setGeometry(rMarkDlgGeometry);
-        pDlg->set(m_pThread,ui->tableWidgetWares,0,5,iType,-1,dt);
+        pDlg->set(m_pThread,ui->tableWidgetWares,0,6,iType,-1,dt);
         pDlg->setWindowTitle("hinzufügen");
         b=pDlg->exec();
         if(b)
@@ -383,7 +383,7 @@ bool CInputDlgTrade::edit_ware(void)
         if(m_pThread->m_pWidgets->get_selected_table_item_value(ui->tableWidgetWares,iArticleId))//get article id from selected row
         {
             dlg.set_count(iCount);
-            dlg.set(m_pThread,ui->tableWidgetWares,0,5,iType,iArticleId,dt);
+            dlg.set(m_pThread,ui->tableWidgetWares,0,6,iType,iArticleId,dt);
             dlg.setWindowTitle("bearbeiten");
             b=dlg.exec();
             if(b)
@@ -446,7 +446,7 @@ bool CInputDlgTrade::get_data(CTrade & tr)
     //wares
     for(int i=0;i<ui->tableWidgetWares->rowCount();i++)
     {
-        sWare=QString("%1x%2").arg(ui->tableWidgetWares->item(i,0)->text(),ui->tableWidgetWares->item(i,5)->text());//how many x article_id
+        sWare=QString("%1x%2").arg(ui->tableWidgetWares->item(i,0)->text(),ui->tableWidgetWares->item(i,6)->text());//how many x article_id
         lsWares.push_back(sWare);
     }
     tr.set_wares(lsWares);
@@ -477,7 +477,7 @@ bool CInputDlgTrade::check_article_counts_on_date(void)
         rows=ui->tableWidgetWares->rowCount();
         for(i=0;i<rows;i++)
         {
-            pItem=ui->tableWidgetWares->item(i,5);
+            pItem=ui->tableWidgetWares->item(i,6);
             if(pItem!=NULL)
             {
                 s=pItem->text();

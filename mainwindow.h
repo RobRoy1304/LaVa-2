@@ -42,6 +42,7 @@
 #include "cdlgbalancelist.h"
 #include "cdlgunilist.h"
 #include "cinputdialogtablesetting.h"
+#include "cexportcvs.h"
 
 namespace Ui
 {
@@ -60,6 +61,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    virtual void closeEvent(QCloseEvent *event);
 
 private:
     Ui::MainWindow *ui;
@@ -74,6 +76,19 @@ public:
     QMenu * m_pContextMenuArticle; //table context menu article(new,edit,copy,remove)
     QString m_sDbPath;//path for database-file
 
+    //mark for update
+    bool m_bUpdateTableInventory;
+    bool m_bUpdateTableTrade;
+    bool m_bUpdateTableTradeWarelist;
+    bool m_bUpdateTableOrdering;
+    bool m_bUpdateTableOrderingWarelist;
+    bool m_bUpdateTableArticle;
+    bool m_bUpdateTableWaregroup;
+    bool m_bUpdateTableMaker;
+    bool m_bUpdateTableDealer;
+    bool m_bUpdateTableCustomer;
+    bool m_bUpdateListLogbook;
+
 protected://overload's
     virtual void resizeEvent(QResizeEvent * event);
     virtual void keyPressEvent(QKeyEvent * event);
@@ -83,7 +98,8 @@ public:
     bool init(void);
     bool widgets_position(QSize szScreen);
     bool open_db(void);
-    bool fill_all_table(void);
+    bool fill_all_table(bool bFillArticleAndInvTableNew=false);
+    bool update_table_by_current_tab(int index);
     bool fill_date_lists(void);
     bool settings(bool bUpdate=false);
     bool check_first_start(void);
@@ -135,6 +151,7 @@ public:
     //inventory
     bool inventory_update_count(void);
     int inventory_get_count_of_arctile_under_limit(void);
+    bool inventory_check_article_under_warnlimit(void);
 
     //logbook
     QDate logbook_get_selected_date(void);
@@ -155,7 +172,7 @@ public:
 
 public slots:
     //tab
-    void tab_switched(void);
+    void tab_switched(int index);
 
     //context menu
     bool open_context_menu();
@@ -266,6 +283,15 @@ public slots:
     bool menu_print_waregroup(void);
     bool menu_table_setting_inventory(void);
     bool menu_table_setting_article(void);
+    bool menu_export_inventory(void);
+    bool menu_export_trade(void);
+    bool menu_export_ordering(void);
+    bool menu_export_article(void);
+    bool menu_export_waregroup(void);
+    bool menu_export_maker(void);
+    bool menu_export_dealer(void);
+    bool menu_export_customer(void);
+    bool menu_export_logbook(void);
 
     //print
     bool print(QPrinter * printer);

@@ -173,7 +173,7 @@ bool CInputDialogArticleAllowance::settings(bool bUpdate)
     return b;
 }
 
-bool CInputDialogArticleAllowance::set(CWorkThread * pThread, QTableWidget * pParentTable, int iColumnCount, int iColumnId, int iType, int iArticleId,QDate dtDate)
+bool CInputDialogArticleAllowance::set(CWorkThread * pThread, QTableWidget * pParentTable, int iColumnCount, int iColumnId, int iType, int iArticleId, QDate dtDate)
 {
     m_pThread=pThread;
     m_pParentTable=pParentTable;
@@ -262,12 +262,14 @@ bool CInputDialogArticleAllowance::update_table(void)
             sCondition=QString("articlenumber like '%%1%'").arg(sMask);
         else if(iMask==2)//2.number
             sCondition=QString("articlenumber2 like '%%1%'").arg(sMask);
+        else if(iMask==5)//location
+            sCondition=QString("location like '%%1%'").arg(sMask);
         else
             sCondition=QString(sMask);
     }
 
     //-get article by mask-
-    if(iMask==0 || iMask==1 || iMask==2 || sMask.length()<=0)//name or numbers or no mask
+    if(iMask==0 || iMask==1 || iMask==2 || iMask==5 || sMask.length()<=0)//name or numbers or location or no mask
         b=m_pThread->set_work(WORK_ARTICLE_GET_ALL,&memory);
     else if(iMask==3)//maker?
         b=m_pThread->set_work(WORK_ARTICLE_GET_ALL_BY_MAKER,&memory);
@@ -310,11 +312,14 @@ int CInputDialogArticleAllowance::get_old_count(int iArticleId)
     for(i=0;i<m_pParentTable->rowCount();i++)
     {
         pItem=m_pParentTable->item(i,m_iParentColumnId);
-        if(pItem->text()==sArticleId)//found
+        if(pItem!=NULL)
         {
-            pItem=m_pParentTable->item(i,m_iParentColumnCount);
-            sCount=pItem->text();
-            break;
+            if(pItem->text()==sArticleId)//found
+            {
+                pItem=m_pParentTable->item(i,m_iParentColumnCount);
+                sCount=pItem->text();
+                break;
+            }
         }
     }
     //-
@@ -350,7 +355,7 @@ bool CInputDialogArticleAllowance::check_count(void)
     if(m_pThread->m_pDbInterface==NULL)
         return false;
     QList<QTableWidgetItem*> ls=ui->tableWidgetArticle->selectedItems();
-    if(ls.count()<6)
+    if(ls.count()<7)
         return false;//nothing article select
     //-
     CArticle ar;
@@ -359,7 +364,7 @@ bool CInputDialogArticleAllowance::check_count(void)
     QStringList lss;
     int article_id,current_count,old_count,max_inventory,ordering_count,inventory,i,max_count_on_date;
     //-
-    article_id=ls[5]->text().toInt(&b,10);//get artile id
+    article_id=ls[6]->text().toInt(&b,10);//get artile id
     if(!b)// cast to int ok?
         return false;
     if(!m_pThread->m_pDbInterface->article_get(article_id,ar))//get article
@@ -458,12 +463,12 @@ bool CInputDialogArticleAllowance::check_count(void)
 bool CInputDialogArticleAllowance::get_data(QString & sData)
 {
     QList <QTableWidgetItem*> ls=ui->tableWidgetArticle->selectedItems();
-    if(ls.count()<6)
+    if(ls.count()<7)
         return false;
     if(ui->spinBox->value()<=0)
         return false;
     sData=QString("%1x").arg(ui->spinBox->text());
-    sData+=ls[5]->text();
+    sData+=ls[6]->text();
     //-
     return true;
 }

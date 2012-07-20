@@ -24,6 +24,10 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    m_bUpdateTableTrade=m_bUpdateTableTradeWarelist=m_bUpdateTableOrdering=m_bUpdateTableOrderingWarelist=true;
+    m_bUpdateTableWaregroup=m_bUpdateTableMaker=m_bUpdateTableDealer=m_bUpdateTableCustomer=m_bUpdateListLogbook=true;
+    m_bUpdateTableInventory=m_bUpdateTableArticle=false;
+
     //-register-
     qRegisterMetaType<Qt::SortOrder>("Qt::SortOrder");
     qRegisterMetaType<QItemSelection>("QItemSelection");
@@ -68,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent)
     {
         m_pContextMenuDefault->addAction(QString("neu"));
         m_pContextMenuDefault->addAction(QString("bearbeiten"));
-        m_pContextMenuDefault->addAction(QString("löschen"));
+        m_pContextMenuDefault->addAction(QString("loeschen"));
     }
     m_pContextMenuTrade=new QMenu(QString("context_trade"),this);
     if(m_pContextMenuTrade!=NULL)
@@ -85,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent)
         m_pContextMenuArticle->addAction(QString("neu"));
         m_pContextMenuArticle->addAction(QString("bearbeiten"));
         m_pContextMenuArticle->addAction(QString("kopieren"));
-        m_pContextMenuArticle->addAction(QString("löschen"));
+        m_pContextMenuArticle->addAction(QString("loeschen"));
     }
 
     //connects context menus
@@ -101,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tableWidgetTrade,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(open_context_menu()));
 
     //connects tab
-    connect(ui->tabWidget,SIGNAL(currentChanged(int)),this,SLOT(tab_switched()));
+    connect(ui->tabWidget,SIGNAL(currentChanged(int)),this,SLOT(tab_switched(int)));
 
     //connects waregroup
     connect(ui->pushButtonWgNew,SIGNAL(clicked()),this,SLOT(waregroup_new()));
@@ -222,10 +226,26 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->menuPrinterWaregroupOView,SIGNAL(triggered()),this,SLOT(menu_print_waregroup()));
     connect(ui->menuSettingInventory,SIGNAL(triggered()),this,SLOT(menu_table_setting_inventory()));
     connect(ui->menuSettingArticle,SIGNAL(triggered()),this,SLOT(menu_table_setting_article()));
+    connect(ui->menuExportInventory,SIGNAL(triggered()),this,SLOT(menu_export_inventory()));
+    connect(ui->menuExportTrade,SIGNAL(triggered()),this,SLOT(menu_export_trade()));
+    connect(ui->menuExportOrdering,SIGNAL(triggered()),this,SLOT(menu_export_ordering()));
+    connect(ui->menuExportArticle,SIGNAL(triggered()),this,SLOT(menu_export_article()));
+    connect(ui->menuExportWaregroup,SIGNAL(triggered()),this,SLOT(menu_export_waregroup()));
+    connect(ui->menuExportMaker,SIGNAL(triggered()),this,SLOT(menu_export_maker()));
+    connect(ui->menuExportDealer,SIGNAL(triggered()),this,SLOT(menu_export_dealer()));
+    connect(ui->menuExportCustomer,SIGNAL(triggered()),this,SLOT(menu_export_customer()));
+    connect(ui->menuExportLogbook,SIGNAL(triggered()),this,SLOT(menu_export_logbook()));
 }
 
 MainWindow::~MainWindow()
 {
+    delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    event=NULL;
+
     //check article inv under warning limit
     QMessageBox msg(QMessageBox::Warning,"","");
     msg.setWindowTitle(QString("Achtung!"));
@@ -255,7 +275,9 @@ MainWindow::~MainWindow()
     killTimer(m_iTimerId);
     m_thread.stop_thread();
     m_db.close_db();
-    delete ui;
+
+    //-
+    close();
 }
 
 void MainWindow::resizeEvent  ( QResizeEvent * event )
@@ -538,35 +560,85 @@ bool MainWindow::open_db(void)
     return b;
 }
 
-bool MainWindow::fill_all_table(void)
+bool MainWindow::fill_all_table(bool bFillArticleAndInvTableNew)
 {
-    //waregroup
-    waregroup_update_tree();
+    m_bUpdateTableTrade=m_bUpdateTableTradeWarelist=m_bUpdateTableOrdering=m_bUpdateTableOrderingWarelist=m_bUpdateTableArticle=true;
+    m_bUpdateTableWaregroup=m_bUpdateTableMaker=m_bUpdateTableDealer=m_bUpdateTableCustomer=m_bUpdateListLogbook=m_bUpdateTableInventory=true;
 
-    //maker
-    maker_mask_set();
+    if(!bFillArticleAndInvTableNew)
+        update_table_by_current_tab(ui->tabWidget->currentIndex());
+    else
+    {
+        m_widgets.set_block_signal_and_sort(ui->tableWidgetInventory,true,false);//faster
+        m_widgets.remove_all_rows(ui->tableWidgetInventory);
+        m_widgets.set_block_signal_and_sort(ui->tableWidgetInventory,false,true);
+        m_widgets.set_block_signal_and_sort(ui->tableWidgetArticle,true,false);//faster
+        m_widgets.remove_all_rows(ui->tableWidgetArticle);
+        m_widgets.set_block_signal_and_sort(ui->tableWidgetArticle,false,true);
+        //-
+        inventory_mask_set();
+        article_mask_set();
+        m_bUpdateTableArticle=m_bUpdateTableInventory=false;
+    }
+    return true;
+}
 
-    //dealer
-    dealer_mask_set();
-
-    //customer
-    customer_mask_set();
-
-    //article
-    article_mask_set();
-
-    //ordering
-    ordering_mask_set();
-
-    //trade
-    trade_mask_set(false);
-
-    //inventory
-    inventory_mask_set();
-
-    //logbook
-    logbook_mask_set();
-    //-
+bool MainWindow::update_table_by_current_tab(int index)
+{
+    //check for update table's by tab switch
+    if(index==ui->tabWidget->indexOf(ui->tabInventory) && m_bUpdateTableInventory==true)
+    {
+        inventory_mask_set();
+        m_bUpdateTableInventory=false;
+        article_widgetitem_clicked();
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabOrdering))
+    {
+        if(m_bUpdateTableOrdering==true)
+            ordering_mask_set();
+        else if(m_bUpdateTableOrderingWarelist==true)
+            ordering_update_wares_list();
+        m_bUpdateTableOrdering=m_bUpdateTableOrderingWarelist=false;
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabWareInOut))
+    {
+        if(m_bUpdateTableTrade==true)
+            trade_mask_set();
+        else if(m_bUpdateTableTradeWarelist==true)
+            trade_update_wares_list();
+        m_bUpdateTableTrade=m_bUpdateTableTradeWarelist=false;
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabArticle) && m_bUpdateTableArticle==true)
+    {
+        article_mask_set();
+        m_bUpdateTableArticle=false;
+        inventory_widgetitem_clicked();
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabWaregroup) && m_bUpdateTableWaregroup==true)
+    {
+        waregroup_update_tree();
+        m_bUpdateTableWaregroup=false;
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabMaker) && m_bUpdateTableMaker==true)
+    {
+        maker_mask_set();
+        m_bUpdateTableMaker=false;
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabDealer) && m_bUpdateTableDealer==true)
+    {
+        dealer_mask_set();
+        m_bUpdateTableDealer=false;
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabCustomer) && m_bUpdateTableCustomer==true)
+    {
+        customer_mask_set();
+        m_bUpdateTableCustomer=false;
+    }
+    if(index==ui->tabWidget->indexOf(ui->tabLog) && m_bUpdateListLogbook==true)
+    {
+        logbook_mask_set();
+        m_bUpdateListLogbook=false;
+    }
     return true;
 }
 
@@ -1153,7 +1225,7 @@ bool MainWindow::receiv_context_menu(QAction * pAction)
         else if(ui->tableWidgetOrdering->hasFocus())//ordering
             ordering_edit();
     }
-    if(pAction->text()==QString("löschen"))
+    if(pAction->text()==QString("loeschen"))
     {//delete
         if(ui->tableWidgetArticle->hasFocus())//article
             article_delete();
@@ -1252,7 +1324,7 @@ void MainWindow::keyPressEvent(QKeyEvent * event)
     ls2.clear();
 }
 
-void MainWindow::tab_switched(void)
+void MainWindow::tab_switched(int index)
 {
     ui->lineEditInventoryMask->clearFocus();
     ui->lineEditTradeMask->clearFocus();
@@ -1261,6 +1333,8 @@ void MainWindow::tab_switched(void)
     ui->lineEditMakerMask->clearFocus();
     ui->lineEditDealerMask->clearFocus();
     ui->lineEditCustomerMask->clearFocus();
+    //-
+    update_table_by_current_tab(index);
 }
 
 void MainWindow::timerEvent(QTimerEvent *event)
@@ -1271,7 +1345,6 @@ void MainWindow::timerEvent(QTimerEvent *event)
     QMessageBox msg(QMessageBox::Critical,"","");
     QString s,s2;
     QDate dt=QDate().currentDate();
-    int i;
 
     //check db-error
     s=m_db.last_error();
@@ -1287,15 +1360,6 @@ void MainWindow::timerEvent(QTimerEvent *event)
             mark_messagebox_error_open=false;
         }
     }
-
-    //inventory-warning
-    i=ui->tabWidget->indexOf(ui->tabInventory);
-    if(i<0||i>=ui->tabWidget->count())
-        i=0;
-    if(inventory_get_count_of_arctile_under_limit()>0)
-        ui->tabWidget->setTabIcon(i,m_widgets.get_warning_icon());
-    else
-        ui->tabWidget->setTabIcon(i,QIcon());
 
     //new date?
     if(mark_date==QDate(0,0,0))
@@ -1425,10 +1489,10 @@ bool MainWindow::waregroup_edit(void)
                 else
                 {
                     waregroup_update_tree(wg.get_id());//update treewidget
-                    inventory_mask_set();//update inventory table
-                    ordering_update_wares_list();//update ordering articlelist
-                    trade_update_wares_list();//update trade articlelist
-                    article_mask_set();//update article table
+                    m_bUpdateTableInventory=true; //update inventory table
+                    m_bUpdateTableOrderingWarelist=true;//update ordering articlelist
+                    m_bUpdateTableTradeWarelist=true;//update trade articlelist
+                    m_bUpdateTableArticle=true;//update article table
 
                     //logbook after
                     if(m_db.logbook_create_edit(wg,lg,false))
@@ -1515,10 +1579,10 @@ bool MainWindow::waregroup_delete(void)
                 {}
                 else
                 {
-                    inventory_mask_set();//update inventory table
-                    ordering_update_wares_list();//update ordering articlelist
-                    trade_update_wares_list();//update trade articlelist
-                    article_mask_set();//update article table
+                    m_bUpdateTableInventory=true; //update inventory table
+                    m_bUpdateTableOrderingWarelist=true;//update ordering articlelist
+                    m_bUpdateTableTradeWarelist=true;//update trade articlelist
+                    m_bUpdateTableArticle=true;//update article table
                 }
             }
             //logbook
@@ -1731,10 +1795,11 @@ bool MainWindow::maker_edit(void)
                 {
                     b=m_widgets.maker_update_row(ui->tableWidgetMaker,mk,true);//update table item
                     maker_update_info();
-                    inventory_mask_set();//update inventory table
-                    ordering_update_wares_list();//update ordering articlelist
-                    trade_update_wares_list();//update trade articlelist
-                    article_mask_set();//update article table
+
+                    m_bUpdateTableInventory=true; //update inventory table
+                    m_bUpdateTableOrderingWarelist=true;//update ordering articlelist
+                    m_bUpdateTableTradeWarelist=true;//update trade articlelist
+                    m_bUpdateTableArticle=true;//update article table
 
                     //logbook after
                     if(m_db.logbook_create_edit(mk,lg,false))
@@ -1802,10 +1867,10 @@ bool MainWindow::maker_delete(void)
                         b=m_thread.set_work(WORK_ARTICLE_ALL_CHANGE_MAKER,&memory);
                         if(b)
                         {
-                            inventory_mask_set();//update inventory table
-                            ordering_update_wares_list();//update ordering articlelist
-                            trade_update_wares_list();//update trade articlelist
-                            article_mask_set();//update article table
+                            m_bUpdateTableInventory=true; //update inventory table
+                            m_bUpdateTableOrderingWarelist=true;//update ordering articlelist
+                            m_bUpdateTableTradeWarelist=true;//update trade articlelist
+                            m_bUpdateTableArticle=true;//update article table
                         }
                     }
                     //-
@@ -2028,7 +2093,7 @@ bool MainWindow::dealer_edit(void)
                 {
                     b=m_widgets.dealer_update_row(ui->tableWidgetDealer,de,true);//update table item
                     dealer_update_info();
-                    ordering_mask_set();//update ordering table
+                    m_bUpdateTableOrdering=true;//update ordering table
 
                     //logbook after
                     if(m_db.logbook_create_edit(de,lg,false))
@@ -2094,7 +2159,7 @@ bool MainWindow::dealer_delete(void)
                         memory.set_int2(&i);
                         b=m_thread.set_work(WORK_ORDERING_ALL_CHANGE_DEALER, &memory);
                         if(b)
-                            ordering_mask_set();//update ordering table
+                            m_bUpdateTableOrdering=true; //update ordering table
                     }
                     //-
                     b=m_widgets.remove_row(ui->tableWidgetDealer,iId);
@@ -2542,6 +2607,8 @@ bool MainWindow::article_mask_set(void)
     }
     //-
     article_check_user_input();
+    //-
+    lsIds.clear();
     return b;
 }
 
@@ -2583,8 +2650,10 @@ bool MainWindow::article_new(void)
                 waregroup_check_user_input();
             }
             m_widgets.article_insert_row(ui->tableWidgetArticle,ar,FORMAT_ONE,ITEM_POSITION_BOTTOM,true);
-            inventory_mask_set();//update inventory table
+            m_widgets.inventory_insert_row(ui->tableWidgetInventory,ar,ITEM_POSITION_BOTTOM,true);
             article_update_count();
+            inventory_update_count();
+            inventory_check_article_under_warnlimit();//set icon to tab, if articles under limit
 
             //logbook
             if(m_db.logbook_create_new(ar,lg))
@@ -2647,12 +2716,14 @@ bool MainWindow::article_edit(void)
                         waregroup_check_user_input();
                     }
                     m_widgets.article_update_row(ui->tableWidgetArticle,ar,FORMAT_ONE,true);
+                    m_widgets.inventory_update_row(ui->tableWidgetInventory,ar,true);
                     //-
-                    trade_mask_set(false);//update trade table
-                    ordering_mask_set();//update ordering table
-                    inventory_mask_set();//update inventory table
-                    ordering_update_wares_list();//update ordering articlelist
-                    trade_update_wares_list();//update trade articlelist
+                    m_bUpdateTableOrdering=true;//update ordering table
+                    m_bUpdateTableOrderingWarelist=true;//update ordering articlelist
+                    m_bUpdateTableTrade=true;//update trade table
+                    m_bUpdateTableTradeWarelist=true;//update trade articlelist
+
+                    inventory_check_article_under_warnlimit();//set icon to tab, if articles under limit
 
                     //logbook after
                     if(m_db.logbook_create_edit(ar,lg,false))
@@ -2712,8 +2783,9 @@ bool MainWindow::article_copy(void)
                 {
                     //update displays
                     m_widgets.article_insert_row(ui->tableWidgetArticle,ar,FORMAT_ONE,ITEM_POSITION_BOTTOM,true);
-                    inventory_mask_set();//update inventory table
+                    m_widgets.inventory_insert_row(ui->tableWidgetInventory,ar,ITEM_POSITION_BOTTOM,true);
                     article_update_count();
+                    inventory_update_count();
 
                     //logbook
                     logbook_insert(lg);
@@ -2783,11 +2855,11 @@ bool MainWindow::article_delete(void)
                 if(b)
                 {
                     m_widgets.remove_row(ui->tableWidgetArticle,iId);
-                    inventory_mask_set();//update inventory table
-                    ordering_update_wares_list();//update ordering articlelist
-                    trade_update_wares_list();//update trade articlelist
+                    m_widgets.remove_row(ui->tableWidgetInventory,iId);
+
                     article_check_user_input();
                     article_update_count();
+                    inventory_update_count();
 
                     //logbook after
                     logbook_insert(lg);
@@ -3053,8 +3125,8 @@ bool MainWindow::ordering_edit(void)
                         }
                     }
                     m_widgets.ordering_update_row(ui->tableWidgetOrdering,ord,FORMAT_ONE,true);
-                    ordering_update_wares_list();
-                    inventory_mask_set();//update inventory table
+                    ordering_update_wares_list();//update warelist
+                    m_bUpdateTableInventory=true;//update inv table
 
                     //logbook after
                     if(m_db.logbook_create_edit(ord,lg,false))
@@ -3096,8 +3168,8 @@ bool MainWindow::ordering_delete(void)
                 b=true;
                 m_widgets.remove_row(ui->tableWidgetOrdering,iId);
                 ordering_update_count();
-                ordering_update_wares_list();
-                inventory_mask_set();//update inventory table
+                ordering_update_wares_list();//update warelist
+                m_bUpdateTableInventory=true;//update inv table
                 ordering_check_user_input();
 
                 //logbook after
@@ -3614,9 +3686,10 @@ bool MainWindow::trade_incoming(void)
         type=tr.get_type();
         if(m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
         {
-            inventory_mask_set();//update inventory table
+            m_bUpdateTableInventory=true;//update inv table
             trade_refresh_datelist();
             trade_update_count();
+            inventory_check_article_under_warnlimit();//set icon to tab, if articles under limit
             //logbook
             if(m_db.logbook_create_new(tr,lg))
                 logbook_insert(lg);
@@ -3665,9 +3738,10 @@ bool MainWindow::trade_outgoing(void)
         type=tr.get_type();
         if(m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
         {
-            inventory_mask_set();//update inventory table
+            m_bUpdateTableInventory=true;//update inv table
             trade_refresh_datelist();
             trade_update_count();
+            inventory_check_article_under_warnlimit();//set icon to tab, if articles under limit
 
             //logbook
             if(m_db.logbook_create_new(tr,lg))
@@ -3722,15 +3796,14 @@ bool MainWindow::trade_ordering_incoming(void)
                 {
                     trade_check_diff_ordering(iOrderingId,tr);
                     bOrdDelete=false;
-                    ordering_mask_set();//update ordering table
                 }
             }
-            //-
             if(bOrdDelete)
             {
                 if(m_db.ordering_remove(iOrderingId))
                     m_widgets.remove_row(ui->tableWidgetOrdering,iOrderingId);
             }
+            m_bUpdateTableOrdering=true;//update ordering table
             //-
             if(m_db.trade_add(tr))
             {
@@ -3742,9 +3815,10 @@ bool MainWindow::trade_ordering_incoming(void)
             type=tr.get_type();
             if(m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
             {
-                inventory_mask_set();//update inventory table
+                m_bUpdateTableInventory=true;//update inv table
                 trade_refresh_datelist();
                 trade_update_count();
+                inventory_check_article_under_warnlimit();//set icon to tab, if articles under limit
 
                 //logbook
                 if(m_db.logbook_create_new(tr,lg))
@@ -3794,9 +3868,10 @@ bool MainWindow::trade_outgoing_customer(void)
         type=tr.get_type();
         if(m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
         {
-            inventory_mask_set();//update inventory table
+            m_bUpdateTableInventory=true;//update inv table
             trade_refresh_datelist();
             trade_update_count();
+            inventory_check_article_under_warnlimit();//set icon to tab, if articles under limit
 
             //logbook
             if(m_db.logbook_create_new(tr,lg))
@@ -3921,9 +3996,23 @@ int MainWindow::inventory_get_count_of_arctile_under_limit(void)
     CPointerMemory memory;
     memory.set_int(&count);
     memory.set_string(&sCondition);
-    if(!m_thread.set_work(WORK_ARTICLE_GET_COUNT,&memory))
+    m_thread.set_work(WORK_ARTICLE_GET_COUNT,&memory);
+    if(count<0)
         count=0;
     return count;
+}
+
+bool MainWindow::inventory_check_article_under_warnlimit(void)
+{
+    //inventory-warning
+    int i=ui->tabWidget->indexOf(ui->tabInventory);
+    if(i<0||i>=ui->tabWidget->count())
+        i=0;
+    if(inventory_get_count_of_arctile_under_limit()>0)
+        ui->tabWidget->setTabIcon(i,m_widgets.get_warning_icon());
+    else
+        ui->tabWidget->setTabIcon(i,QIcon());
+    return true;
 }
 
 bool MainWindow::inventory_widgetitem_clicked()
@@ -4000,9 +4089,11 @@ bool MainWindow::inventory_mask_set(void)
             sCondition=QString("articlenumber like '%%1%'").arg(s);
         else if(index==8)//2.articlenumber
             sCondition=QString("articlenumber2 like '%%1%'").arg(s);
-        else if(index==11)//unit
+        else if(index==11)//location
+            sCondition=QString("location like '%%1%'").arg(s);
+        else if(index==12)//unit
             sCondition=QString("unit like '%%1%'").arg(s);
-        else if(index==12)//comment
+        else if(index==13)//comment
             sCondition=QString("comment like '%%1%'").arg(s);
         else if(index>=0 && index<4)//inventory / max.inventory
         {
@@ -4290,7 +4381,7 @@ bool MainWindow::logbook_mask_set(void)
     QDateTime dt_tiSelect;
     int index=ui->comboBoxMaskLogbook->currentIndex();
     //-
-    b=m_widgets.get_mask_condition_logbook(dt,index,sCondition);
+    b=m_widgets.logbook_get_mask_condition(dt,index,sCondition);
     if(b)
     {
         b=m_thread.set_work(WORK_LOGBOOK_GET_ALL,&memory);
@@ -4600,7 +4691,7 @@ bool MainWindow::menu_db_backup_load(void)
         else
         {
             //update widgets
-            fill_all_table();
+            fill_all_table(true);
             startTimer(3000);
         }
     }
@@ -5035,7 +5126,7 @@ bool MainWindow::menu_db_import_from_lava1(void)
     }
 
     //update table's
-    fill_all_table();
+    fill_all_table(true);
 
     //clear
     lsInt.clear();
@@ -5381,6 +5472,90 @@ bool MainWindow::menu_table_setting_article(void)
     }
     lsHeaderNames.clear();
     return bReturn;
+}
+
+bool MainWindow::menu_export_inventory(void)
+{
+    CExportCVS exportCVS;
+    QString sTitle=QString("Lagerbestandsübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_inventory(this,ui->tableWidgetInventory,m_db,m_widgets,QString("Lagerbestände"),sTitle);
+}
+
+bool MainWindow::menu_export_trade(void)
+{
+    QString si=QString("");
+
+    //dates
+    if(ui->listWidgetTradeMaskDate->currentRow()>=0 && ui->listWidgetTradeMaskDate->currentRow()<ui->listWidgetTradeMaskDate->count())//date selected
+        si=ui->listWidgetTradeMaskDate->item(ui->listWidgetTradeMaskDate->currentRow())->text();
+
+    CExportCVS exportCVS;
+    QString sTitle=QString("Warenein-/ausgangsübersicht %1 (erstellt %2)").arg(si,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_trade(this,ui->tableWidgetTrade,m_db,m_widgets,QString("Warengänge"),sTitle);
+}
+
+bool MainWindow::menu_export_ordering(void)
+{
+    CExportCVS exportCVS;
+    QString sTitle=QString("Bestellungenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_ordering(this,ui->tableWidgetOrdering,m_db,m_widgets,QString("Bestellungen"),sTitle);
+}
+
+bool MainWindow::menu_export_article(void)
+{
+    CExportCVS exportCVS;
+    QString sTitle=QString("Artikelübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_article(this,ui->tableWidgetArticle,m_db,QString("Artikel"),sTitle);
+}
+
+bool MainWindow::menu_export_waregroup(void)
+{
+    CExportCVS exportCVS;
+    QString sTitle=QString("Warengruppenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_tree(this,ui->treeWidgetWaregroup,QString("Warengruppen"),sTitle);
+}
+
+bool MainWindow::menu_export_maker(void)
+{
+    CExportCVS exportCVS;
+    QString sTitle=QString("Herstellerübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_maker(this,ui->tableWidgetMaker,m_db,QString("Hersteller"),sTitle);
+}
+
+bool MainWindow::menu_export_dealer(void)
+{
+    CExportCVS exportCVS;
+    QString sTitle=QString("Händlerübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_dealer(this,ui->tableWidgetDealer,m_db,QString("Händler"),sTitle);
+}
+
+bool MainWindow::menu_export_customer(void)
+{
+    CExportCVS exportCVS;
+    QString sTitle=QString("Kundenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    return exportCVS.write_data_customer(this,ui->tableWidgetCustomer,m_db,QString("Kunden"),sTitle);
+}
+
+bool MainWindow::menu_export_logbook(void)
+{
+    bool b=false;
+    CExportCVS exportCVS;
+    QString s,sFile,sTitle;
+
+    //get mask datetext
+    QList<QListWidgetItem *> ls=ui->listWidgetLogbookMaskDate->selectedItems();
+    if(ls.count()>0)
+    {
+        s=ls[0]->text();
+        s.resize(10);//copy only 10 char (dd.mm.yyyy)
+        sTitle=QString("Logbuchübersicht vom %1, %2 (erstellt %3)").arg(s,ui->comboBoxMaskLogbook->currentText(),QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+        sFile=QString("logbuch-%1").arg(s);
+        exportCVS.write_data_list(this,ui->listWidgetLogbook,sFile,sTitle);
+        b=true;
+    }
+    //-
+    ls.clear();
+    return b;
 }
 
 

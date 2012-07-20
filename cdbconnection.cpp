@@ -405,15 +405,15 @@ int CDbConnection::waregroup_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s=QString("SELECT id FROM waregroup");
+        QString s=QString("SELECT count(id) FROM waregroup");
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-
@@ -612,15 +612,15 @@ int CDbConnection::maker_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT id FROM maker");
+        QString s("SELECT count(id) FROM maker");
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-
@@ -658,7 +658,7 @@ bool CDbConnection::dealer_add(CDealer & de)
     bool b;
     QSqlQuery query;
     QString s=QString("INSERT INTO dealer (name,adress,call_numbers,fax_numbers,email_adress,homepage,contect_person,comment,customer_number)"
-                      "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8' , '%9')").arg(de.get_name(),de.get_adress(),de.get_callnumber(),
+                      "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8','%9')").arg(de.get_name(),de.get_adress(),de.get_callnumber(),
                         de.get_faxnumber(),de.get_email(),de.get_homepage(),de.get_contectperson(),de.get_comment(),de.get_customernumber());
     //-
     b=query.exec(s);//add ok?
@@ -779,15 +779,15 @@ int CDbConnection::dealer_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT id FROM dealer");
+        QString s("SELECT count(id) FROM dealer");
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-
@@ -922,15 +922,15 @@ int CDbConnection::customer_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT id FROM customer");
+        QString s("SELECT count(id) FROM customer");
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-
@@ -1148,7 +1148,7 @@ int CDbConnection::article_get_count(QString sCondition, bool bWithDeleteArticle
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT id FROM article");
+        QString s("SELECT count(id) FROM article");
         //-
         if(!bWithDeleteArticle)
         {
@@ -1159,12 +1159,12 @@ int CDbConnection::article_get_count(QString sCondition, bool bWithDeleteArticle
         //-
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-
@@ -1517,15 +1517,15 @@ int CDbConnection::ordering_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT id FROM ordering");
+        QString s("SELECT count(id) FROM ordering");
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-
@@ -1976,15 +1976,15 @@ int CDbConnection::trade_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT booking_number FROM trade");
+        QString s("SELECT count(booking_number) FROM trade");
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-
@@ -2614,15 +2614,15 @@ int CDbConnection::logbook_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT date_time FROM logbook");
+        QString s("SELECT count(date_time) FROM logbook");
         if(sCondition.length()>0)
             s+=QString(" WHERE %1").arg(sCondition);
-        QSqlQueryModel model;
         QSqlQuery query;
         if(query.exec(s))
         {
-            model.setQuery(query);
-            count=model.rowCount();
+            query.first();
+            if(query.value(0).toInt()>0)
+                count=query.value(0).toInt();
         }
     }
     //-

@@ -23,6 +23,7 @@
 #include "cworkthread.h"
 #include "cprintjob.h"
 #include "csettings.h"
+#include "cexportcvs.h"
 
 
 #define TYPE_WARN_LIST 1
@@ -54,6 +55,7 @@ public:
 
 public slots:
     bool print_button_press(void);
+    bool export_button_press(void);
     bool print(QPrinter * printer);
     void date_changed(void);
 };

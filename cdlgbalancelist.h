@@ -23,6 +23,7 @@
 #include "cworkthread.h"
 #include "cinputdialogbrowsearticle.h"
 #include "cprintjob.h"
+#include "cexportcvs.h"
 
 
 namespace Ui {
@@ -52,6 +53,7 @@ public slots:
     bool browse_article_dlg(void);
     bool dates_changed(void);
     bool print_button_press(void);
+    bool export_button_press(void);
     bool print(QPrinter * printer);
 };
 

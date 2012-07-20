@@ -190,12 +190,14 @@ bool CInputDialogBrowseArticle::update_table(void)
             sCondition=QString("articlenumber like '%%1%'").arg(sMask);
         else if(iMask==2)//2.number
             sCondition=QString("articlenumber2 like '%%1%'").arg(sMask);
+        else if(iMask==5)//location
+            sCondition=QString("location like '%%1%'").arg(sMask);
         else
             sCondition=QString(sMask);
     }
 
     //-get article by mask-
-    if(iMask==0 || iMask==1 || iMask==2 || sMask.length()<=0)//name or numbers or no mask
+    if(iMask==0 || iMask==1 || iMask==2 || iMask==5 || sMask.length()<=0)//name or numbers or location or no mask
         b=m_pThread->set_work(WORK_ARTICLE_GET_ALL,&memory);
     else if(iMask==3)//maker?
         b=m_pThread->set_work(WORK_ARTICLE_GET_ALL_BY_MAKER,&memory);
