@@ -57,7 +57,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="movable">
      <bool>true</bool>
@@ -178,6 +178,11 @@
       <column>
        <property name="text">
         <string>Warengruppe</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Standort</string>
        </property>
       </column>
       <column>

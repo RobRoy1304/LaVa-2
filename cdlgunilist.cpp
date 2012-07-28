@@ -241,8 +241,8 @@ bool CDlgUniList::export_button_press(void)
         s=QString("Liste-Lagerbestand_%1").arg(ui->dateEditFrom->date().toString(QString("dd.MM.yyyy")));
     QString sTitle=QString("%1 (erstellt %2)").arg(s,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
 
-    CExportCVS exportCVS;
-    return exportCVS.write_data_table(this,ui->tableWidget,s,sTitle,true);
+    CExportCSV exportCSV;
+    return exportCSV.write_data_table(this,ui->tableWidget,s,sTitle,true);
 }
 
 bool CDlgUniList::print(QPrinter * pPrinter)

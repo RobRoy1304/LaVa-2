@@ -47,7 +47,7 @@ bool CSettings::create_default_setting_file(void)
         s=QString("TAB_ORDER#0,1,2,3,4,5,6,7,8\n");
         file.write(s.toAscii());
         //-
-        s=QString("INVENTORY_TABLE_COLUMNS_WIDTHS#100,80,200,200,200,200,200,200,200,200,200,0\n");
+        s=QString("INVENTORY_TABLE_COLUMNS_WIDTHS#100,80,200,200,200,200,200,200,200,200,200,200,0\n");
         file.write(s.toAscii());
         s=QString("SORT_ORDER_INVENTORY#0,0\n");
         file.write(s.toAscii());
@@ -55,7 +55,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toAscii());
         s=QString("MASK_SELECTION_INVENTORY#0\n");
         file.write(s.toAscii());
-        s=QString("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,1,2,1,1,3,1,1,4,1,1,5,1,0,6,1,0,7,1,0,8,1,0,9,1,0,10,1,0,11,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
+        s=QString("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,1,2,1,1,3,1,1,4,1,1,5,1,0,6,1,0,7,1,0,8,1,0,9,1,0,10,1,0,11,1,0,12,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
         file.write(s.toAscii());
         //-
         s=QString("TRADE_TABLE_COLUMNS_WIDTHS_OVIEW#200,200,200,200,200,200,200\n");

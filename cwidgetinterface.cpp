@@ -2841,8 +2841,10 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
                 ti.set_text(s);
             }
             if(lsOrder[j]==10)//d.column 10
-                ti.set_text(ar.get_comment());
+                ti.set_text(ar.get_location());
             if(lsOrder[j]==11)//d.column 11
+                ti.set_text(ar.get_comment());
+            if(lsOrder[j]==12)//d.column 12
             {
                 s=QString("%1").arg(ar.get_id());
                 ti.set_text(s);

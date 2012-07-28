@@ -5476,9 +5476,9 @@ bool MainWindow::menu_table_setting_article(void)
 
 bool MainWindow::menu_export_inventory(void)
 {
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Lagerbestandsübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_inventory(this,ui->tableWidgetInventory,m_db,m_widgets,QString("Lagerbestände"),sTitle);
+    return exportCSV.write_data_inventory(this,ui->tableWidgetInventory,m_db,m_widgets,QString("Lagerbestände"),sTitle);
 }
 
 bool MainWindow::menu_export_trade(void)
@@ -5489,57 +5489,57 @@ bool MainWindow::menu_export_trade(void)
     if(ui->listWidgetTradeMaskDate->currentRow()>=0 && ui->listWidgetTradeMaskDate->currentRow()<ui->listWidgetTradeMaskDate->count())//date selected
         si=ui->listWidgetTradeMaskDate->item(ui->listWidgetTradeMaskDate->currentRow())->text();
 
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Warenein-/ausgangsübersicht %1 (erstellt %2)").arg(si,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_trade(this,ui->tableWidgetTrade,m_db,m_widgets,QString("Warengänge"),sTitle);
+    return exportCSV.write_data_trade(this,ui->tableWidgetTrade,m_db,m_widgets,QString("Warengänge"),sTitle);
 }
 
 bool MainWindow::menu_export_ordering(void)
 {
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Bestellungenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_ordering(this,ui->tableWidgetOrdering,m_db,m_widgets,QString("Bestellungen"),sTitle);
+    return exportCSV.write_data_ordering(this,ui->tableWidgetOrdering,m_db,m_widgets,QString("Bestellungen"),sTitle);
 }
 
 bool MainWindow::menu_export_article(void)
 {
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Artikelübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_article(this,ui->tableWidgetArticle,m_db,QString("Artikel"),sTitle);
+    return exportCSV.write_data_article(this,ui->tableWidgetArticle,m_db,QString("Artikel"),sTitle);
 }
 
 bool MainWindow::menu_export_waregroup(void)
 {
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Warengruppenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_tree(this,ui->treeWidgetWaregroup,QString("Warengruppen"),sTitle);
+    return exportCSV.write_data_tree(this,ui->treeWidgetWaregroup,QString("Warengruppen"),sTitle);
 }
 
 bool MainWindow::menu_export_maker(void)
 {
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Herstellerübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_maker(this,ui->tableWidgetMaker,m_db,QString("Hersteller"),sTitle);
+    return exportCSV.write_data_maker(this,ui->tableWidgetMaker,m_db,QString("Hersteller"),sTitle);
 }
 
 bool MainWindow::menu_export_dealer(void)
 {
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Händlerübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_dealer(this,ui->tableWidgetDealer,m_db,QString("Händler"),sTitle);
+    return exportCSV.write_data_dealer(this,ui->tableWidgetDealer,m_db,QString("Händler"),sTitle);
 }
 
 bool MainWindow::menu_export_customer(void)
 {
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString sTitle=QString("Kundenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCVS.write_data_customer(this,ui->tableWidgetCustomer,m_db,QString("Kunden"),sTitle);
+    return exportCSV.write_data_customer(this,ui->tableWidgetCustomer,m_db,QString("Kunden"),sTitle);
 }
 
 bool MainWindow::menu_export_logbook(void)
 {
     bool b=false;
-    CExportCVS exportCVS;
+    CExportCSV exportCSV;
     QString s,sFile,sTitle;
 
     //get mask datetext
@@ -5550,7 +5550,7 @@ bool MainWindow::menu_export_logbook(void)
         s.resize(10);//copy only 10 char (dd.mm.yyyy)
         sTitle=QString("Logbuchübersicht vom %1, %2 (erstellt %3)").arg(s,ui->comboBoxMaskLogbook->currentText(),QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
         sFile=QString("logbuch-%1").arg(s);
-        exportCVS.write_data_list(this,ui->listWidgetLogbook,sFile,sTitle);
+        exportCSV.write_data_list(this,ui->listWidgetLogbook,sFile,sTitle);
         b=true;
     }
     //-

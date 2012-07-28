@@ -1,5 +1,5 @@
-#ifndef CEXPORTCVS_H
-#define CEXPORTCVS_H
+#ifndef CEXPORTCSV_H
+#define CEXPORTCSV_H
 
 #include <QtGui/QDialog>
 
@@ -7,10 +7,10 @@
 #include "cdbconnection.h"
 #include "cwidgetinterface.h"
 
-class CExportCVS
+class CExportCSV
 {
 public:
-    CExportCVS();
+    CExportCSV();
 
     bool write(QString sFile, QList<QString> & ls);
     bool check_format(QList<QString> & ls);
@@ -35,4 +35,4 @@ public:
     bool write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbConnection & db,CWidgetInterface & widget, QString sFileDescription, QString sTitle=QString(""));
 };
 
-#endif // CEXPORTCVS_H
+#endif // CEXPORTCSV_H

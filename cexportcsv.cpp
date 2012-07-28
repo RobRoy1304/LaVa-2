@@ -1,10 +1,10 @@
-#include "cexportcvs.h"
+#include "cexportcsv.h"
 
-CExportCVS::CExportCVS()
+CExportCSV::CExportCSV()
 {
 }
 
-bool CExportCVS::write(QString sFile, QList<QString> & ls)
+bool CExportCSV::write(QString sFile, QList<QString> & ls)
 {
     if(ls.count()<=0)
         return false;
@@ -29,7 +29,7 @@ bool CExportCVS::write(QString sFile, QList<QString> & ls)
     return b;
 }
 
-bool CExportCVS::check_format(QList<QString> & ls)
+bool CExportCSV::check_format(QList<QString> & ls)
 {
     if(ls.count()<=0)
         return false;
@@ -75,7 +75,7 @@ bool CExportCVS::check_format(QList<QString> & ls)
     return b;
 }
 
-QString CExportCVS::check_format(QString s)
+QString CExportCSV::check_format(QString s)
 {
     QString sReturn=QString("");
     if(s.length()>0)
@@ -88,7 +88,7 @@ QString CExportCVS::check_format(QString s)
     return sReturn;
 }
 
-bool CExportCVS::open_filedialog(QString & sPath, QWidget * pParent, QString sFilename)
+bool CExportCSV::open_filedialog(QString & sPath, QWidget * pParent, QString sFilename)
 {
     if(pParent==NULL)
         return false;
@@ -119,9 +119,9 @@ bool CExportCVS::open_filedialog(QString & sPath, QWidget * pParent, QString sFi
 
     //set path
     if(sExportPath.length()>0)//backup path load?
-        sFile=sExportPath+QString("/%1_%2.cvs").arg(sFilename,dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+        sFile=sExportPath+QString("/%1_%2.csv").arg(sFilename,dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
     else//default path
-        sFile=QDir::homePath()+QString("/%1_%2.cvs").arg(sFilename,dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+        sFile=QDir::homePath()+QString("/%1_%2.csv").arg(sFilename,dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
 
     //open file dialog
     sFile=QFileDialog::getSaveFileName(pParent,QString("Export"),sFile);
@@ -156,7 +156,7 @@ bool CExportCVS::open_filedialog(QString & sPath, QWidget * pParent, QString sFi
     return b;
 }
 
-bool CExportCVS::create_data_table(QTableWidget * pTable, QList<QString> & ls, QString sTitle, bool bLastColumn)
+bool CExportCSV::create_data_table(QTableWidget * pTable, QList<QString> & ls, QString sTitle, bool bLastColumn)
 {
     if(pTable==NULL)
         return false;
@@ -213,7 +213,7 @@ bool CExportCVS::create_data_table(QTableWidget * pTable, QList<QString> & ls, Q
     return true;
 }
 
-bool CExportCVS::create_data_table(QTableWidget * pTable, QList<QString> & ls, int iFromColumn, int iToColumn, QString sTitle)
+bool CExportCSV::create_data_table(QTableWidget * pTable, QList<QString> & ls, int iFromColumn, int iToColumn, QString sTitle)
 {
     bool b=true;
     int x,y;
@@ -275,7 +275,7 @@ bool CExportCVS::create_data_table(QTableWidget * pTable, QList<QString> & ls, i
     return b;
 }
 
-bool CExportCVS::create_data_list(QListWidget * pList, QList<QString> & ls, QString sTitle)
+bool CExportCSV::create_data_list(QListWidget * pList, QList<QString> & ls, QString sTitle)
 {
     if(pList==NULL)
         return false;
@@ -303,7 +303,7 @@ bool CExportCVS::create_data_list(QListWidget * pList, QList<QString> & ls, QStr
     return true;
 }
 
-bool CExportCVS::create_data_list_table(QListWidget * pList, QTableWidget * pTable, QList<QString> & ls, QString sTitle, bool bLastColumn)
+bool CExportCSV::create_data_list_table(QListWidget * pList, QTableWidget * pTable, QList<QString> & ls, QString sTitle, bool bLastColumn)
 {
     if(pTable==NULL || pList==NULL)
         return false;
@@ -323,7 +323,7 @@ bool CExportCVS::create_data_list_table(QListWidget * pList, QTableWidget * pTab
     return true;
 }
 
-bool CExportCVS::create_data_tree(QTreeWidget * pTree, QList<QString> & ls, QString sTitle)
+bool CExportCSV::create_data_tree(QTreeWidget * pTree, QList<QString> & ls, QString sTitle)
 {
     if(pTree==NULL)
         return false;
@@ -357,7 +357,7 @@ bool CExportCVS::create_data_tree(QTreeWidget * pTree, QList<QString> & ls, QStr
     return true;
 }
 
-bool CExportCVS::create_data_tree_children(QTreeWidgetItem * pItemParent, QList<QString> & ls, int iSubLevel)
+bool CExportCSV::create_data_tree_children(QTreeWidgetItem * pItemParent, QList<QString> & ls, int iSubLevel)
 {
     if(pItemParent==NULL || iSubLevel<0 || iSubLevel>20)
         return false;
@@ -409,7 +409,7 @@ bool CExportCVS::create_data_tree_children(QTreeWidgetItem * pItemParent, QList<
     return true;
 }
 
-bool CExportCVS::write_data_table(QWidget * pParent, QTableWidget * pTable, QString sFileDescription, QString sTitle,bool bLastColumn)
+bool CExportCSV::write_data_table(QWidget * pParent, QTableWidget * pTable, QString sFileDescription, QString sTitle,bool bLastColumn)
 {
     if(pParent==NULL || pTable==NULL || sFileDescription.length()<=0)
         return false;
@@ -426,7 +426,7 @@ bool CExportCVS::write_data_table(QWidget * pParent, QTableWidget * pTable, QStr
     return true;
 }
 
-bool CExportCVS::write_data_list(QWidget * pParent, QListWidget * pList, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_list(QWidget * pParent, QListWidget * pList, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pList==NULL || sFileDescription.length()<=0)
         return false;
@@ -443,7 +443,7 @@ bool CExportCVS::write_data_list(QWidget * pParent, QListWidget * pList, QString
     return true;
 }
 
-bool CExportCVS::write_data_list_table(QWidget * pParent, QListWidget * pList, QTableWidget * pTable, QString sFileDescription, QString sTitle, bool bLastColumn)
+bool CExportCSV::write_data_list_table(QWidget * pParent, QListWidget * pList, QTableWidget * pTable, QString sFileDescription, QString sTitle, bool bLastColumn)
 {
     if(pParent==NULL || pTable==NULL || pList==NULL || sFileDescription.length()<=0)
         return false;
@@ -460,7 +460,7 @@ bool CExportCVS::write_data_list_table(QWidget * pParent, QListWidget * pList, Q
     return true;
 }
 
-bool CExportCVS::write_data_tree(QWidget * pParent,QTreeWidget * pTree, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_tree(QWidget * pParent,QTreeWidget * pTree, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTree==NULL || sFileDescription.length()<=0)
         return false;
@@ -478,7 +478,7 @@ bool CExportCVS::write_data_tree(QWidget * pParent,QTreeWidget * pTree, QString 
     return true;
 }
 
-bool CExportCVS::write_data_maker(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_maker(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTable==NULL || !db.is_db_connect() || sFileDescription.length()<=0)
         return false;
@@ -539,7 +539,7 @@ bool CExportCVS::write_data_maker(QWidget * pParent, QTableWidget * pTable, CDbC
     return true;
 }
 
-bool CExportCVS::write_data_dealer(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_dealer(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTable==NULL || !db.is_db_connect() || sFileDescription.length()<=0)
         return false;
@@ -601,7 +601,7 @@ bool CExportCVS::write_data_dealer(QWidget * pParent, QTableWidget * pTable, CDb
     return true;
 }
 
-bool CExportCVS::write_data_customer(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_customer(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTable==NULL || !db.is_db_connect() || sFileDescription.length()<=0)
         return false;
@@ -664,7 +664,7 @@ bool CExportCVS::write_data_customer(QWidget * pParent, QTableWidget * pTable, C
     return true;
 }
 
-bool CExportCVS::write_data_inventory(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, CWidgetInterface & widget, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_inventory(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, CWidgetInterface & widget, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTable==NULL || !db.is_db_connect() || sFileDescription.length()<=0)
         return false;
@@ -674,7 +674,7 @@ bool CExportCVS::write_data_inventory(QWidget * pParent, QTableWidget * pTable, 
     QString s,sLine,sFile;
     QList<QString> ls;
     QStringList lss;
-    int i,id_column,id;
+    int j,i,id_column,id;
     QTableWidgetItem * pItem;
     CTableItemData ti;
 
@@ -688,7 +688,7 @@ bool CExportCVS::write_data_inventory(QWidget * pParent, QTableWidget * pTable, 
 
     //header
     ls.push_back(QString("\"Auslastung(%)\";\"Warnung\";\"Bestand\";\"bestellte Menge\";\"Anzahl Bestellungen\";\"Lagerkapazität\";\"Einheit\";\"Artikelbezeichnung\";"
-                         "\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Kommentar\"\n"));
+                         "\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Standort\";\"Kommentar\"\n"));
 
     //get maker info
     id_column=pTable->columnCount()-1;
@@ -725,11 +725,15 @@ bool CExportCVS::write_data_inventory(QWidget * pParent, QTableWidget * pTable, 
                             //-
                             sLine+=QString("\"%1\";").arg(ar.get_inventory());//inv
                             sLine+=QString("\"%1\";").arg(db.ordering_get_count_by_article(ar.get_id()));//ordering(article count)
-                            sLine+=QString("\"%1\";").arg(db.ordering_get_ordering_count_by_article(ar.get_id()));//ordering(count)
+                            j=db.ordering_get_ordering_count_by_article(ar.get_id());
+                            if(j>0)
+                                sLine+=QString("\"%1\";").arg(j);//ordering(article count)
+                            else
+                                sLine+=QString("\"\";");
                             sLine+=QString("\"%1\";").arg(ar.get_max_inventory());//max inv
-                            sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
+                            sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
                                                                                                      db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()),
-                                                                                                     ar.get_comment());
+                                                                                                     ar.get_location(),ar.get_comment());
                             ls.push_back(sLine);
                         }
                     }
@@ -749,7 +753,7 @@ bool CExportCVS::write_data_inventory(QWidget * pParent, QTableWidget * pTable, 
     return true;
 }
 
-bool CExportCVS::write_data_article(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_article(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTable==NULL || !db.is_db_connect() || sFileDescription.length()<=0)
         return false;
@@ -836,7 +840,7 @@ bool CExportCVS::write_data_article(QWidget * pParent, QTableWidget * pTable, CD
     return true;
 }
 
-bool CExportCVS::write_data_ordering(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, CWidgetInterface & widget, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_ordering(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, CWidgetInterface & widget, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTable==NULL || !db.is_db_connect() || sFileDescription.length()<=0)
         return false;
@@ -858,7 +862,8 @@ bool CExportCVS::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
     }
 
     //header
-    ls.push_back(QString("\"Bestelldatum\";\"Bestellnummer\";\"Händler\";\"Kommentar\";\"Anzahl\";\"Einheit\";\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\"\n"));
+    ls.push_back(QString("\"Bestelldatum\";\"Bestellnummer\";\"Händler\";\"Kommentar\";\"Anzahl\";\"Einheit\";\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";"
+                         "\"Hersteller\";\"Warengruppe\";\"Standort\"\n"));
 
     //create
     id_column=pTable->columnCount()-1;
@@ -899,8 +904,9 @@ bool CExportCVS::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
                                         }
                                         else
                                             sLine=QString("\"\";\"\";\"\";\"\";\"%1\";").arg(iCount);
-                                        sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
-                                                                                                         db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()));
+                                        sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
+                                                                                                         db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()),
+                                                                                                         ar.get_location());
                                         ls.push_back(sLine);
                                     }
                                 }
@@ -927,7 +933,7 @@ bool CExportCVS::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
     return true;
 }
 
-bool CExportCVS::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, CWidgetInterface & widget, QString sFileDescription, QString sTitle)
+bool CExportCSV::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbConnection & db, CWidgetInterface & widget, QString sFileDescription, QString sTitle)
 {
     if(pParent==NULL || pTable==NULL || !db.is_db_connect() || sFileDescription.length()<=0)
         return false;
@@ -950,7 +956,7 @@ bool CExportCVS::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbC
 
     //header
     ls.push_back(QString("\"Art\";\"storniert\";\"Buchungsnummer\";\"Ein-/Ausgangsdatum\";\"Info1\";\"Info2\";\"Info3\";\"Info4\";\"Info5\";\"Kommentar\";\"Anzahl\";"
-                         "\"Einheit\";\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\"\n"));
+                         "\"Einheit\";\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Standort\"\n"));
 
     //create
     id_column=2;//bookingnumber
@@ -1050,8 +1056,9 @@ bool CExportCVS::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbC
                                     }
                                     else
                                         sLine=QString("\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"%1\";").arg(iCount);
-                                    sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
-                                                                                                         db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()));
+                                    sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
+                                                                                                         db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()),
+                                                                                                         ar.get_location());
                                     ls.push_back(sLine);
                                 }
                             }

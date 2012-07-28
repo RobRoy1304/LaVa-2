@@ -243,8 +243,8 @@ bool CDlgBalanceList::export_button_press(void)
 {
     QString s=QString("Artikelsaldenliste_%1-%2").arg(ui->dateEditFrom->date().toString(QString("dd.MM.yyyy")),ui->dateEditTo->date().toString(QString("dd.MM.yyyy")));
     QString sTitle=QString("%1 (erstellt %2)").arg(s,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    CExportCVS exportCVS;
-    return exportCVS.write_data_list_table(this,ui->listWidgetArticle,ui->tableWidgetList,s,sTitle,true);
+    CExportCSV exportCSV;
+    return exportCSV.write_data_list_table(this,ui->listWidgetArticle,ui->tableWidgetList,s,sTitle,true);
 }
 
 bool CDlgBalanceList::print(QPrinter * pPrinter)

@@ -23,7 +23,7 @@
 #include "cworkthread.h"
 #include "cinputdialogbrowsearticle.h"
 #include "cprintjob.h"
-#include "cexportcvs.h"
+#include "cexportcsv.h"
 
 
 namespace Ui {

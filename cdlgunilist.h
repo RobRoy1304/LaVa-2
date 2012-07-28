@@ -23,7 +23,7 @@
 #include "cworkthread.h"
 #include "cprintjob.h"
 #include "csettings.h"
-#include "cexportcvs.h"
+#include "cexportcsv.h"
 
 
 #define TYPE_WARN_LIST 1

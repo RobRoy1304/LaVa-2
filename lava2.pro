@@ -29,7 +29,7 @@ SOURCES += main.cpp \
     cinputdialogwaregroup.cpp \
     cprintjob.cpp \
     cinputdialogtablesetting.cpp \
-    cexportcvs.cpp
+    cexportcsv.cpp
 HEADERS += mainwindow.h \
     data_classes.h \
     cinputdialogbrowsewaregroup.h \
@@ -54,7 +54,7 @@ HEADERS += mainwindow.h \
     cinputdialogwaregroup.h \
     cprintjob.h \
     cinputdialogtablesetting.h \
-    cexportcvs.h
+    cexportcsv.h
 FORMS += mainwindow.ui \
     cinputdialogbrowsewaregroup.ui \
     cinputdialogcustomer.ui \

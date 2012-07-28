@@ -42,7 +42,7 @@
 #include "cdlgbalancelist.h"
 #include "cdlgunilist.h"
 #include "cinputdialogtablesetting.h"
-#include "cexportcvs.h"
+#include "cexportcsv.h"
 
 namespace Ui
 {
