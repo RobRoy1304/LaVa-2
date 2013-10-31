@@ -1,0 +1,2980 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>570</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1000</width>
+    <height>570</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <weight>50</weight>
+    <bold>false</bold>
+    <underline>false</underline>
+    <strikeout>false</strikeout>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>lava2</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="lava2res.qrc">
+    <normaloff>:/images/res/icon.ico</normaloff>:/images/res/icon.ico</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>941</width>
+      <height>551</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::NoContextMenu</enum>
+    </property>
+    <property name="tabPosition">
+     <enum>QTabWidget::North</enum>
+    </property>
+    <property name="tabShape">
+     <enum>QTabWidget::Rounded</enum>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <property name="movable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="tabInventory">
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>76</red>
+           <green>76</green>
+           <blue>76</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>76</red>
+           <green>76</green>
+           <blue>76</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>159</red>
+           <green>158</green>
+           <blue>158</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <attribute name="title">
+      <string>Lagerbestand</string>
+     </attribute>
+     <widget class="QTableWidget" name="tableWidgetInventory">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>60</y>
+        <width>256</width>
+        <height>361</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>true</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Auslastung</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Warnung</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Bestand</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>bestellt / Anz.Bestell.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Lagerkapazität</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Standort</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskInventory">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>0</y>
+        <width>251</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Bestand &lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bestand &gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kapazität &lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kapazität &gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Lagerauslastung (%) &lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Lagerauslastung (%) &gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Standort</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Einheit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaskSetInventory">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>30</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>setzen</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxAutoSearchInventory">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>20</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>auto</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditInventoryMask">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>30</y>
+        <width>251</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelMaskInventory">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>10</y>
+        <width>71</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="Line" name="lineInventory">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>120</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountInventory">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>100</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabWareInOut">
+     <attribute name="title">
+      <string>Warenein-/ausgang</string>
+     </attribute>
+     <widget class="QPushButton" name="pushButtonTradeIncoming">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>80</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Wareneingang</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonTradeCancel">
+      <property name="geometry">
+       <rect>
+        <x>490</x>
+        <y>100</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>stornieren</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonTradeOutgoing">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>60</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Warenausgang</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonTradeOrderingIncoming">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>100</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Eingang(Bestell.)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelMaskWareInOut">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>20</y>
+        <width>62</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditTradeMask">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>20</y>
+        <width>251</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskTrade">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>20</y>
+        <width>151</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Buchungsnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Händler</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bestellnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kundenname</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kundennummer</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaskSetTrade">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>40</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>setzen</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidgetTrade">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>190</y>
+        <width>181</width>
+        <height>151</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Art</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>storniert</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Buchungsnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Ein-/Ausgangsdatum</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Artikel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Händler/Kunde</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QListWidget" name="listWidgetTradeMaskDate">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>170</y>
+        <width>181</width>
+        <height>171</height>
+       </rect>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxAutoSearchTrade">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>50</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>auto</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="Line" name="lineTrade">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>80</y>
+        <width>31</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxTradeMaskDate">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>90</y>
+        <width>71</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Tagesübersicht</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Wochenübersicht</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Monatsübersicht</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Quartalsübersicht</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="labelTradeWareslist">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>140</y>
+        <width>101</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Warenliste:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountTrade">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>160</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidgetTradeWareslist">
+      <property name="geometry">
+       <rect>
+        <x>440</x>
+        <y>200</y>
+        <width>191</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Anzahl</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Standort</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QComboBox" name="comboBoxTradeMaskYear">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>130</y>
+        <width>71</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidgetTradeInfo">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>350</y>
+        <width>181</width>
+        <height>81</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelTradeInfo">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>390</y>
+        <width>101</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Information:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonTradeOutgoingCustomer">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>130</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Ausgang(Kunde)</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabOrdering">
+     <attribute name="title">
+      <string>Bestellungen</string>
+     </attribute>
+     <widget class="QPushButton" name="pushButtonOrderingNew">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>80</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>neue Bestellung</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidgetOrdering">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>80</y>
+        <width>256</width>
+        <height>361</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Bestelldatum</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Bestellnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Händler</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Artikel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QLabel" name="labelMaskOrdering">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>30</y>
+        <width>71</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskOrdering">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>20</y>
+        <width>251</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Händler</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bestelldatum von-bis</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bestelldatum &lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bestelldatum =</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bestelldatum &gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Bestellnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLineEdit" name="lineEditOrderingMask">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>50</y>
+        <width>251</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonOrderingDelete">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>140</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Bestellung löschen</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonOrderingEdit">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>110</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Bestellung bearbeiten</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaskSetOrdering">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>50</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>setzen</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxAutoSearchOrdering">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>40</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>auto</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountOrdering">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>20</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidgetOrderingWareslist">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>240</y>
+        <width>191</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Anzahl</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Standort</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QLabel" name="labelOrderingWareslist">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>190</y>
+        <width>161</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Warenliste:</string>
+      </property>
+     </widget>
+     <widget class="Line" name="lineOrdering">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>210</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabArticle">
+     <attribute name="title">
+      <string>Artikel</string>
+     </attribute>
+     <widget class="QTableWidget" name="tableWidgetArticle">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>70</y>
+        <width>256</width>
+        <height>361</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>true</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Warnung(Bst.&lt;)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>EK</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>VK</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Marge</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Standort</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="pushButtonArticleNew">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>70</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>neuer Artikel</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditArticleMask">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>40</y>
+        <width>251</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonArticleDelete">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>160</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Artikel löschen</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonArticleEdit">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>100</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Artikel bearbeiten</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskArticle">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>10</y>
+        <width>251</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Artikelbezeichnung</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>2.Artikelnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Warengruppe</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Einkaufspreis &lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Einkaufspreis &gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Verkaufspreis &lt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Verkaufspreis &gt;</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Standort</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Einheit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Währung</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="labelMaskAricle">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>20</y>
+        <width>71</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaskSetArticle">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>40</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>setzen</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountArticle">
+      <property name="geometry">
+       <rect>
+        <x>490</x>
+        <y>30</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxAutoSearchArticle">
+      <property name="geometry">
+       <rect>
+        <x>560</x>
+        <y>70</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>auto</string>
+      </property>
+     </widget>
+     <widget class="Line" name="lineArticle">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>210</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonArticleCopy">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>130</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Artikel kopieren</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabWaregroup">
+     <attribute name="title">
+      <string>Warengruppen</string>
+     </attribute>
+     <widget class="QTreeWidget" name="treeWidgetWaregroup">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>170</y>
+        <width>256</width>
+        <height>192</height>
+       </rect>
+      </property>
+      <property name="showDropIndicator" stdset="0">
+       <bool>true</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::NoDragDrop</enum>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>false</bool>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="wordWrap">
+       <bool>false</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Warengruppen</string>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Bemerkungen</string>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Parent ID</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="pushButtonWgNew">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>20</y>
+        <width>181</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>neue Warengruppe</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonWgDelete">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>80</y>
+        <width>181</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Warengruppe löschen</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonWgEdit">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>50</y>
+        <width>181</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Warengruppe bearbeiten</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountWaregroup">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>50</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabMaker">
+     <attribute name="title">
+      <string>Hersteller</string>
+     </attribute>
+     <widget class="QListWidget" name="listWidgetMakerData">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>140</y>
+        <width>341</width>
+        <height>211</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>false</bool>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMakerNew">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>10</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>neuer Hersteller</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMakerDelete">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>70</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Hersteller löschen</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidgetMaker">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>256</width>
+        <height>361</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Hersteller</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QLabel" name="labelMaker">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditMakerMask">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>20</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMakerEdit">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>40</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Hersteller bearbeiten</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaskSetMaker">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>0</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>setzen</string>
+      </property>
+      <property name="shortcut">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountMaker">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>30</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxAutoSearchMaker">
+      <property name="geometry">
+       <rect>
+        <x>500</x>
+        <y>50</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>auto</string>
+      </property>
+     </widget>
+     <widget class="Line" name="lineMaker">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>350</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskMaker">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>110</y>
+        <width>161</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Adresse</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Telefonnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Faxnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>email</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>homepage</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kontaktperson</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabDealer">
+     <attribute name="title">
+      <string>Händler</string>
+     </attribute>
+     <widget class="QLabel" name="labelDealer">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditDealerMask">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>30</y>
+        <width>151</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidgetDealer">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>70</y>
+        <width>256</width>
+        <height>361</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Händler</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="pushButtonDealerDelete">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>100</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Händler löschen</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonDealerNew">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>40</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>neuer Händler</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonDealerEdit">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>70</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Händler bearbeiten</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidgetDealerData">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>150</y>
+        <width>341</width>
+        <height>211</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>false</bool>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaskSetDealer">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>20</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>setzen</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBoxAutoSearchDealer">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>50</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>auto</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountDealer">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>90</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="Line" name="lineDealer">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>380</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskDealer">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>0</y>
+        <width>161</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kundennummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Adresse</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Telefonnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Faxnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>email</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>homepage</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kontaktperson</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabCustomer">
+     <attribute name="title">
+      <string>Kunden</string>
+     </attribute>
+     <widget class="QCheckBox" name="checkBoxAutoSearchCustomer">
+      <property name="geometry">
+       <rect>
+        <x>590</x>
+        <y>90</y>
+        <width>93</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>auto</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelMaskCustomer">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>40</y>
+        <width>71</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonCustomerDelete">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>150</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Kunde löschen</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonCustomerEdit">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>120</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Kunde bearbeiten</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonCustomerNew">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>90</y>
+        <width>171</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>neuer Kunde</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountCustomer">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>50</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditCustomerMask">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>60</y>
+        <width>251</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maxLength">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaskSetCustomer">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>60</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>setzen</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskCustomer">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>30</y>
+        <width>251</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Kundennummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Nachname</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Vorname</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Strasse</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Postleitzahl</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Ort</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Telefonnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Faxnummer</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Email</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QTableWidget" name="tableWidgetCustomer">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>90</y>
+        <width>256</width>
+        <height>361</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>true</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Kundennummer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Nachname, Vorname</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Adresse</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Kommentar</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="Line" name="lineCustomer">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>220</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidgetCustomerData">
+      <property name="geometry">
+       <rect>
+        <x>410</x>
+        <y>260</y>
+        <width>341</width>
+        <height>211</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>false</bool>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabLog">
+     <attribute name="title">
+      <string>Logbuch</string>
+     </attribute>
+     <widget class="QComboBox" name="comboBoxLogbookMaskYear">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>140</y>
+        <width>71</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="Line" name="lineLogbook">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>90</y>
+        <width>31</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelMaskLogbook">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>30</y>
+        <width>62</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Filter:</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidgetLogbookMaskDate">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>180</y>
+        <width>181</width>
+        <height>171</height>
+       </rect>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidgetLogbook">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>180</y>
+        <width>181</width>
+        <height>171</height>
+       </rect>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>false</bool>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelCountLogbook">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>140</y>
+        <width>131</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Datensätze</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxMaskLogbook">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>80</y>
+        <width>151</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>alle</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>nur Warenein-/ausgänge</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>nur Bestellungen</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>nur Artikel</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>nur Warengruppen</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>nur Hersteller</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>nur Händler</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>nur Kunden</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_count_log_item">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>30</y>
+        <width>371</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Anzahl der letzten zu speichernden Logbucheinträge:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditCountItemLog">
+      <property name="geometry">
+       <rect>
+        <x>500</x>
+        <y>70</y>
+        <width>81</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>100</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonLogbookChangeCount">
+      <property name="geometry">
+       <rect>
+        <x>590</x>
+        <y>120</y>
+        <width>111</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Anzahl ändern</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonLogbookClear">
+      <property name="geometry">
+       <rect>
+        <x>590</x>
+        <y>160</y>
+        <width>111</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Logbuch leeren</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1000</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuInfo">
+    <property name="title">
+     <string>Programm</string>
+    </property>
+    <addaction name="menuQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuOver">
+    <property name="title">
+     <string>Hilfe</string>
+    </property>
+    <addaction name="menuHelp"/>
+    <addaction name="separator"/>
+    <addaction name="menuAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuPrinter">
+    <property name="title">
+     <string>Druck</string>
+    </property>
+    <widget class="QMenu" name="menuPrinterTrade">
+     <property name="title">
+      <string>Warenein-/ausgang</string>
+     </property>
+     <addaction name="menuPrinterTradeOView"/>
+     <addaction name="menuPrinterTradeSel"/>
+    </widget>
+    <widget class="QMenu" name="menuPrinterOrdering">
+     <property name="title">
+      <string>Bestellung(en)</string>
+     </property>
+     <addaction name="menuPrinterOrderingOView"/>
+     <addaction name="menuPrinterOrderingSel"/>
+    </widget>
+    <widget class="QMenu" name="menuPrinterArticle">
+     <property name="title">
+      <string>Artikel</string>
+     </property>
+     <addaction name="menuPrinterArticleOView"/>
+    </widget>
+    <widget class="QMenu" name="menuPrinterMaker">
+     <property name="title">
+      <string>Hersteller</string>
+     </property>
+     <addaction name="menuPrinterMakerOView"/>
+     <addaction name="menuPrinterMakerSel"/>
+    </widget>
+    <widget class="QMenu" name="menuPrinterDealer">
+     <property name="title">
+      <string>Händler</string>
+     </property>
+     <addaction name="menuPrinterDealerOView"/>
+     <addaction name="menuPrinterDealerSel"/>
+    </widget>
+    <widget class="QMenu" name="menuPrinterCustomer">
+     <property name="title">
+      <string>Kunde(n)</string>
+     </property>
+     <addaction name="menuPrinterCustomerOView"/>
+     <addaction name="menuPrinterCustomerSel"/>
+    </widget>
+    <widget class="QMenu" name="menuPrinterInventory_2">
+     <property name="title">
+      <string>Lagerbestände</string>
+     </property>
+     <addaction name="menuPrinterInventoryOView"/>
+    </widget>
+    <widget class="QMenu" name="menuLogbuch">
+     <property name="title">
+      <string>Logbuch</string>
+     </property>
+     <addaction name="menuPrinterLogbookDateView"/>
+    </widget>
+    <widget class="QMenu" name="menuWarengruppen">
+     <property name="title">
+      <string>Warengruppen</string>
+     </property>
+     <addaction name="menuPrinterWaregroupOView"/>
+    </widget>
+    <addaction name="separator"/>
+    <addaction name="menuPrinterInventory_2"/>
+    <addaction name="menuPrinterTrade"/>
+    <addaction name="menuPrinterOrdering"/>
+    <addaction name="menuPrinterArticle"/>
+    <addaction name="menuWarengruppen"/>
+    <addaction name="menuPrinterMaker"/>
+    <addaction name="menuPrinterDealer"/>
+    <addaction name="menuPrinterCustomer"/>
+    <addaction name="menuLogbuch"/>
+   </widget>
+   <widget class="QMenu" name="menuList">
+    <property name="title">
+     <string>Listen</string>
+    </property>
+    <addaction name="menuListBalanceList"/>
+    <addaction name="menuListUnderWarnLimit"/>
+    <addaction name="menuListInventoryDate"/>
+    <addaction name="menuListInv"/>
+   </widget>
+   <widget class="QMenu" name="menuDatabase">
+    <property name="title">
+     <string>Datenbank</string>
+    </property>
+    <widget class="QMenu" name="menuExport">
+     <property name="title">
+      <string>Daten als CSV-Datei exportieren</string>
+     </property>
+     <addaction name="menuExportInventory"/>
+     <addaction name="menuExportTrade"/>
+     <addaction name="menuExportOrdering"/>
+     <addaction name="menuExportArticle"/>
+     <addaction name="menuExportWaregroup"/>
+     <addaction name="menuExportMaker"/>
+     <addaction name="menuExportDealer"/>
+     <addaction name="menuExportCustomer"/>
+     <addaction name="menuExportLogbook"/>
+    </widget>
+    <addaction name="menuDbBackupCreate"/>
+    <addaction name="menuDbBackupLoad"/>
+    <addaction name="separator"/>
+    <addaction name="menuExport"/>
+    <addaction name="menuImportFromCSV"/>
+    <addaction name="separator"/>
+    <addaction name="menuDbImportFromLavaOne"/>
+    <addaction name="separator"/>
+    <addaction name="menuDbClear"/>
+   </widget>
+   <widget class="QMenu" name="menuSetting">
+    <property name="title">
+     <string>Einstellungen</string>
+    </property>
+    <addaction name="menuSettingInventory"/>
+    <addaction name="menuSettingArticle"/>
+   </widget>
+   <addaction name="menuInfo"/>
+   <addaction name="menuPrinter"/>
+   <addaction name="menuList"/>
+   <addaction name="menuDatabase"/>
+   <addaction name="menuSetting"/>
+   <addaction name="menuOver"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="menuQuit">
+   <property name="text">
+    <string>beenden</string>
+   </property>
+  </action>
+  <action name="menuAbout">
+   <property name="text">
+    <string>über das Programm</string>
+   </property>
+  </action>
+  <action name="actionPrinterSettings">
+   <property name="text">
+    <string>Druckeinstellungen</string>
+   </property>
+  </action>
+  <action name="menuPrinterTradeSel">
+   <property name="text">
+    <string>Auswahl</string>
+   </property>
+  </action>
+  <action name="menuPrinterTradeOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuPrinterOrderingSel">
+   <property name="text">
+    <string>Auswahl</string>
+   </property>
+  </action>
+  <action name="menuPrinterOrderingOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuArticleSel">
+   <property name="text">
+    <string>Auswahl</string>
+   </property>
+  </action>
+  <action name="menuPrinterArticleOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuPrinterMakerSel">
+   <property name="text">
+    <string>Auswahl</string>
+   </property>
+  </action>
+  <action name="menuPrinterMakerOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuPrinterDealerSel">
+   <property name="text">
+    <string>Auswahl</string>
+   </property>
+  </action>
+  <action name="menuPrinterDealerOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuPrinterCustomerSel">
+   <property name="text">
+    <string>Auswahl</string>
+   </property>
+  </action>
+  <action name="menuPrinterCustomerOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuHelp">
+   <property name="text">
+    <string>Hilfe</string>
+   </property>
+  </action>
+  <action name="menuPrinterInventoryOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuPrinterLogbookDateView">
+   <property name="text">
+    <string>Tagesübersicht</string>
+   </property>
+  </action>
+  <action name="menuPrinterWaregroupOView">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="menuListBalanceList">
+   <property name="text">
+    <string>Artikelsaldenliste</string>
+   </property>
+  </action>
+  <action name="menuListUnderWarnLimit">
+   <property name="text">
+    <string>Artikel unter Warnlimit</string>
+   </property>
+  </action>
+  <action name="menuDbBackupCreate">
+   <property name="text">
+    <string>Sicherung erstellen</string>
+   </property>
+  </action>
+  <action name="menuDbBackupLoad">
+   <property name="text">
+    <string>Sicherung laden</string>
+   </property>
+  </action>
+  <action name="menuDbClear">
+   <property name="text">
+    <string>Datenbank leeren</string>
+   </property>
+  </action>
+  <action name="menuListInventoryDate">
+   <property name="text">
+    <string>Artikelbestände(Datum)</string>
+   </property>
+  </action>
+  <action name="menuSettingInventory">
+   <property name="text">
+    <string>Tabelle Lagerbestand</string>
+   </property>
+  </action>
+  <action name="menuSettingArticle">
+   <property name="text">
+    <string>Tabelle Artikel</string>
+   </property>
+  </action>
+  <action name="menuExportInventory">
+   <property name="text">
+    <string>Lagerbestände</string>
+   </property>
+  </action>
+  <action name="menuExportArticle">
+   <property name="text">
+    <string>Artikel</string>
+   </property>
+  </action>
+  <action name="menuExportMaker">
+   <property name="text">
+    <string>Hersteller</string>
+   </property>
+  </action>
+  <action name="menuExportDealer">
+   <property name="text">
+    <string>Händler</string>
+   </property>
+  </action>
+  <action name="menuExportCustomer">
+   <property name="text">
+    <string>Kunde(n)</string>
+   </property>
+  </action>
+  <action name="menuExportLogbook">
+   <property name="text">
+    <string>Logbuch</string>
+   </property>
+  </action>
+  <action name="menuExportWaregroup">
+   <property name="text">
+    <string>Warengruppen</string>
+   </property>
+  </action>
+  <action name="menuExportOrdering">
+   <property name="text">
+    <string>Bestellung(en)</string>
+   </property>
+  </action>
+  <action name="menuExportTrade">
+   <property name="text">
+    <string>Warenein-/ausgang</string>
+   </property>
+  </action>
+  <action name="menuImportFromCSV">
+   <property name="text">
+    <string>Daten aus CSV-Datei importieren</string>
+   </property>
+  </action>
+  <action name="menuDbImportFromLavaOne">
+   <property name="text">
+    <string>Daten aus LaVa 1 importieren</string>
+   </property>
+  </action>
+  <action name="menuListInv">
+   <property name="text">
+    <string>Inventurliste</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>treeWidgetWaregroup</tabstop>
+  <tabstop>pushButtonWgNew</tabstop>
+  <tabstop>pushButtonWgEdit</tabstop>
+  <tabstop>pushButtonWgDelete</tabstop>
+  <tabstop>listWidgetMakerData</tabstop>
+  <tabstop>pushButtonMakerNew</tabstop>
+  <tabstop>pushButtonMakerDelete</tabstop>
+  <tabstop>tableWidgetMaker</tabstop>
+  <tabstop>lineEditMakerMask</tabstop>
+ </tabstops>
+ <resources>
+  <include location="lava2res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

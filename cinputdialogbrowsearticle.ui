@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CInputDialogBrowseArticle</class>
+ <widget class="QDialog" name="CInputDialogBrowseArticle">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>540</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="lava2res.qrc">
+    <normaloff>:/images/res/icon.ico</normaloff>:/images/res/icon.ico</iconset>
+  </property>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>121</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Artikel:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBoxMask">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>181</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Artikelbezeichnung</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>1.Artikelnummer</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>2.Artikelnummer</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Hersteller</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Warengruppe</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Standort</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>500</y>
+     <width>591</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+   <property name="centerButtons">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tableWidgetArticle">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>90</y>
+     <width>881</width>
+     <height>401</height>
+    </rect>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="alternatingRowColors">
+    <bool>true</bool>
+   </property>
+   <property name="selectionMode">
+    <enum>QAbstractItemView::SingleSelection</enum>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <property name="sortingEnabled">
+    <bool>true</bool>
+   </property>
+   <column>
+    <property name="text">
+     <string>Artikelbezeichnung</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Artikelnummer(n)</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Hersteller</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Warengruppe</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Standort</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>id</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QPushButton" name="pushButtonMaskSet">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>30</y>
+     <width>81</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>setzen</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>121</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Filter:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditMask">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>30</y>
+     <width>511</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="maxLength">
+    <number>200</number>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBoxAuto">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>30</y>
+     <width>71</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Auto</string>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>comboBoxMask</tabstop>
+  <tabstop>lineEditMask</tabstop>
+  <tabstop>pushButtonMaskSet</tabstop>
+  <tabstop>checkBoxAuto</tabstop>
+  <tabstop>tableWidgetArticle</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="lava2res.qrc"/>
+ </resources>
+ <connections/>
+</ui>
