@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,12 +25,16 @@ CInputDialogBrowseArticle::CInputDialogBrowseArticle(QWidget *parent) :
 {
     ui->setupUi(this);
     m_pThread=NULL;
+    m_bMaskDisable=false;
 
     ui->buttonBox->setEnabled(false);
     settings(false);//load & set settings
 
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
+
+    //disable auto default buttons
+    ui->pushButtonMaskSet->setAutoDefault(false);
 
     //connects
     connect(ui->pushButtonMaskSet,SIGNAL(clicked()),this,SLOT(update_table()));
@@ -54,6 +58,8 @@ void CInputDialogBrowseArticle::keyPressEvent(QKeyEvent * event)
     {
         if(ui->lineEditMask->hasFocus())
             update_table();
+        else if(ui->tableWidgetArticle->hasFocus())
+            accept();
     }
 }
 
@@ -62,71 +68,74 @@ bool CInputDialogBrowseArticle::settings(bool bUpdate)
     bool b;
     CSettings settings;
     QList<QString> lsSType,lsSValue,lsSUpdateType,lsSUpdateValue;
-    lsSType.push_back(QString("DLG_ARTICLE_BROWSE_TABLE_COLUMNS_WIDTHS"));
-    lsSType.push_back(QString("TABLE_SORT_ORDER_DLG_ARTICLE_BROWSE"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_ARTICLE_BROWSE"));
-    lsSType.push_back(QString("MASK_SELECTION_DLG_ARTICLE_BROWSE"));
-    //-
-    b=settings.load(lsSType,lsSValue);//load all settings
-    if(b)
-    {
-        if(!bUpdate)//set
-        {
-            //table width
-            if(lsSValue.count()>0)
-                settings.set_table_columns_width(ui->tableWidgetArticle,lsSValue[0],200);
-            //table sort
-            if(lsSValue.count()>1)
-                settings.set_table_sort(ui->tableWidgetArticle,lsSValue[1],0);
-            //auto checkbox
-            if(lsSValue.count()>2)
-                settings.set_checkbox(ui->checkBoxAuto,lsSValue[2],false);
-            //mask selection
-            if(lsSValue.count()>3)
-                settings.set_combobox(ui->comboBoxMask,lsSValue[3],0);
-        }
-        if(bUpdate)//write
-        {
-            //table width
-            if(lsSValue.count()>0)
-            {
-                if(settings.get_table_columns_width(ui->tableWidgetArticle,lsSValue[0]))//setting change?
-                {
-                    lsSUpdateType.push_back(lsSType[0]);
-                    lsSUpdateValue.push_back(lsSValue[0]);
-                }
-            }
-            //table sort
-            if(lsSValue.count()>1)
-            {
-                if(settings.get_table_sort(ui->tableWidgetArticle,lsSValue[1]))//setting change?
-                {
-                    lsSUpdateType.push_back(lsSType[1]);
-                    lsSUpdateValue.push_back(lsSValue[1]);
-                }
-            }
-            //checkbox
-            if(lsSValue.count()>2)
-            {
-                if(settings.get_checkbox(ui->checkBoxAuto,lsSValue[2]))//setting change?
-                {
-                    lsSUpdateType.push_back(lsSType[2]);
-                    lsSUpdateValue.push_back(lsSValue[2]);
-                }
-            }
-            //combobox
-            if(lsSValue.count()>3)
-            {
-                if(settings.get_combobox(ui->comboBoxMask,lsSValue[3]))//setting change?
-                {
-                    lsSUpdateType.push_back(lsSType[3]);
-                    lsSUpdateValue.push_back(lsSValue[3]);
-                }
-            }
+    lsSType.push_back(QString::fromUtf8("DLG_ARTICLE_BROWSE_TABLE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("TABLE_SORT_ORDER_DLG_ARTICLE_BROWSE"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_ARTICLE_BROWSE"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_DLG_ARTICLE_BROWSE"));
 
-            //write updates
-            if(lsSUpdateType.count()>0 && lsSUpdateType.count()==lsSUpdateValue.count())
-                b=settings.write(lsSUpdateType,lsSUpdateValue);
+    if(!m_bMaskDisable)//save settings only when mask not disable
+    {
+        b=settings.load(lsSType,lsSValue);//load all settings
+        if(b)
+        {
+            if(!bUpdate)//set
+            {
+                //table width
+                if(lsSValue.count()>0)
+                    settings.set_table_columns_width(ui->tableWidgetArticle,lsSValue[0],200);
+                //table sort
+                if(lsSValue.count()>1)
+                    settings.set_table_sort(ui->tableWidgetArticle,lsSValue[1],0);
+                //auto checkbox
+                if(lsSValue.count()>2)
+                    settings.set_checkbox(ui->checkBoxAuto,lsSValue[2],false);
+                //mask selection
+                if(lsSValue.count()>3)
+                    settings.set_combobox(ui->comboBoxMask,lsSValue[3],0);
+            }
+            if(bUpdate)//write
+            {
+                //table width
+                if(lsSValue.count()>0)
+                {
+                    if(settings.get_table_columns_width(ui->tableWidgetArticle,lsSValue[0]))//setting change?
+                    {
+                        lsSUpdateType.push_back(lsSType[0]);
+                        lsSUpdateValue.push_back(lsSValue[0]);
+                    }
+                }
+                //table sort
+                if(lsSValue.count()>1)
+                {
+                    if(settings.get_table_sort(ui->tableWidgetArticle,lsSValue[1]))//setting change?
+                    {
+                        lsSUpdateType.push_back(lsSType[1]);
+                        lsSUpdateValue.push_back(lsSValue[1]);
+                    }
+                }
+                //checkbox
+                if(lsSValue.count()>2)
+                {
+                    if(settings.get_checkbox(ui->checkBoxAuto,lsSValue[2]))//setting change?
+                    {
+                        lsSUpdateType.push_back(lsSType[2]);
+                        lsSUpdateValue.push_back(lsSValue[2]);
+                    }
+                }
+                //combobox
+                if(lsSValue.count()>3)
+                {
+                    if(settings.get_combobox(ui->comboBoxMask,lsSValue[3]))//setting change?
+                    {
+                        lsSUpdateType.push_back(lsSType[3]);
+                        lsSUpdateValue.push_back(lsSValue[3]);
+                    }
+                }
+
+                //write updates
+                if(lsSUpdateType.count()>0 && lsSUpdateType.count()==lsSUpdateValue.count())
+                    b=settings.write(lsSUpdateType,lsSUpdateValue);
+            }
         }
     }
     //-
@@ -181,17 +190,17 @@ bool CInputDialogBrowseArticle::update_table(void)
 
     //-condition-
     if(sMask.length()<=0)//mask not set?
-        sCondition=QString("");
+        sCondition=QString::fromUtf8("");
     else
     {
         if(iMask==0)//name?
-            sCondition=QString("name like '%%1%'").arg(sMask);
+            sCondition=QString::fromUtf8("name like '%%1%'").arg(sMask);
         else if(iMask==1)//number
-            sCondition=QString("articlenumber like '%%1%'").arg(sMask);
+            sCondition=QString::fromUtf8("articlenumber like '%%1%'").arg(sMask);
         else if(iMask==2)//2.number
-            sCondition=QString("articlenumber2 like '%%1%'").arg(sMask);
+            sCondition=QString::fromUtf8("articlenumber2 like '%%1%'").arg(sMask);
         else if(iMask==5)//location
-            sCondition=QString("location like '%%1%'").arg(sMask);
+            sCondition=QString::fromUtf8("location like '%%1%'").arg(sMask);
         else
             sCondition=QString(sMask);
     }
@@ -248,4 +257,24 @@ bool CInputDialogBrowseArticle::set_data(int iArticleId)
         }
     }
     return b;
+}
+
+bool CInputDialogBrowseArticle::set_mask_and_disable_change(QString sMask, int iArticlenumberSelect)
+{
+    if(iArticlenumberSelect >=0 && iArticlenumberSelect <=1 && sMask.length()>0)
+    {
+        ui->comboBoxMask->setCurrentIndex(iArticlenumberSelect+1);
+        ui->lineEditMask->setText(sMask);
+        ui->comboBoxMask->setDisabled(true);
+        ui->lineEditMask->setDisabled(true);
+        ui->checkBoxAuto->setDisabled(true);
+        ui->pushButtonMaskSet->setDisabled(true);
+    }
+    return true;
+}
+
+bool CInputDialogBrowseArticle::select_first_row(void)
+{
+    ui->tableWidgetArticle->selectRow(0);
+    return true;
 }

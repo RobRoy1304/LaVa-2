@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,26 +34,32 @@ int main(int argc, char *argv[])
         a.addLibraryPath( a.applicationDirPath() + "/plugins" );
 
     //languages
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));//for german spezial letter
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf8"));//for german spezial letter
     QTranslator translator;
     if(translator.load("qt_de.qm", "")) // German for common qt widgets
         a.installTranslator(&translator); //for standard widgets texts
 
     //icon
-    QIcon ico(QString(":/images/res/icon.ico"));
+    QIcon ico(QString::fromUtf8(":/images/res/icon.ico"));
     if(!ico.isNull())
         a.setWindowIcon(ico);
 
     //start
+    CSettings settings;
     if(w.check_first_start())//first start? -> agreement yes?
     {
         if(!w.check_run_the_program())//don't running?
         {
-            if(w.open_db())//open db ok?
+            //logo
+            logo_dlg.set_db_interface(&w.m_db);//set db-interface
+            logo_dlg.exec();
+            if(!logo_dlg.get_start())//start?
+                settings.remove_line(QString::fromUtf8("PROGRAM_RUNNING"));
+            else
             {
-                //logo
-                logo_dlg.startTimer(1500);//start timer to close logo widget
-                logo_dlg.exec();
+                //user name
+                w.set_user(logo_dlg.get_user());
+                w.set_db_path(logo_dlg.get_db_path());
 
                 //init
                 w.init();
@@ -66,6 +72,9 @@ int main(int argc, char *argv[])
 
                 //fill tables
                 w.fill_all_table(true);
+
+                //fill logbook count
+                w.fill_logbook_count();
 
                 //warnlinit
                 w.inventory_check_article_under_warnlimit();

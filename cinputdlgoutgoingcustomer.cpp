@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,9 +28,19 @@ CInputDlgOutgoingCustomer::CInputDlgOutgoingCustomer(QWidget *parent) :
     settings(false);//load & set settings
 
     ui->dateEdit->setDate(QDate().currentDate());//set current date
-    ui->buttonBox->setEnabled(false);
+    ui->pushButtonOk->setEnabled(false);
     ui->pushButtonDelete->setEnabled(false);
     ui->pushButtonEdit->setEnabled(false);
+
+    //disable auto default buttons
+    ui->pushButtonAddBarcode->setAutoDefault(false);
+    ui->pushButtonCancel->setAutoDefault(false);
+    ui->pushButtonDelete->setAutoDefault(false);
+    ui->pushButtonEdit->setAutoDefault(false);
+    ui->pushButtonMaskSet->setAutoDefault(false);
+    ui->pushButtonNew->setAutoDefault(false);
+    ui->pushButtonNomination->setAutoDefault(false);
+    ui->pushButtonOk->setAutoDefault(false);
 
     //date
     QDate dt=QDate().currentDate();
@@ -44,9 +54,9 @@ CInputDlgOutgoingCustomer::CInputDlgOutgoingCustomer(QWidget *parent) :
     m_pContextMenu=new QMenu(QString("context_default"),this);
     if(m_pContextMenu!=NULL)
     {
-        m_pContextMenu->addAction(QString("Hinzufügen"));
+        m_pContextMenu->addAction(QString::fromUtf8("Hinzufügen"));
         m_pContextMenu->addAction(QString("Bearbeiten"));
-        m_pContextMenu->addAction(QString("Löschen"));
+        m_pContextMenu->addAction(QString::fromUtf8("Löschen"));
     }
 
     //connects context menus
@@ -59,6 +69,7 @@ CInputDlgOutgoingCustomer::CInputDlgOutgoingCustomer(QWidget *parent) :
     connect(ui->comboBoxMask,SIGNAL(currentIndexChanged(QString)),this,SLOT(mask_edit()));
     connect(ui->pushButtonMaskSet,SIGNAL(clicked()),this,SLOT(update_customer_table()));
     connect(ui->pushButtonNew,SIGNAL(clicked()),this,SLOT(add_ware()));
+    connect(ui->pushButtonAddBarcode,SIGNAL(clicked()),this,SLOT(add_ware_barcode()));
     connect(ui->pushButtonDelete,SIGNAL(clicked()),this,SLOT(delete_ware()));
     connect(ui->pushButtonEdit,SIGNAL(clicked()),this,SLOT(edit_ware()));
     connect(ui->pushButtonNomination,SIGNAL(clicked()),this,SLOT(set_booking_number_nomination()));
@@ -67,6 +78,8 @@ CInputDlgOutgoingCustomer::CInputDlgOutgoingCustomer(QWidget *parent) :
     connect(ui->tableWidgetWares,SIGNAL(itemSelectionChanged()),this,SLOT(check_user_input()));
     connect(ui->tableWidgetCustomer,SIGNAL(itemSelectionChanged()),this,SLOT(check_user_input()));
     connect(ui->dateEdit,SIGNAL(dateChanged(QDate)),this,SLOT(date_changed(QDate)));
+    connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
+    connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -74,6 +87,7 @@ CInputDlgOutgoingCustomer::CInputDlgOutgoingCustomer(QWidget *parent) :
 
 CInputDlgOutgoingCustomer::~CInputDlgOutgoingCustomer()
 {
+    killTimer(m_iTimerId);
     settings(true);//save settings if update
 
     //context menu's
@@ -81,18 +95,6 @@ CInputDlgOutgoingCustomer::~CInputDlgOutgoingCustomer()
         delete m_pContextMenu;
 
     delete ui;
-}
-
-void CInputDlgOutgoingCustomer::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
 }
 
 void CInputDlgOutgoingCustomer::keyPressEvent(QKeyEvent * event)
@@ -116,6 +118,66 @@ void CInputDlgOutgoingCustomer::keyPressEvent(QKeyEvent * event)
         }
     }
     ls.clear();
+}
+
+void CInputDlgOutgoingCustomer::timerEvent(QTimerEvent *event)
+{
+    bool b=false;
+    QString s;
+    int id,type;
+    //-
+    if(event!=NULL && m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL && m_pThread->m_pWidgets!=NULL && m_LastDbChange.check_update_last_change())
+        {//db change from another client?
+            s=m_LastDbChange.get_last_change();//get fom db
+            if(m_LastDbChange.get_data_from_last_change_string(type,id,s))//split string
+            {
+                //orderings update?
+                if(type==LC_ACTION_UPDATE_CUSTOMER || type==LC_ACTION_UPDATE_ALL )
+                {
+                    update_customer_table();
+                    b=true;
+                }
+
+                //article's update?
+                if(type==LC_ACTION_UPDATE_MAKER || type==LC_ACTION_UPDATE_WAREGROUP || type==LC_ACTION_UPDATE_ARTICLE_INV
+                        || type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG || type==LC_ACTION_UPDATE_INVENTORY_TRADE)
+                {//update all rows
+                    update_wares_table();
+                    b=true;
+                }
+            }
+        }
+    }
+
+    //message in window title, if another client edit db
+    static QString mark_title=QString("");
+    static int counter=0;
+    static bool mark_message_on=false;
+    //-
+    if(b)
+    {
+        if(!mark_message_on)//message not on screen
+        {
+            counter=3;
+            mark_message_on=true;
+            mark_title=windowTitle();
+            s=mark_title+QString::fromUtf8(" - Datenbank wurde von einer anderen Programminstanz verändert");
+            setWindowTitle(s);
+        }
+    }
+
+    //counter run?
+    if(mark_message_on)
+    {
+        counter-=1;
+        if(counter<0)
+        {
+            setWindowTitle(mark_title);
+            mark_message_on=false;
+        }
+    }
 }
 
 bool CInputDlgOutgoingCustomer::open_context_menu()
@@ -150,11 +212,11 @@ bool CInputDlgOutgoingCustomer::receiv_context_menu(QAction * pAction)
     if(pAction==NULL)
         return false;
 
-    if(pAction->text()==QString("Hinzufügen"))
+    if(pAction->text()==QString::fromUtf8("Hinzufügen"))
         add_ware();
     if(pAction->text()==QString("Bearbeiten"))
         edit_ware();
-    if(pAction->text()==QString("Löschen"))
+    if(pAction->text()==QString::fromUtf8("Löschen"))
         delete_ware();
     return true;
 }
@@ -268,6 +330,12 @@ bool CInputDlgOutgoingCustomer::settings(bool bUpdate)
 bool CInputDlgOutgoingCustomer::set_thread(CWorkThread * pThread)
 {
     m_pThread=pThread;
+    //set db in class CLastDBChange
+    if(pThread!=NULL)
+    {
+        m_LastDbChange.set_db(pThread->m_pDbInterface);
+        m_iTimerId=startTimer(1000);//start timer
+    }
     return true;
 }
 
@@ -366,6 +434,66 @@ bool CInputDlgOutgoingCustomer::update_customer_table(void)
     return b;
 }
 
+bool CInputDlgOutgoingCustomer::update_wares_table(void)
+{
+    bool b;
+    int i,j,id;
+    QString s;
+    CArticle ar;
+    QTableWidgetItem * pItem;
+    QList<CTableItemData> lsData;
+    //-
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL && m_pThread->m_pWidgets!=NULL)
+        {
+            for(i=0;i<ui->tableWidgetWares->rowCount();i++)
+            {
+                //get article id
+                pItem=ui->tableWidgetWares->item(i,ui->tableWidgetWares->columnCount()-1);//last column->id
+                if(pItem!=NULL)
+                {
+                    s=pItem->text();
+                    id=s.toInt(&b);
+                }
+                if(b)
+                {
+                    //get article
+                    if(!m_pThread->m_pDbInterface->article_get(id,ar))
+                        b=false;//article not found
+                    else
+                    {
+                        //update article data in table
+                        if(m_pThread->m_pWidgets->article_format(ar,lsData,FORMAT_THREE))//get format text
+                        for(j=1;j<ui->tableWidgetWares->columnCount()-1 && j<lsData.count();j++)
+                        {
+                            pItem=ui->tableWidgetWares->item(i,j);
+                            if(pItem!=NULL)
+                            {
+                                if(pItem->text() != lsData[j-1].get_text())//article data update?
+                                    pItem->setText(lsData[j-1].get_text());
+                            }
+                        }
+                    }
+                }
+                //-
+                if(!b)
+                {//error->delete row
+                    ui->tableWidgetWares->removeRow(i);
+                    i--;
+                }
+                //-
+                lsData.clear();
+            }
+        }
+    }
+    //-
+    if(ui->tableWidgetWares->rowCount()<=0)//all rows delete?
+        ui->pushButtonOk->setEnabled(false);
+    //-
+    return true;
+}
+
 void CInputDlgOutgoingCustomer::mask_edit(void)
 {
     if(ui->checkBoxAuto->isChecked())
@@ -382,45 +510,34 @@ void CInputDlgOutgoingCustomer::checkbox_auto_clicked(void)
 
 bool CInputDlgOutgoingCustomer::add_ware(void)
 {
-    if(m_pThread==NULL)
-        return false;
-    QString s;
-    bool b;
+    CInputDialogArticleAllowance dlg;
     QDate dt=ui->dateEdit->date();//get selected date
-
-    //do -> user quit the article allowance dialog
-    QRect rMarkDlgGeometry(0,0,0,0);
-    CInputDialogArticleAllowance * pDlg=NULL;
-    do
+    //-
+    if(m_pThread!=NULL)
     {
-        pDlg=new CInputDialogArticleAllowance;
-        if(pDlg==NULL)
-            break;
-        if(rMarkDlgGeometry!=QRect(0,0,0,0))
-            pDlg->setGeometry(rMarkDlgGeometry);
-        pDlg->set(m_pThread,ui->tableWidgetWares,0,6,ARTICLE_DLG_TYPE_OUTGOING,-1,dt);
-        pDlg->setWindowTitle("hinzufügen");
-        b=pDlg->exec();
-        if(b)
-        {
-            if(pDlg->get_data(s))
-                insert_ware_at_table(s,false,true);
-            else
-                b=false;
-        }
-        if(!pDlg->get_checkbox_not_close_the_dialog())//dialog not close? (easy to add many article)
-            b=false;
-        if(pDlg!=NULL)
-        {
-            rMarkDlgGeometry=pDlg->geometry();
-            delete pDlg;
-            pDlg=NULL;
-        }
-    }while(b);
+        dlg.set(m_pThread,ui->tableWidgetWares,0,6,ARTICLE_DLG_TYPE_OUTGOING,-1,dt);
+        dlg.setWindowTitle(QString::fromUtf8("hinzufügen"));
+        if(dlg.exec())
+            check_user_input();
+    }
     //-
-    check_user_input();
+    return true;
+}
+
+bool CInputDlgOutgoingCustomer::add_ware_barcode(void)
+{
+    CInputDlgBarcode dlg;
+    QDate dt=ui->dateEdit->date();//get selected date
     //-
-    return b;
+    if(m_pThread!=NULL)
+    {
+        dlg.set(m_pThread,ui->tableWidgetWares,0,6,ARTICLE_DLG_TYPE_OUTGOING,dt);
+        dlg.setWindowTitle(QString::fromUtf8("hinzufügen (Barcode)"));
+        if(dlg.exec())
+            check_user_input();
+    }
+    //-
+    return true;
 }
 
 bool CInputDlgOutgoingCustomer::delete_ware(void)
@@ -518,7 +635,7 @@ bool CInputDlgOutgoingCustomer::check_user_input(void)
         ls=ui->tableWidgetCustomer->selectedItems();
         if(ls.count()<=0)
         {
-            sError=QString("Fehler: kein Kunde ausgewählt");
+            sError=QString::fromUtf8("Fehler: kein Kunde ausgewählt");
             b=false;
         }
         else
@@ -527,17 +644,17 @@ bool CInputDlgOutgoingCustomer::check_user_input(void)
             count=ui->tableWidgetWares->rowCount();
             if(count<=0)
             {
-                sError=QString("Fehler: keine Artikel in der Artikelliste");
+                sError=QString("Fehler: keine Artikel in der Warenliste");
                 b=false;
             }
         }
     }
     //-
     ui->labelError->setText(sError);
-    ui->buttonBox->setEnabled(b);
+    ui->pushButtonOk->setEnabled(b);
     memory.clear();
     ls.clear();
-    return true;
+    return b;
 }
 
 bool CInputDlgOutgoingCustomer::insert_ware_at_table(QString sData,bool bEdit,bool bSelect)
@@ -556,7 +673,7 @@ bool CInputDlgOutgoingCustomer::check_article_counts_on_date(void)
     QMessageBox msg(QMessageBox::Information,"","");
     QDate dt=ui->dateEdit->date();
     QString s;
-    bool b,bToMany=false;
+    bool b,bToMany=false,bReturn=true;
     QTableWidgetItem * pItem=NULL;
     int i,rows,count,id;
     unsigned int max;
@@ -588,6 +705,7 @@ bool CInputDlgOutgoingCustomer::check_article_counts_on_date(void)
                             m_pThread->set_work(WORK_ARTICLE_GET_INVENTORY_ON_DATE,&memory);//get max.count on date
                             if((unsigned int)count>max)//to many on this date
                             {
+                                bReturn=false;
                                 s=QString("%1").arg(max);
                                 if(max>0)
                                     pItem->setText(s);//set max.count
@@ -608,14 +726,14 @@ bool CInputDlgOutgoingCustomer::check_article_counts_on_date(void)
     //-
     if(bToMany)
     {
-        s=QString("Der/Die max.Warenausgang/-gänge der Artikel in der Liste an dem Datum wurde(n) überschritten,");
-        s+=QString("beachten Sie die chronologische Reihenfolge von Warenein-/ausgang! Die Anzahl wurde jeweils angepasst.");
+        s=QString::fromUtf8("Der/Die max.Warenausgang/-gänge der Artikel in der Liste an dem Datum wurde(n) überschritten,");
+        s+=QString::fromUtf8("beachten Sie die chronologische Reihenfolge von Warenein-/ausgang! Die Anzahl wurde jeweils angepasst.");
         msg.setWindowTitle("Information:");
         msg.setText(s);
         msg.exec();
     }
     //-
-    return true;
+    return bReturn;
 }
 
 bool CInputDlgOutgoingCustomer::get_data(CTrade & tr)
@@ -690,4 +808,44 @@ bool CInputDlgOutgoingCustomer::get_data(CTrade & tr)
     }
     //-
     return b;
+}
+
+void CInputDlgOutgoingCustomer::press_ok(void)
+{
+    bool bOk=true;
+    CTrade tr;
+    QString s;
+    QMessageBox msg(QMessageBox::Information,"","");
+    msg.setWindowTitle("!");
+    msg.setText(QString::fromUtf8("Artikel aus der Warenliste wurde(n) von einer anderen Programminstanz gelöscht!"));
+
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL)
+        {
+            if(check_article_counts_on_date())
+            {
+                if(check_user_input())
+                {
+                    //check article in list -> another client delete?
+                    get_data(tr);
+                    if(!m_pThread->m_pDbInterface->check_article_at_wares(tr.get_wares(),s))
+                    {//error article was delete
+                        msg.exec();
+                        bOk=false;
+                    }
+                    //-
+                    if(bOk)
+                        done(1);
+                    else
+                        close();
+                }
+            }
+        }
+    }
+}
+
+void CInputDlgOutgoingCustomer::press_cancel(void)
+{
+    close();
 }

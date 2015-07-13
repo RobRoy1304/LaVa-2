@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ class CInputDialogWaregroup : public QDialog
 
 private:
     Ui::CInputDialogWaregroup *ui;
-    int m_iWaregroupId;//only for edit mode
     CWorkThread * m_pThread;
 
-protected:
-    void changeEvent(QEvent *e);
-    bool check_waregroupname(void);
+    //only for edit mode
+    int m_iMarkId;
+    int m_iMarkParentId;
+    QString m_sMarkName;
 
 public:
     explicit CInputDialogWaregroup(QWidget *parent = 0);
@@ -46,14 +46,17 @@ public:
     void set_thread(CWorkThread * pThread=NULL);
     void set_data(CWaregroup & wg);
     void get_data(CWaregroup & wg);
+    void update_waregroup_tree(int iSelectId);
     void update_parent_label(void);
     void update_parent_label(int iId);
-    void update_waregroup_tree(int iSelectId);
+    bool check_waregroupname(void);
     bool settings(bool bUpdate=false);
 
 public slots:
     bool check_user_input();
     bool treewidget_clicked(QTreeWidgetItem* pItem);
+    void press_ok(void);
+    void press_cancel(void);
 };
 
 #endif // CINPUTDIALOGWAREGROUP_H

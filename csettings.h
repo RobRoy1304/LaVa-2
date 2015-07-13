@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ public:
     bool get_tab_order(QTabWidget * pTab, QString & sValues, QList<QWidget*> & lsPWidget);
     bool remove_line(QString sType);
     bool cast_string_to_int_list(QString s, QList<int> & lsInt, bool bWithType=false);
-    QString cast_int_list_to_string(QList<int> & lsInt, QString sType=QString(""));
+    QString cast_int_list_to_string(QList<int> & lsInt, QString sType=QString::fromUtf8(""));
     bool cast_table_columns_order_visible_alignment(QString & sValues, CTableColumnsData * p_tcdData);
     bool give_it_setting_file(void);
     bool is_program_running(void);

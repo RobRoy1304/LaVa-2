@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #define CDLGUNILIST_H
 
 #include <QDialog>
+#include <QPrintPreviewDialog>
 #include "cworkthread.h"
 #include "cprintjob.h"
 #include "csettings.h"
@@ -28,6 +29,8 @@
 
 #define TYPE_WARN_LIST 1
 #define TYPE_INVENTORYS_ON_DATE 2
+#define TYPE_INVENTORY_LIST 3
+#define TYPE_LIST_VALUE_OF_GOODS 4
 
 namespace Ui {
     class CDlgUniList;

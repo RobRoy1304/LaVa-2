@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@
 CSettings::CSettings()
 {
     //settings path
-    if(QFile::exists(QDir::homePath()+QString("/lava2/")))//aplication(lava2) installed?
-        m_sSettingsPath=QDir::homePath()+QString("/lava2/");
+    if(QFile::exists(QDir::homePath()+QString::fromUtf8("/lava2/")))//aplication(lava2) installed?
+        m_sSettingsPath=QDir::homePath()+QString::fromUtf8("/lava2/");
     else
-        m_sSettingsPath=QDir::currentPath()+QString("/");//not installed
+        m_sSettingsPath=QDir::currentPath()+QString::fromUtf8("/");//not installed
 }
 
 bool CSettings::create_default_setting_file(void)
 {
     bool b=true;
-    QString s,sFile=m_sSettingsPath+QString("settings.txt");
+    QString s,sFile=m_sSettingsPath+QString::fromUtf8("settings.txt");
     //-
     QFile file(sFile);
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -42,207 +42,262 @@ bool CSettings::create_default_setting_file(void)
     else
     {
         //main
-        s=QString("//MAINWINDOW\n");
-        file.write(s.toAscii());
-        s=QString("TAB_ORDER#0,1,2,3,4,5,6,7,8\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//MAINWINDOW\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TAB_ORDER#0,1,2,3,4,5,6,7,8\n");
+        file.write(s.toLatin1());
         //-
-        s=QString("INVENTORY_TABLE_COLUMNS_WIDTHS#100,80,200,200,200,200,200,200,200,200,200,200,0\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_INVENTORY#0,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_MAIN_INV#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_INVENTORY#0\n");
-        file.write(s.toAscii());
-        s=QString("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,1,2,1,1,3,1,1,4,1,1,5,1,0,6,1,0,7,1,0,8,1,0,9,1,0,10,1,0,11,1,0,12,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
-        file.write(s.toAscii());
+        s=QString::fromUtf8("INVENTORY_TABLE_COLUMNS_WIDTHS#100,80,200,200,200,200,200,200,200,200,200,200,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_INVENTORY#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_MAIN_INV#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_INVENTORY#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,1,2,1,1,3,1,1,4,1,1,5,1,0,6,1,0,7,1,0,8,1,0,9,1,0,10,1,0,11,1,0,12,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
+        file.write(s.toLatin1());
         //-
-        s=QString("TRADE_TABLE_COLUMNS_WIDTHS_OVIEW#200,200,200,200,200,200,200\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_TRADE_OVIEW#3,0\n");
-        file.write(s.toAscii());
-        s=QString("TRADE_TABLE_COLUMNS_WIDTHS_WARES#90,170,130,130,130,130,130\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_TRADE_WARES#1,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_MAIN_TRADE#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_TRADE#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_TRADE_PERIOD#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("TRADE_TABLE_COLUMNS_WIDTHS_OVIEW#200,200,200,200,200,200,200\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_TRADE_OVIEW#3,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TRADE_TABLE_COLUMNS_WIDTHS_WARES#90,170,130,130,130,130,130\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_TRADE_WARES#1,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_MAIN_TRADE#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_TRADE#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_TRADE_PERIOD#0\n");
+        file.write(s.toLatin1());
         //-
-        s=QString("ORDERING_TABLE_COLUMNS_WIDTHS_OVIEW#230,230,230,230,350,0\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_ORDERING_OVIEW#0,0\n");
-        file.write(s.toAscii());
-        s=QString("ORDERING_TABLE_COLUMNS_WIDTHS_WARES#100,200,180,180,180,180,180\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_ORDERING_WARES#1,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_MAIN_ORDERING#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_ORDERING#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("ORDERING_TABLE_COLUMNS_WIDTHS_OVIEW#230,230,230,230,350,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_ORDERING_OVIEW#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("ORDERING_TABLE_COLUMNS_WIDTHS_WARES#100,200,180,180,180,180,180\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_ORDERING_WARES#1,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_MAIN_ORDERING#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_ORDERING#0\n");
+        file.write(s.toLatin1());
         //-
-        s=QString("ARTICLE_TABLE_COLUMNS_WIDTHS#200,200,200,200,150,150,150,150,250,250,250,0\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_ARTICLE#0,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_MAIN_ARTICLE#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_ARTICLE#0\n");
-        file.write(s.toAscii());
-        s=QString("ARTICLE_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,0,2,1,0,3,1,0,4,1,0,5,1,1,6,1,1,7,1,1,8,1,1,9,1,0,10,1,0,11,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
-        file.write(s.toAscii());
+        s=QString::fromUtf8("ARTICLE_TABLE_COLUMNS_WIDTHS#200,200,200,200,150,150,150,150,250,250,250,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_ARTICLE#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_MAIN_ARTICLE#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_ARTICLE#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("ARTICLE_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT#0,1,0,1,1,0,2,1,0,3,1,0,4,1,0,5,1,1,6,1,1,7,1,1,8,1,1,9,1,0,10,1,0,11,0,0\n");//column order, bool visible, aligment 0-left,1-right,2-center
+        file.write(s.toLatin1());
         //-
-        s=QString("WAREGROUP_TREE_COLUMNS_WIDTHS#500,500,0,0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("WAREGROUP_TREE_COLUMNS_WIDTHS#500,500,0,0\n");
+        file.write(s.toLatin1());
         //-
-        s=QString("MAKER_TABLE_COLUMNS_WIDTHS#500,500,0\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_MAKER#0,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_MAIN_MAKER#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_MAKER#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("MAKER_TABLE_COLUMNS_WIDTHS#500,500,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_MAKER#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_MAIN_MAKER#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_MAKER#0\n");
+        file.write(s.toLatin1());
         //-
-        s=QString("DEALER_TABLE_COLUMNS_WIDTHS#500,500,0\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_DEALER#0,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_MAIN_DEALER#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_DEALER#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("DEALER_TABLE_COLUMNS_WIDTHS#500,500,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_DEALER#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_MAIN_DEALER#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_DEALER#0\n");
+        file.write(s.toLatin1());
         //-
-        s=QString("CUSTOMER_TABLE_COLUMNS_WIDTHS#150,280,280,280,0\n");
-        file.write(s.toAscii());
-        s=QString("SORT_ORDER_CUSTOMER#1,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_MAIN_CUSTOMER#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_CUSTOMER#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("CUSTOMER_TABLE_COLUMNS_WIDTHS#150,280,280,280,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("SORT_ORDER_CUSTOMER#1,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_MAIN_CUSTOMER#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_CUSTOMER#0\n");
+        file.write(s.toLatin1());
         //-
-        s=QString("MASK_SELECTION_LOGBOOK#0\n");
-        file.write(s.toAscii());
-        s=QString("LOGBOOK_COUNT#100\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("MASK_SELECTION_LOGBOOK#0\n");
+        file.write(s.toLatin1());
 
         //dlg trade in/out
-        s=QString("//DLG_TRADE\n");
-        file.write(s.toAscii());
-        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_IN_OUT_WARES#120,200,250,200,200,200,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_TRADE_IN_OUT_WARES#1,0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_TRADE\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_TRADE_TABLE_COLUMNS_WIDTHS_IN_OUT_WARES#120,200,250,200,200,200,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_TRADE_IN_OUT_WARES#1,0\n");
+        file.write(s.toLatin1());
 
         //dlg ordering incoming
-        s=QString("//DLG_TRADE_ORDERING_INCOMING\n");
-        file.write(s.toAscii());
-        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_ORD_IN_ORD#230,230,230,230,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_TRADE_ORDERING_ORD#0,0\n");
-        file.write(s.toAscii());
-        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_ORD_IN_WARES#230,230,230,230,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_TRADE_ORDERING_WARES#0,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_TRADE_ORDERING_INCOMING#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_DLG_TRADE_ORDERING#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_TRADE_ORDERING_INCOMING\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_TRADE_TABLE_COLUMNS_WIDTHS_ORD_IN_ORD#230,230,230,230,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_TRADE_ORDERING_ORD#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_TRADE_TABLE_COLUMNS_WIDTHS_ORD_IN_WARES#230,230,230,230,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_TRADE_ORDERING_WARES#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_TRADE_ORDERING_INCOMING#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_DLG_TRADE_ORDERING#0\n");
+        file.write(s.toLatin1());
 
         //dlg customer outgoing
-        s=QString("//DLG_TRADE_CUSTOMER_OUTGOING\n");
-        file.write(s.toAscii());
-        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_CUS_OUT_CUS#140,250,280,280,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_TRADE_CUSTOMER_CUS#1,0\n");
-        file.write(s.toAscii());
-        s=QString("DLG_TRADE_TABLE_COLUMNS_WIDTHS_CUS_OUT_WARES#120,200,250,200,200,200,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_TRADE_CUSTOMER_WARES#1,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_TRADE_CUSTOMER_OUTGOING#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_DLG_TRADE_CUSTOMER#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_TRADE_CUSTOMER_OUTGOING\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_TRADE_TABLE_COLUMNS_WIDTHS_CUS_OUT_CUS#140,250,280,280,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_TRADE_CUSTOMER_CUS#1,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_TRADE_TABLE_COLUMNS_WIDTHS_CUS_OUT_WARES#120,200,250,200,200,200,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_TRADE_CUSTOMER_WARES#1,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_TRADE_CUSTOMER_OUTGOING#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_DLG_TRADE_CUSTOMER#0\n");
+        file.write(s.toLatin1());
 
         //dlg ordering
-        s=QString("//DLG_ORDERING\n");
-        file.write(s.toAscii());
-        s=QString("DLG_ORDERING_TABLE_COLUMNS_WIDTHS_WARES#120,200,250,200,200,200,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_ORDERING#1,0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_ORDERING\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_ORDERING_TABLE_COLUMNS_WIDTHS_WARES#120,200,250,200,200,200,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_ORDERING#1,0\n");
+        file.write(s.toLatin1());
 
         //dlg article browse
-        s=QString("//DLG_ARTICLE_BROWSE\n");
-        file.write(s.toAscii());
-        s=QString("DLG_ARTICLE_BROWSE_TABLE_COLUMNS_WIDTHS#210,210,210,210,200,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_ARTICLE_BROWSE#0,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_ARTICLE_BROWSE#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_DLG_ARTICLE_BROWSE#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_ARTICLE_BROWSE\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_ARTICLE_BROWSE_TABLE_COLUMNS_WIDTHS#210,210,210,210,200,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_ARTICLE_BROWSE#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_ARTICLE_BROWSE#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_DLG_ARTICLE_BROWSE#0\n");
+        file.write(s.toLatin1());
 
         //dlg article allowance
-        s=QString("//DLG_ARTICLE_ALLOWANCE\n");
-        file.write(s.toAscii());
-        s=QString("DLG_ARTICLE_ALLOWANCE_TABLE_COLUMNS_WIDTHS#230,160,160,160,160,160,0\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_ALLOWANCE#1,0\n");
-        file.write(s.toAscii());
-        s=QString("AUTO_CHECKBOX_ARTICLE_ALLOWANCE#0\n");
-        file.write(s.toAscii());
-        s=QString("MASK_SELECTION_DLG_ALLOWANCE#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_ARTICLE_ALLOWANCE\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_ARTICLE_ALLOWANCE_TABLE_COLUMNS_WIDTHS#230,160,160,160,160,160,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_ALLOWANCE#1,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("AUTO_CHECKBOX_ARTICLE_ALLOWANCE#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("MASK_SELECTION_DLG_ALLOWANCE#0\n");
+        file.write(s.toLatin1());
 
         //dlg browse waregroup
-        s=QString("//DLG_BROWSE_WAREGROUP\n");
-        file.write(s.toAscii());
-        s=QString("DLG_WAREGROUP_TREE#300,300,0,0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_BROWSE_WAREGROUP\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_WAREGROUP_TREE#300,300,0,0\n");
+        file.write(s.toLatin1());
 
         //dlg uni list
-        s=QString("//DLG_UNI_LIST\n");
-        file.write(s.toAscii());
-        s=QString("DLG_ARTICLE_UNDER_WARNLIMIT_TABLE_COLUMNS_WIDTHS#230,140,140,130,130,100,100\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_UNI_LIST_TYPE_WARNLIMIT#0,0\n");
-        file.write(s.toAscii());
-        s=QString("DLG_INVENTORYS_ON_DATE_TABLE_COLUMNS_WIDTHS#160,160,160,160,150,150\n");
-        file.write(s.toAscii());
-        s=QString("TABLE_SORT_ORDER_DLG_UNI_LIST_TYPE_INV_ON_DATE#1,0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_UNI_LIST\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_ARTICLE_UNDER_WARNLIMIT_TABLE_COLUMNS_WIDTHS#230,140,140,130,130,100,100\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_UNI_LIST_TYPE_WARNLIMIT#0,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_INVENTORYS_ON_DATE_TABLE_COLUMNS_WIDTHS#160,160,160,160,150,150\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_UNI_LIST_TYPE_INV_ON_DATE#1,0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_UNI_INVENTORY_LIST_TABLE_COLUMNS_WIDTHS#130,160,200,130,130,170\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("TABLE_SORT_ORDER_DLG_UNI_INVENTORY_LIST#0,0\n");
+        file.write(s.toLatin1());
 
         //dlg balance list
-        s=QString("//DLG_BALANCE_LIST\n");
-        file.write(s.toAscii());
-        s=QString("DLG_BALANCE_LIST_TABLE_COLUMNS_WIDTHS#160,160,160,160,150,150\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//DLG_BALANCE_LIST\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_BALANCE_LIST_TABLE_COLUMNS_WIDTHS#160,160,160,160,150,150,150,150,150\n");
+        file.write(s.toLatin1());
+
+        //list values of goods
+        s=QString::fromUtf8("//DLG_LIST_VALUE_OF_GOODS\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_LIST_VALUE_OF_GOODS_TABLE_COLUMNS_WIDTHS#250,120,180,100,150,100,100,100\n");
+        file.write(s.toLatin1());
+
+        //input dlg barcode
+        s=QString::fromUtf8("//DLG_BARCODE\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_BARCODE_SELECT_ARTICLENUMBER#0\n");
+        file.write(s.toLatin1());
+
+        //export csv user settings dialog
+        s=QString::fromUtf8("//DLG_EXPORT_CSV_DIALOG\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_EXPORT_CSV_DIALOG_CODEC#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_EXPORT_CSV_DIALOG_SPLIT_TEXT_CHAR#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_EXPORT_CSV_DIALOG_SPLIT_CHAR#;\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_EXPORT_CSV_DIALOG_FIRST_ROW_HEADER#1\n");
+        file.write(s.toLatin1());
+
+        //import csv user setting dialog
+        s=QString::fromUtf8("//DLG_IMPORT_CSV_DIALOG\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_IMPORT_CSV_DIALOG_CODEC#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_IMPORT_CSV_DIALOG_SPLIT_TEXT_CHAR#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_IMPORT_CSV_DIALOG_SPLIT_CHAR#;\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("DLG_IMPORT_CSV_DIALOG_SELECT_TYPE#0\n");
+        file.write(s.toLatin1());
+
+        //print dialog setting
+        s=QString::fromUtf8("//PRINT_DIALOG\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("PRINT_DIALOG_MARGINS#15,10,10,10\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("PRINT_DIALOG_ORIENTATION#0\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("PRINT_DIALOG_PRINTER#\n");
+        file.write(s.toLatin1());
 
         //etc.
-        s=QString("//ETC\n");
-        file.write(s.toAscii());
-
-        //warelist
-        s=QString("WARELIST_DLG_NOT_CLOSE_BY_ADD#0\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("//ETC\n");
+        file.write(s.toLatin1());
 
         //path's
-        s=QString("BACKUP_PATH#\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("BACKUP_PATH#\n");
+        file.write(s.toLatin1());
 
-        s=QString("EXPORT_PATH#\n");
-        file.write(s.toAscii());
+        s=QString::fromUtf8("EXPORT_PATH#\n");
+        file.write(s.toLatin1());
 
+        s=QString::fromUtf8("IMPORT_PATH#\n");
+        file.write(s.toLatin1());
+
+        s=QString::fromUtf8("DB_PATH#\n");
+        file.write(s.toLatin1());
+
+        //users
+        s=QString::fromUtf8("//users\n");
+        file.write(s.toLatin1());
+        s=QString::fromUtf8("USERS#\n");
+        file.write(s.toLatin1());
         //-
         file.close();
     }
@@ -259,24 +314,25 @@ bool CSettings::load(QList<QString> & lsSType, QList<QString> & lsSValue)
     lsSValue.clear();
     while(lsSValue.count()<lsSType.count())
     {
-        lsSValue.push_back(QString(""));
+        lsSValue.push_back(QString::fromUtf8(""));
     }
     if(lsSValue.count()!=lsSType.count())
         return false;
 
     bool b=false;
     int i,j,iFound=0;
-    QString s,sValue, sFile=m_sSettingsPath+QString("settings.txt");
+    QString s,sValue, sFile=m_sSettingsPath+QString::fromUtf8("settings.txt");
     QStringList lsString;
     //-
+
     QFile file(sFile);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        file.close();
+            file.close();
     else
     {
         while (!file.atEnd())
         {
-            s=QString(file.readLine());
+            s=file.readLine();
             lsString=s.split("#");
             if(lsString.count()>1)
             {
@@ -285,7 +341,7 @@ bool CSettings::load(QList<QString> & lsSType, QList<QString> & lsSValue)
                 {
                     if(lsSType[i]==lsString[0])//found
                     {
-                        sValue=QString("");
+                        sValue=QString::fromUtf8("");
                         for(j=1;j<lsString.count();j++)
                             sValue+=lsString[j];
                         lsString.clear();
@@ -297,7 +353,6 @@ bool CSettings::load(QList<QString> & lsSType, QList<QString> & lsSValue)
                 }
             }
         }
-        //-
         file.close();
     }
     //-
@@ -311,7 +366,7 @@ bool CSettings::load(QString sType, QString & sValue)
     QList<QString> lsSType;
     lsSType.push_back(sType);
     QList<QString> lsSValue;
-    lsSValue.push_back(QString(""));
+    lsSValue.push_back(QString::fromUtf8(""));
     bool b=load(lsSType,lsSValue);
     if(lsSValue.count()> 0)
         sValue=lsSValue[0];
@@ -324,7 +379,7 @@ bool CSettings::write(QList<QString> & lsSType, QList<QString> & lsSValue)
 {
     int i;
     bool b=true;
-    QString s,sFile=m_sSettingsPath+QString("settings.txt"),sTempFile=m_sSettingsPath+QString("settings_temp.txt");
+    QString s,sFile=m_sSettingsPath+QString::fromUtf8("settings.txt"),sTempFile=m_sSettingsPath+QString::fromUtf8("settings_temp.txt");
     QStringList lsS;
     QFile file(sFile);
     QFile file_temp(sTempFile);
@@ -360,7 +415,7 @@ bool CSettings::write(QList<QString> & lsSType, QList<QString> & lsSValue)
                         {
                             if(lsSType[i]==lsS[0])//found
                             {
-                                s=QString("%1#%2\n").arg(lsSType[i],lsSValue[i]);
+                                s=QString::fromUtf8("%1#%2\n").arg(lsSType[i],lsSValue[i]);
                                 lsSType.removeAt(i);//remove
                                 lsSValue.removeAt(i);
                                 break;
@@ -376,7 +431,7 @@ bool CSettings::write(QList<QString> & lsSType, QList<QString> & lsSValue)
                 {
                     for(i=0;i<lsSType.count();i++)
                     {
-                        s=QString("%1#%2\n").arg(lsSType[i],lsSValue[i]);
+                        s=QString::fromUtf8("%1#%2\n").arg(lsSType[i],lsSValue[i]);
                         file_temp.write(s.toAscii()); //write in temp
                     }
                     lsSType.clear();
@@ -776,9 +831,9 @@ bool CSettings::get_table_columns_width(QTableWidget * pTable, QString & sValues
     //get
     for(i=0;i<pTable->columnCount();i++)
     {
-        sNew+=QString("%1").arg(pTable->columnWidth(i));
+        sNew+=QString::fromUtf8("%1").arg(pTable->columnWidth(i));
         if(i!=pTable->columnCount()-1)//not last column
-            sNew+=QString(",");
+            sNew+=QString::fromUtf8(",");
     }
 
     //check update?
@@ -799,8 +854,8 @@ bool CSettings::get_table_sort(QTableWidget * pTable, QString & sValues)
     bool bUpdate=false;
     QString sNew;
 
-    sNew+=QString("%1").arg(pTable->horizontalHeader()->sortIndicatorSection());
-    sNew+=QString(",%1").arg(pTable->horizontalHeader()->sortIndicatorOrder());
+    sNew+=QString::fromUtf8("%1").arg(pTable->horizontalHeader()->sortIndicatorSection());
+    sNew+=QString::fromUtf8(",%1").arg(pTable->horizontalHeader()->sortIndicatorOrder());
 
     //check update?
     if(sValues!=sNew)
@@ -825,14 +880,14 @@ bool CSettings::get_table_columns_order_visible_alignment(CTableColumnsData * pC
     pColumnsData->get_columns_order(lsOrder);
     pColumnsData->get_columns_visible(lsVisible);
     pColumnsData->get_columns_alignment(lsAlignment);
-    sNew=QString("");
+    sNew=QString::fromUtf8("");
     while(lsOrder.count()>0 && lsVisible.count()>0 && lsAlignment.count()>0)
     {
         if(sNew.length()>0)
-            sNew+=QString(",");
-        sNew+=QString("%1,").arg(lsOrder[0]);
-        sNew+=QString("%1,").arg(lsVisible[0]);
-        sNew+=QString("%1").arg(lsAlignment[0]);
+            sNew+=QString::fromUtf8(",");
+        sNew+=QString::fromUtf8("%1,").arg(lsOrder[0]);
+        sNew+=QString::fromUtf8("%1,").arg(lsVisible[0]);
+        sNew+=QString::fromUtf8("%1").arg(lsAlignment[0]);
         lsOrder.removeFirst();
         lsVisible.removeFirst();
         lsAlignment.removeFirst();
@@ -857,9 +912,9 @@ bool CSettings::get_checkbox(QCheckBox * pCheckBox,QString & sValue)
     QString sNew;
 
     if(pCheckBox->isChecked())
-        sNew=QString("1");
+        sNew=QString::fromUtf8("1");
     else
-        sNew=QString("0");
+        sNew=QString::fromUtf8("0");
 
     //check update?
     if(sValue!=sNew)
@@ -882,7 +937,7 @@ bool CSettings::get_combobox(QComboBox * pComboBox, QString  & sValue)
     bool bUpdate=false;
 
     //check update?
-    sNew=QString("%1").arg(pComboBox->currentIndex());
+    sNew=QString::fromUtf8("%1").arg(pComboBox->currentIndex());
     if(sValue!=sNew)
     {
         bUpdate=true;
@@ -904,9 +959,9 @@ bool CSettings::get_tree_width(QTreeWidget * pTree, QString & sValues)
     //get
     for(i=0;i<pTree->columnCount();i++)
     {
-        sNew+=QString("%1").arg(pTree->columnWidth(i));
+        sNew+=QString::fromUtf8("%1").arg(pTree->columnWidth(i));
         if(i!=pTree->columnCount()-1)//not last column
-            sNew+=QString(",");
+            sNew+=QString::fromUtf8(",");
     }
 
     //check update?
@@ -934,11 +989,11 @@ bool CSettings::get_tab_order(QTabWidget * pTab, QString & sValues,QList<QWidget
         for(j=0;j<lsPWidget.count();j++)
         {
             if(pTab->indexOf(lsPWidget[j])==i)//search widget index
-                sNew+=QString("%1").arg(j);
+                sNew+=QString::fromUtf8("%1").arg(j);
         }
         //-
         if(i<pTab->count()-1)//not the last?
-            sNew+=QString(",");
+            sNew+=QString::fromUtf8(",");
     }
 
     if(sNew!=sValues)//update?
@@ -953,7 +1008,7 @@ bool CSettings::get_tab_order(QTabWidget * pTab, QString & sValues,QList<QWidget
 bool CSettings::remove_line(QString sType)
 {
     bool b=true,bWriteLine;
-    QString s,sFile=m_sSettingsPath+QString("settings.txt"),sTempFile=m_sSettingsPath+QString("settings_temp.txt");
+    QString s,sFile=m_sSettingsPath+QString::fromUtf8("settings.txt"),sTempFile=m_sSettingsPath+QString::fromUtf8("settings_temp.txt");
     QStringList lsS;
     QFile file(sFile);
     QFile file_temp(sTempFile);
@@ -989,7 +1044,7 @@ bool CSettings::remove_line(QString sType)
                 lsS.clear();
                 //write
                 if(bWriteLine)
-                    file_temp.write(s.toAscii()); //write in temp
+                    file_temp.write(s.toLatin1()); //write in temp
             }
             //-
             file.close();
@@ -1014,7 +1069,7 @@ bool CSettings::cast_string_to_int_list(QString s, QList<int> & lsInt, bool bWit
         if(lsString.count()>1)
             s=lsString[1];
         else
-            s=QString("");
+            s=QString::fromUtf8("");
         lsString.clear();
     }
     //-
@@ -1037,13 +1092,13 @@ QString CSettings::cast_int_list_to_string(QList<int> & lsInt, QString sType)
     QString sReturn;
     //-
     if(sType.length()>0)//with type?
-        sReturn=QString("%1#").arg(sType);
+        sReturn=QString::fromUtf8("%1#").arg(sType);
     //-
     for(int i=0;i<lsInt.count();i++)
     {
-        sReturn+=QString("%1").arg(lsInt[i]);
+        sReturn+=QString::fromUtf8("%1").arg(lsInt[i]);
         if(i+1<lsInt.count())
-            sReturn+=QString(",");
+            sReturn+=QString::fromUtf8(",");
     }
     return sReturn;
 }
@@ -1152,7 +1207,7 @@ bool CSettings::cast_table_columns_order_visible_alignment(QString & sValues, CT
 
 bool CSettings::give_it_setting_file(void)
 {
-    QString sFile=m_sSettingsPath+QString("settings.txt");
+    QString sFile=m_sSettingsPath+QString::fromUtf8("settings.txt");
     bool b=QFile::exists(sFile);
     return b;
 }
@@ -1161,7 +1216,7 @@ bool CSettings::is_program_running(void)
 {
     bool b=false;
     QString s;
-    if(load(QString("PROGRAM_RUNNING"),s))
+    if(load(QString::fromUtf8("PROGRAM_RUNNING"),s))
         b=true;
     return b;
 }

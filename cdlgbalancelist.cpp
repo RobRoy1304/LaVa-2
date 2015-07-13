@@ -1,7 +1,7 @@
 
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,12 @@ CDlgBalanceList::CDlgBalanceList(QWidget *parent) :
     ui->dateEditTo->setDate(cur_dt);
     ui->dateEditFrom->setMaximumDate(cur_dt);
     ui->dateEditTo->setMaximumDate(cur_dt);
-    ui->listWidgetArticle->addItem(QString("Bitte einen Artikel auswählen..."));
+    ui->listWidgetArticle->addItem(QString::fromUtf8("Bitte einen Artikel auswählen..."));
+
+    //disable auto default buttons
+    ui->pushButtonBrowseArticle->setAutoDefault(false);
+    ui->pushButtonExport->setAutoDefault(false);
+    ui->pushButtonPrint->setAutoDefault(false);
 
     for(int i=0;i<ui->tableWidgetList->columnCount();i++)
         ui->tableWidgetList->setColumnWidth(i,150);
@@ -62,7 +67,7 @@ bool CDlgBalanceList::settings(bool bUpdate)
     bool b;
     CSettings settings;
     QList<QString> lsSType,lsSValue,lsSUpdateType,lsSUpdateValue;
-    lsSType.push_back(QString("DLG_BALANCE_LIST_TABLE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("DLG_BALANCE_LIST_TABLE_COLUMNS_WIDTHS"));
     //-
     b=settings.load(lsSType,lsSValue);//load all settings
     if(b)
@@ -71,7 +76,7 @@ bool CDlgBalanceList::settings(bool bUpdate)
         {
             //table width
             if(lsSValue.count()>0)
-                settings.set_table_columns_width(ui->tableWidgetList,lsSValue[0],200);
+                settings.set_table_columns_width(ui->tableWidgetList,lsSValue[0],150);
         }
         if(bUpdate)//write
         {
@@ -122,7 +127,7 @@ bool CDlgBalanceList::dates_changed(void)
 bool CDlgBalanceList::browse_article_dlg(void)
 {
     CInputDialogBrowseArticle dlg;
-    dlg.setWindowTitle(QString("Artikelauswahl"));
+    dlg.setWindowTitle(QString::fromUtf8("Artikelauswahl"));
     dlg.set_thread(m_pThread);
     dlg.set_data(m_iArticleId);
     if(dlg.exec())
@@ -148,34 +153,34 @@ bool CDlgBalanceList::update_article_info(void)
                 b=true;
                 ui->listWidgetArticle->clear();
 
-                s=QString("Bezeichnung: %1").arg(ar.get_name());
+                s=QString::fromUtf8("Bezeichnung: %1").arg(ar.get_name());
                 ui->listWidgetArticle->addItem(s);
 
                 s2=ar.get_articlenumber();
                 if(s2.length()>0)
                 {
-                    s=QString("1.Artikelnummer: %1").arg(s2);
+                    s=QString::fromUtf8("1.Artikelnummer: %1").arg(s2);
                     ui->listWidgetArticle->addItem(s);
                 }
 
                 s2=ar.get_articlenumber2();
                 if(s2.length()>0)
                 {
-                    s=QString("2.Artikelnummer: %1").arg(s2);
+                    s=QString::fromUtf8("2.Artikelnummer: %1").arg(s2);
                     ui->listWidgetArticle->addItem(s);
                 }
 
                 s2=m_pThread->m_pDbInterface->maker_get_name(ar.get_maker_id());
                 if(s2.length()>0)
                 {
-                    s=QString("Hersteller: %1").arg(s2);
+                    s=QString::fromUtf8("Hersteller: %1").arg(s2);
                     ui->listWidgetArticle->addItem(s);
                 }
 
                 s2=m_pThread->m_pDbInterface->waregroup_get_path(ar.get_waregroup_id());
                 if(s2.length()>0)
                 {
-                    s=QString("Warengruppe: %1").arg(s2);
+                    s=QString::fromUtf8("Warengruppe: %1").arg(s2);
                     ui->listWidgetArticle->addItem(s);
                 }
             }
@@ -202,11 +207,35 @@ bool CDlgBalanceList::update_balance_list(void)
 
 bool CDlgBalanceList::print_button_press(void)
 {
+    bool b,b2;
+    CSettings settings;
+    QList<int> lsInt;
+    qreal margin_left=15,margin_right=10,margin_top=10,margin_bottom=10;
     bool bAllColumns=true;
-    QString sTitle=QString("Artikelsaldenliste vom %1 bis %2:").arg(ui->dateEditFrom->date().toString(QString("dd.MM.yyyy")),ui->dateEditTo->date().toString(QString("dd.MM.yyyy")));
+    QString sMargins,sOrientation,sOriUpdate,sMarUpdate,sPrinter,sPriUpdate;
+    QString sTitle=QString::fromUtf8("Artikelsaldenliste vom %1 bis %2:").arg(ui->dateEditFrom->date().toString(QString::fromUtf8("dd.MM.yyyy")),ui->dateEditTo->date().toString(QString::fromUtf8("dd.MM.yyyy")));
+
+    //load settings
+    b2=settings.load("PRINT_DIALOG_MARGINS",sMargins);
+    if(b2)
+    {
+        b2=settings.cast_string_to_int_list(sMargins,lsInt);
+        if(lsInt.count()>=4)
+        {
+            margin_left=lsInt[0];
+            margin_top=lsInt[1];
+            margin_right=lsInt[2];
+            margin_bottom=lsInt[3];
+        }
+    }
+    if(!settings.load("PRINT_DIALOG_ORIENTATION",sOrientation))
+        sOrientation=QString::fromUtf8("0");//error set default
+
+    settings.load("PRINT_DIALOG_PRINTER",sPrinter);
 
     //init print job
     m_print_job.m_memory.clear();
+    m_print_job.set_type(PRINT_JOB_TABLE_AND_LIST);
     m_print_job.m_memory.set_tablewidget(ui->tableWidgetList);
     m_print_job.m_memory.set_bool(&bAllColumns);
     m_print_job.m_memory.set_listwidget(ui->listWidgetArticle);
@@ -214,10 +243,10 @@ bool CDlgBalanceList::print_button_press(void)
 
     //init preview dlg
     QPrinter printer(QPrinter::PrinterResolution);
-    bool b=true;
+    b=true;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("Fehler"));
-    msg.setText(QString("Dem Betriebssystem ist kein Drucker bekannt."));
+    msg.setWindowTitle(QString::fromUtf8("Fehler"));
+    msg.setText(QString::fromUtf8("Dem Betriebssystem ist kein Drucker bekannt."));
     if(!printer.isValid())
     {
         b=false;
@@ -225,26 +254,69 @@ bool CDlgBalanceList::print_button_press(void)
     }
     else
     {
-        printer.setDocName(QString("LaVa 2"));
-        printer.setFullPage( true );
+        printer.setDocName(QString("LaVa 2 - Artikelsaldenliste"));
         QPrintPreviewDialog previewDlg(&printer, this);
-        previewDlg.setWindowTitle(QString("Druckvorschau"));
+        previewDlg.setWindowTitle(QString::fromUtf8("Druckvorschau"));
         previewDlg.setWindowFlags ( Qt::Window );
         connect(&previewDlg, SIGNAL(paintRequested(QPrinter* )), SLOT(print(QPrinter* )));
         previewDlg.setMinimumSize(800,500);
-        printer.setPageMargins((qreal)5,(qreal)5,(qreal)5,(qreal)5,QPrinter::Millimeter);
+
+        //orientation
+        if(sOrientation==QString::fromUtf8("0"))
+            printer.setOrientation(QPrinter::Portrait);
+        else
+            printer.setOrientation(QPrinter::Landscape);
+
+        //margins
+        printer.setPageMargins(margin_left ,margin_top ,margin_right ,margin_bottom ,QPrinter::Millimeter);
+
+        //printer
+        if(sPrinter.length()>0)
+        {
+            printer.setPrinterName(sPrinter);
+            if(!printer.isValid())
+            {//error, last selected printer is not online
+                msg.setText(QString("Der zuletzt benutzte Drucker ist nicht erreichbar, es wird der Standarddrucker gesetzt."));
+                msg.exec();
+                printer.setPrinterName(QString(""));//set default printer
+            }
+        }
+
+        //-
         previewDlg.showMaximized();
         previewDlg.exec();
+
+        //get settings
+        printer.getPageMargins(&margin_left ,&margin_top ,&margin_right ,&margin_bottom ,QPrinter::Millimeter); //margins
+        sMarUpdate=QString("%1,").arg(margin_left);
+        sMarUpdate+=QString("%1,").arg(margin_top);
+        sMarUpdate+=QString("%1,").arg(margin_right);
+        sMarUpdate+=QString("%1").arg(margin_bottom);
+
+        if(printer.orientation()==0)//orientation
+            sOriUpdate=QString("0");
+        else
+            sOriUpdate=QString("1");
+
+        sPriUpdate=printer.printerName();
+
+        //update settings
+        if(sOrientation!=sOriUpdate && sOriUpdate.length()>0)
+            settings.write(QString("PRINT_DIALOG_ORIENTATION"),sOriUpdate);
+        if(sMargins!=sMarUpdate && sMarUpdate.length()>0)
+            settings.write(QString("PRINT_DIALOG_MARGINS"),sMarUpdate);
+        if(sPrinter!=sPriUpdate && sPriUpdate.length()>0)
+            settings.write(QString("PRINT_DIALOG_PRINTER"),sPriUpdate);
     }
+    lsInt.clear();
     return b;
 }
 
 bool CDlgBalanceList::export_button_press(void)
 {
-    QString s=QString("Artikelsaldenliste_%1-%2").arg(ui->dateEditFrom->date().toString(QString("dd.MM.yyyy")),ui->dateEditTo->date().toString(QString("dd.MM.yyyy")));
-    QString sTitle=QString("%1 (erstellt %2)").arg(s,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
+    QString s=QString::fromUtf8("Artikelsaldenliste_%1-%2").arg(ui->dateEditFrom->date().toString(QString::fromUtf8("dd.MM.yyyy")),ui->dateEditTo->date().toString(QString::fromUtf8("dd.MM.yyyy")));
     CExportCSV exportCSV;
-    return exportCSV.write_data_list_table(this,ui->listWidgetArticle,ui->tableWidgetList,s,sTitle,true);
+    return exportCSV.write_data_list_table(this,ui->listWidgetArticle,ui->tableWidgetList,s,QString::fromUtf8(""),true);
 }
 
 bool CDlgBalanceList::print(QPrinter * pPrinter)

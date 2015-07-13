@@ -16,63 +16,54 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CINPUTDIALOGARTICLEALLOWANCE_H
-#define CINPUTDIALOGARTICLEALLOWANCE_H
+#ifndef CINPUTDLGBARCODE_H
+#define CINPUTDLGBARCODE_H
 
 #include <QtGui/QDialog>
 #include "cworkthread.h"
 #include "csettings.h"
-#include "clastdbchange.h"
+#include "cinputdialogbrowsearticle.h"
 
 #define ARTICLE_DLG_TYPE_INCOMING 0
 #define ARTICLE_DLG_TYPE_OUTGOING 1
 #define ARTICLE_DLG_TYPE_ORDERING 2
+#define RETURN_ARTICLE_NOT_FOUND -1
+#define RETURN_USER_EXIT 0
+#define RETURN_ARTICLE_FOUND 2
 
 namespace Ui {
-    class CInputDialogArticleAllowance;
+class CInputDlgBarcode;
 }
 
-class CInputDialogArticleAllowance : public QDialog {
+class CInputDlgBarcode : public QDialog
+{
     Q_OBJECT
 
 private:
-    Ui::CInputDialogArticleAllowance *ui;
-    int m_iArticleId;
+    Ui::CInputDlgBarcode *ui;
+    //-
     int m_iType;
     int m_iParentColumnCount;
     int m_iParentColumnId;
     QTableWidget * m_pParentTable;
     CWorkThread * m_pThread;
     QDate m_dtDate;
-    CLastDbChange m_LastDbChange;//class to check-> db change from another client
 
 public:
-    CInputDialogArticleAllowance(QWidget *parent = 0);
-    ~CInputDialogArticleAllowance();
+    explicit CInputDlgBarcode(QWidget *parent = 0);
+    ~CInputDlgBarcode();
     virtual void keyPressEvent(QKeyEvent * event);
-
-    bool set(CWorkThread * pThread, QTableWidget * pParentTable, int iColumnCount, int iColumnId, int iType, int iArticleId, QDate dtDate=QDate(0,0,0));
-    bool update_table(void);
-    bool check_count(void);
-    int get_old_count(int iArticleId);
-    bool get_data(QString & sData);
-    bool set_count(int iCount);
-    int get_count(void);
-    int get_count_on_date(int iArticleId);
+    //-
+    bool set(CWorkThread * pThread, QTableWidget * pParentTable, int iColumnCount, int iColumnId, int iType, QDate dtDate=QDate(0,0,0));
     bool settings(bool bUpdate=false);
-    bool get_checkbox_not_close_the_dialog(void);
-    bool set_mask(QString sMask);
-    QString get_mask(void);
-    bool insert_ware_at_parent_table(QString sData);
+    bool add_ware(void);
+    int get_article_id_by_barcode(QString s, int number, CArticle & ar);
+    int get_parent_table_count(int iArticleId);
+    int get_count_on_date(int iArticleId);
+    int get_ordering_count(int iArticleId);
 
 public slots:
-    void mask_changed(void);
-    void article_changed(void);
-    void checkbox_auto_clicked(void);
-    void mask_edit(void);
-    void count_changed(void);
-    void press_ok(void);
-    void press_cancel(void);
+    void articlenumber_changed(void);
 };
 
-#endif // CINPUTDIALOGARTICLEALLOWANCE_H
+#endif // CINPUTDLGBARCODE_H

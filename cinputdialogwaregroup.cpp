@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,9 +24,15 @@ CInputDialogWaregroup::CInputDialogWaregroup(QWidget *parent) :
     ui(new Ui::CInputDialogWaregroup)
 {
     ui->setupUi(this);
-    m_iWaregroupId=-1;
+    m_iMarkId=m_iMarkParentId=-1;
     m_pThread=NULL;
     //-
+
+    //disable auto default buttons
+    ui->pushButtonCancel->setAutoDefault(false);
+    ui->pushButtonOk->setAutoDefault(false);
+    //-
+    ui->pushButtonOk->setEnabled(false);
     ui->treeWidgetParents->hideColumn(2);//id column
     ui->treeWidgetParents->hideColumn(3);//parent_id column
     ui->treeWidgetParents->setSortingEnabled(false);
@@ -35,6 +41,8 @@ CInputDialogWaregroup::CInputDialogWaregroup(QWidget *parent) :
     //-
     connect(ui->lineEditInpDia_name,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     connect(ui->treeWidgetParents,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(treewidget_clicked(QTreeWidgetItem*)));
+    connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
+    connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -46,7 +54,6 @@ CInputDialogWaregroup::~CInputDialogWaregroup()
     delete ui;
 }
 
-
 void CInputDialogWaregroup::set_thread(CWorkThread * pThread)
 {
     m_pThread=pThread;
@@ -54,11 +61,17 @@ void CInputDialogWaregroup::set_thread(CWorkThread * pThread)
 
 void CInputDialogWaregroup::set_data(CWaregroup & wg)
 {
-    m_iWaregroupId=wg.get_id();//for edit mode
+    //for edit mode
+    m_iMarkId=wg.get_id();
+    m_iMarkParentId=wg.get_parent_id();
+    m_sMarkName=wg.get_name();
+
     ui->lineEditInpDia_name->setText(wg.get_name());//set name
     ui->lineEditInpDia_comment->setText(wg.get_comment());//set comment
     update_waregroup_tree(wg.get_parent_id());//fill tree and select parent
     update_parent_label(wg.get_parent_id());//update path
+    ui->pushButtonOk->setText(QString::fromUtf8("Änderung(en) anwenden"));
+    ui->pushButtonOk->setEnabled(true);
 }
 
 void CInputDialogWaregroup::get_data(CWaregroup & wg)
@@ -81,216 +94,13 @@ void CInputDialogWaregroup::get_data(CWaregroup & wg)
     ls.clear();
 }
 
-void CInputDialogWaregroup::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-
 void CInputDialogWaregroup::update_waregroup_tree(int iSelectId)
 {
     if(m_pThread!=NULL)
     {
         if(m_pThread->m_pDbInterface!=NULL)
-        {
-            if(!m_pThread->m_pWidgets->waregroup_update_treewidget(ui->treeWidgetParents,iSelectId))
-            {}
-        }
+            m_pThread->m_pWidgets->waregroup_update_treewidget(ui->treeWidgetParents,iSelectId);
     }
-}
-
-bool CInputDialogWaregroup::check_waregroupname(void)
-{
-    if(m_pThread==NULL)
-        return false;
-    if(m_pThread->m_pDbInterface==NULL)
-        return false;
-    //-
-    QString s=ui->lineEditInpDia_name->text();//get name
-    if(s.length()<=0)
-    {
-        ui->label_warning->setText("Fehler: Bezeichnung fehlt");
-        return false;
-    }
-    //-
-    bool b=true;
-    int id;
-    QList<QTreeWidgetItem*> ls=ui->treeWidgetParents->selectedItems();
-    if(ls.count()<=0)//nothing selected?
-        id=-1;//root dir id
-    else
-        id=ls[0]->text(2).toInt(&b,10);//get id
-    if(!b)//number?
-        return false;
-    //-
-    int max=0;
-    CWaregroup wg;
-    if(m_iWaregroupId>0)//edit mode?
-    {
-        if(m_pThread->m_pDbInterface->waregroup_get(m_iWaregroupId,wg))
-        {
-            if(s==wg.get_name() && id==wg.get_parent_id())
-                max=1;
-        }
-    }
-    //-
-    int count=0;
-    QList<QTreeWidgetItem*> ls2;
-    if(id==-1)//root dir?
-    {
-        ls2=ui->treeWidgetParents->findItems(s,Qt::MatchExactly,0);//search items with name
-        count=ls2.count();
-        ls2.clear();
-    }
-    else//child?
-    {
-        for(int i=0;i<ls[0]->childCount();i++)
-        {
-            if(ls[0]->child(i)->text(0)==s)
-                count++;
-        }
-    }
-    //-
-    if(count>max)
-    {//found?
-        if(id==-1)
-            ui->label_warning->setText("Fehler: Warengruppe gibt es schon im 'Hauptverzeichnis'");
-        else if(ls.count()>0)
-        {
-            s=QString("Fehler: Warengruppe gibt es schon in '%1'").arg(ls[0]->text(0));
-            ui->label_warning->setText(s);
-        }
-        b=false;
-    }
-    if(b)
-        ui->label_warning->setText("");
-    //-
-    return b;
-}
-
-bool CInputDialogWaregroup::check_user_input()
-{
-    bool b=check_waregroupname();
-    ui->buttonBox->setEnabled(b);
-    return true;
-}
-
-bool CInputDialogWaregroup::settings(bool bUpdate)
-{
-    bool b;
-    CSettings settings;
-    QList<QString> lsSType,lsSValue,lsSUpdateType,lsSUpdateValue;
-    lsSType.push_back(QString("DLG_WAREGROUP_TREE"));
-    //-
-    b=settings.load(lsSType,lsSValue);//load all settings
-    if(b)
-    {
-        if(!bUpdate)//set
-        {
-            //tree width
-            if(lsSValue.count()>0)
-                settings.set_tree_width(ui->treeWidgetParents,lsSValue[0],500);
-        }
-        if(bUpdate)//write
-        {
-            //tree width
-            if(lsSValue.count()>0)
-            {
-                if(settings.get_tree_width(ui->treeWidgetParents,lsSValue[0]))//setting change?
-                {
-                    lsSUpdateType.push_back(lsSType[0]);
-                    lsSUpdateValue.push_back(lsSValue[0]);
-                }
-            }
-
-            //write updates
-            if(lsSUpdateType.count()>0 && lsSUpdateType.count()==lsSUpdateValue.count())
-                b=settings.write(lsSUpdateType,lsSUpdateValue);
-        }
-    }
-    //-
-    lsSValue.clear();
-    lsSType.clear();
-    lsSUpdateValue.clear();
-    lsSUpdateType.clear();
-    return b;
-}
-
-bool CInputDialogWaregroup::treewidget_clicked(QTreeWidgetItem* pItem)
-{
-    if(m_pThread==NULL)
-        return false;
-    if(m_pThread->m_pDbInterface==NULL)
-        return false;
-
-    CPointerMemory memory;
-    QList<int> lsInt;
-    bool b=true;
-    QString s;
-    static QTreeWidgetItem * pMarkItem=NULL;
-    int i,id=-1;
-
-    //check edit mode and selected yourself or subwaregroups of yourself?
-    if(pItem!=NULL && m_iWaregroupId>0 && m_pThread!=NULL)
-    {
-        id=pItem->text(2).toInt(&b,10);//get id
-        if(b)//number?
-        {
-            if(id==m_iWaregroupId)//yourself?
-            {
-                s=QString("Fehler: Die Warengruppe kann keine Untergruppe von sich selbst sein");
-                b=false;
-            }
-            else
-            {
-                //is subwaregroup of yourself?
-                memory.set_int(&m_iWaregroupId);
-                memory.set_int_list(&lsInt);
-                if(!m_pThread->set_work(WORK_WAREGROUP_GET_ALL_SUBWAREGROUPS,&memory))
-                {
-                }
-                else
-                {
-                    for(i=0;i<lsInt.count();i++)
-                    {
-                        if(lsInt[i]==id)//found?
-                        {
-                            b=false;
-                            s=QString("Fehler: Die Warengruppe kann keine Untergruppe einer Untergruppe von sich selbst sein");
-                            break;
-                        }
-                    }
-                }
-            }
-            //-
-            ui->label_warning->setText(s);
-            ui->buttonBox->setEnabled(b);
-        }
-    }
-
-    //select / un-select
-    if(b)//no error
-    {
-        if(pMarkItem!=pItem)
-        {//selected
-            pMarkItem=pItem;
-            pItem->setSelected(true);
-        }
-        else if(pMarkItem==pItem)
-        {//deselected
-            pMarkItem=NULL;
-            pItem->setSelected(false);
-        }
-        update_parent_label();
-        check_waregroupname();
-    }
-    return true;
 }
 
 void CInputDialogWaregroup::update_parent_label(int iId)
@@ -336,3 +146,215 @@ void CInputDialogWaregroup::update_parent_label(void)
     }
 }
 
+bool CInputDialogWaregroup::check_waregroupname(void)
+{
+    if(m_pThread==NULL)
+        return false;
+    if(m_pThread->m_pDbInterface==NULL)
+        return false;
+
+    int i,max=0,iParentId=-1;
+    bool b,bReturn=true;
+    QString s,sError,sInput=ui->lineEditInpDia_name->text();//get input name
+    QList<QTreeWidgetItem*> ls=ui->treeWidgetParents->selectedItems();//get selected
+    //-
+    if(ls.count()>0)//selected?
+    {
+        iParentId=ls[0]->text(2).toInt(&b,10);//get parent-id
+        if(!b)//number?
+            iParentId=-1;
+    }
+    //-
+    if(sInput.length()<=0)
+    {
+        sError=QString("Fehler: Bezeichnung fehlt");
+        bReturn=false;
+    }
+    else
+    {
+        if(sInput==m_sMarkName && iParentId==m_iMarkParentId)
+            max=1;//edit name & p.id same
+        s=QString("name = '%1' AND ").arg(sInput);
+        s+=QString("parent_id = %1").arg(iParentId);
+        i=m_pThread->m_pDbInterface->waregroup_get_count(s);
+        if(i>max)
+        {
+            if(iParentId==-1)
+                sError=QString("Fehler: Warengruppe gibt es schon im Hauptverzeichnis");
+            else
+                sError=QString("Fehler: Warengruppe gibt es schon in diesem Unterverzeichnis");
+            bReturn=false;
+        }
+    }
+    //-
+    if(sError.length()>0)
+        ui->label_warning->setText(sError);
+    else
+        ui->label_warning->setText(QString(""));
+    //-
+    ls.clear();
+    return bReturn;
+}
+
+bool CInputDialogWaregroup::settings(bool bUpdate)
+{
+    bool b;
+    CSettings settings;
+    QList<QString> lsSType,lsSValue,lsSUpdateType,lsSUpdateValue;
+    lsSType.push_back(QString("DLG_WAREGROUP_TREE"));
+    //-
+    b=settings.load(lsSType,lsSValue);//load all settings
+    if(b)
+    {
+        if(!bUpdate)//set
+        {
+            //tree width
+            if(lsSValue.count()>0)
+                settings.set_tree_width(ui->treeWidgetParents,lsSValue[0],500);
+        }
+        if(bUpdate)//write
+        {
+            //tree width
+            if(lsSValue.count()>0)
+            {
+                if(settings.get_tree_width(ui->treeWidgetParents,lsSValue[0]))//setting change?
+                {
+                    lsSUpdateType.push_back(lsSType[0]);
+                    lsSUpdateValue.push_back(lsSValue[0]);
+                }
+            }
+
+            //write updates
+            if(lsSUpdateType.count()>0 && lsSUpdateType.count()==lsSUpdateValue.count())
+                b=settings.write(lsSUpdateType,lsSUpdateValue);
+        }
+    }
+    //-
+    lsSValue.clear();
+    lsSType.clear();
+    lsSUpdateValue.clear();
+    lsSUpdateType.clear();
+    return b;
+}
+
+bool CInputDialogWaregroup::check_user_input()
+{
+    bool b=check_waregroupname();
+    ui->pushButtonOk->setEnabled(b);
+    return true;
+}
+
+bool CInputDialogWaregroup::treewidget_clicked(QTreeWidgetItem* pItem)
+{
+    if(m_pThread==NULL)
+        return false;
+    if(m_pThread->m_pDbInterface==NULL)
+        return false;
+
+    CPointerMemory memory;
+    QList<int> lsInt;
+    bool b=true;
+    QString s;
+    static QTreeWidgetItem * pMarkItem=NULL;
+    int i,id=-1;
+
+    //check edit mode and selected yourself or subwaregroups of yourself?
+    if(pItem!=NULL && m_iMarkId>0 && m_pThread!=NULL)
+    {
+        id=pItem->text(2).toInt(&b,10);//get id
+        if(b)//number?
+        {
+            if(id==m_iMarkId)//yourself?
+            {
+                s=QString("Fehler: Die Warengruppe kann keine Untergruppe von sich selbst sein");
+                b=false;
+            }
+            else
+            {
+                //is subwaregroup of yourself?
+                memory.set_int(&m_iMarkId);
+                memory.set_int_list(&lsInt);
+                if(!m_pThread->set_work(WORK_WAREGROUP_GET_ALL_SUBWAREGROUPS,&memory))
+                {
+                }
+                else
+                {
+                    for(i=0;i<lsInt.count();i++)
+                    {
+                        if(lsInt[i]==id)//found?
+                        {
+                            b=false;
+                            s=QString("Fehler: Die Warengruppe kann keine Untergruppe einer Untergruppe von sich selbst sein");
+                            break;
+                        }
+                    }
+                }
+            }
+            //-
+            ui->label_warning->setText(s);
+            ui->pushButtonOk->setEnabled(b);
+        }
+    }
+
+    //select / un-select
+    if(b)//no error
+    {
+        if(pMarkItem!=pItem)
+        {//selected
+            pMarkItem=pItem;
+            pItem->setSelected(true);
+        }
+        else if(pMarkItem==pItem)
+        {//deselected
+            pMarkItem=NULL;
+            pItem->setSelected(false);
+        }
+        update_parent_label();
+        check_waregroupname();
+    }
+    return true;
+}
+
+void CInputDialogWaregroup::press_ok(void)
+{
+    int i;
+    QString s;
+    bool bOk=true;
+    QMessageBox msg(QMessageBox::Information,"","");
+    msg.setWindowTitle("!");
+    msg.setText(QString::fromUtf8("Der Datensatz wurde von einer anderen Programminstanz gelöscht oder die Struktur verändert!"));
+    //-
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL)
+        {
+            //check name
+            if(!check_waregroupname())
+                bOk=false;
+
+            //another client delete this record?
+            if(m_iMarkId>0)//edit-mode?
+            {
+                s=QString("id = %1").arg(m_iMarkId);
+                s+=QString(" AND name = '%1' AND ").arg(m_sMarkName);
+                s+=QString("parent_id = %1").arg(m_iMarkParentId);
+                i=m_pThread->m_pDbInterface->waregroup_get_count(s);
+                if(i<=0)//record delete?
+                {
+                    msg.exec();
+                    bOk=false;
+                }
+            }
+        }
+    }
+    //-
+    if(bOk)
+        done(1);
+    else
+        close();
+}
+
+void CInputDialogWaregroup::press_cancel(void)
+{
+    close();
+}

@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <QtGui/QDialog>
 #include "cworkthread.h"
 #include "csettings.h"
+#include "clastdbchange.h"
 
 namespace Ui {
     class CInputDlgOrderingIncoming;
@@ -35,15 +36,14 @@ private:
     Ui::CInputDlgOrderingIncoming *ui;
     QMenu * m_pContextMenu; //table context menu
     QDate m_dtMark;//to check is booking number handmake or not
-
-protected:
-    void changeEvent(QEvent *e);
+    int m_iTimerId;
+    CLastDbChange m_LastDbChange;//class to check-> db change from another client
 
 public:
     CInputDlgOrderingIncoming(QWidget *parent = 0);
     ~CInputDlgOrderingIncoming();
     virtual void keyPressEvent(QKeyEvent * event);
-
+    void timerEvent(QTimerEvent *event);
     bool init(void);
     bool get_data(CTrade & trade, int & iOrderingId, bool & bCompleteIncoming);
     bool set_thread(CWorkThread * pThread);
@@ -66,6 +66,8 @@ public slots:
     bool set_booking_number_nomination(void);
     bool date_changed(QDate dtNew);
     bool check_user_input(void);
+    void press_ok(void);
+    void press_cancel(void);
 };
 
 #endif // CINPUTDLGORDERINGINCOMING_H

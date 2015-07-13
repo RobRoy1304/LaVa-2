@@ -23,25 +23,6 @@
    <iconset>
     <normaloff>res/icon.ico</normaloff>res/icon.ico</iconset>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>520</y>
-     <width>991</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-   <property name="centerButtons">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="lineEditMaxInventory">
    <property name="geometry">
     <rect>
@@ -99,12 +80,12 @@
     <rect>
      <x>10</x>
      <y>70</y>
-     <width>141</width>
+     <width>231</width>
      <height>18</height>
     </rect>
    </property>
    <property name="text">
-    <string>1.Artikelnummer:</string>
+    <string>1.Artikelnummer oder Barcode:</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEditLocation">
@@ -302,12 +283,12 @@
     <rect>
      <x>510</x>
      <y>70</y>
-     <width>151</width>
+     <width>231</width>
      <height>18</height>
     </rect>
    </property>
    <property name="text">
-    <string>2.Artikelnummer:</string>
+    <string>2.Artikelnummer oder Barcode:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -540,6 +521,32 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButtonCancel">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>530</y>
+     <width>131</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>abbrechen</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonOk">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>530</y>
+     <width>181</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>hinzufügen</string>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>lineEditName</tabstop>
@@ -558,41 +565,9 @@
   <tabstop>lineEditWaregroup</tabstop>
   <tabstop>pushButtonWaregroup</tabstop>
   <tabstop>lineEditComment</tabstop>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>pushButtonOk</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>CInputDialogArticle</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>CInputDialogArticle</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,13 +21,13 @@
 //basic------------------------------------------------------------------------------------------
 CDbConnection::CDbConnection()
 {
+    m_db=QSqlDatabase::addDatabase(QString::fromUtf8("QSQLITE"));
     m_bConnect=false;
-    m_db=QSqlDatabase::addDatabase(QString("QSQLITE"));
 }
 
 CDbConnection::~CDbConnection()
 {
-   m_db.removeDatabase(QString("QSQLITE"));
+   m_db.removeDatabase(QString::fromUtf8("QSQLITE"));
    close_db();
 }
 
@@ -54,6 +54,34 @@ bool CDbConnection::close_db(void)
     return true;
 }
 
+bool CDbConnection::clear(void)
+{
+    bool b=true;
+    QString s;
+    //-
+    if(m_bConnect)
+    {
+        s=QString::fromUtf8("DELETE FROM waregroup");
+        b=exec_sql(s);
+        s=QString::fromUtf8("DELETE FROM maker");
+        b=exec_sql(s);
+        s=QString::fromUtf8("DELETE FROM dealer");
+        b=exec_sql(s);
+        s=QString::fromUtf8("DELETE FROM article");
+        b=exec_sql(s);
+        s=QString::fromUtf8("DELETE FROM logbook");
+        b=exec_sql(s);
+        s=QString::fromUtf8("DELETE FROM customer");
+        b=exec_sql(s);
+        s=QString::fromUtf8("DELETE FROM ordering");
+        b=exec_sql(s);
+        s=QString::fromUtf8("DELETE FROM trade");
+        b=exec_sql(s);
+    }
+    //-
+    return b;
+}
+
 QString CDbConnection::last_error(void)
 {
     return m_db.lastError().text();
@@ -70,7 +98,7 @@ QString CDbConnection::get_db_version(void)
     if(m_bConnect)
     {
         QSqlQuery query;
-        QString s=QString("SELECT * FROM info");
+        QString s=QString::fromUtf8("SELECT * FROM info");
         if(query.exec(s))
         {
             query.first();
@@ -90,7 +118,7 @@ QDateTime CDbConnection::get_last_session(void)
     if(m_bConnect)
     {
         QSqlQuery query;
-        QString s=QString("SELECT * FROM info");
+        QString s=QString::fromUtf8("SELECT * FROM info");
         if(query.exec(s))
         {
             query.first();
@@ -104,14 +132,49 @@ QDateTime CDbConnection::get_last_session(void)
     return dtTi;
 }
 
-bool CDbConnection::set_last_session(QDateTime dtTi)
+bool CDbConnection::write_last_session(QDateTime dtTi)
 {
     bool b=false;
     QString s;
     QSqlQuery query;
     if(m_bConnect)
     {
-        s=QString("UPDATE info SET last_session='%1'").arg(dtTi.toString("yyyy-MM-dd-hh-mm-ss"));
+        s=QString::fromUtf8("UPDATE info SET last_session='%1'").arg(dtTi.toString("yyyy-MM-dd-hh-mm-ss"));
+        b=query.exec(s);
+    }
+    return b;
+}
+
+int CDbConnection::get_logbook_count(void)
+{
+    int iReturn=-1;
+    //-
+    if(m_bConnect)
+    {
+        QSqlQuery query;
+        QString s=QString::fromUtf8("SELECT * FROM info");
+        if(query.exec(s))
+        {
+            query.first();
+            if(query.isValid())
+            {
+                QSqlRecord record=query.record();
+                iReturn=query.value( record.indexOf("logbook_count")).toInt();
+            }
+        }
+    }
+    //-
+    return iReturn;
+}
+
+bool CDbConnection::write_logbook_count(int iNewCount)
+{
+    bool b=false;
+    QString s;
+    QSqlQuery query;
+    if(m_bConnect && iNewCount>=10 && iNewCount<=9999)
+    {
+        s=QString::fromUtf8("UPDATE info SET logbook_count = %1").arg(iNewCount);
         b=query.exec(s);
     }
     return b;
@@ -139,49 +202,49 @@ bool CDbConnection::check_database_file(bool bCheckDbVersion)
                 //check give it table's
                 if(i==0)//check waregroup
                 {
-                    s=QString("SELECT * FROM waregroup WHERE name = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM waregroup WHERE name = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
                 if(i==1)//check maker
                 {
-                    s=QString("SELECT * FROM maker WHERE name = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM maker WHERE name = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
                 if(i==2)//check dealer
                 {
-                    s=QString("SELECT * FROM dealer WHERE name = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM dealer WHERE name = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
                 if(i==3)//check customer
                 {
-                    s=QString("SELECT * FROM customer WHERE name = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM customer WHERE name = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
                 if(i==4)//check article
                 {
-                    s=QString("SELECT * FROM article WHERE name = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM article WHERE name = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
                 if(i==5)//check ordering
                 {
-                    s=QString("SELECT * FROM ordering WHERE comment = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM ordering WHERE comment = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
                 if(i==6)//check trade
                 {
-                    s=QString("SELECT * FROM trade WHERE info_5 = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM trade WHERE info_5 = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
                 if(i==7)//check logbook
                 {
-                    s=QString("SELECT * FROM logbook WHERE text = 'xgtzasgl'");
+                    s=QString::fromUtf8("SELECT * FROM logbook WHERE text = 'xgtzasgl'");
                     if(!exec_sql(s))
                         break;
                 }
@@ -197,7 +260,7 @@ bool CDbConnection::check_database_file(bool bCheckDbVersion)
 
 bool CDbConnection::check_and_update_db_version(void)
 {
-    QString s;
+    QString s,sDbVersion;
     QList<QString> lsSql;
     bool bReturn=true;
     //-
@@ -205,13 +268,13 @@ bool CDbConnection::check_and_update_db_version(void)
         bReturn=false;
     else
     {
-        s=get_db_version();
-        if(s!=QString(CURRENT_DB_VERSION))
+        sDbVersion=get_db_version();
+        if(sDbVersion!=QString(CURRENT_DB_VERSION))
         {
-            if(s==QString("1,01"))//update to 1,02
+            if(sDbVersion==QString::fromUtf8("1,01"))//update to 1,02
             {
                 //new column in article
-                lsSql.push_back(QString("ALTER TABLE article ADD COLUMN delete_status BOOL DEFAULT (0)"));
+                lsSql.push_back(QString::fromUtf8("ALTER TABLE article ADD COLUMN delete_status BOOL DEFAULT (0)"));
 
                 //rename a column name  -> sqlite not support ALTER TABLE ... RENAME COLUMN  -> another solution
                 lsSql.push_back("ALTER TABLE ordering RENAME TO temp_ordering");
@@ -232,8 +295,28 @@ bool CDbConnection::check_and_update_db_version(void)
                 if(bReturn)
                 {
                     //update db_version text
-                    s=QString("UPDATE info SET version = '1,02'");
+                    s=QString::fromUtf8("UPDATE info SET version = '1,02'");
                     bReturn=exec_sql(s);
+                }
+            }
+
+            if(sDbVersion==QString::fromUtf8("1,02"))//update to 1,03
+            {
+                //new column in info
+                s=QString::fromUtf8("ALTER TABLE info ADD COLUMN last_change TEXT");
+                bReturn=exec_sql(s);
+
+                if(bReturn)
+                {
+                    s=QString::fromUtf8("ALTER TABLE info ADD COLUMN logbook_count INTEGER DEFAULT (100)");
+                    bReturn=exec_sql(s);
+
+                    if(bReturn)
+                    {
+                        //update db_version text
+                        s=QString::fromUtf8("UPDATE info SET version = '1,03'");
+                        bReturn=exec_sql(s);
+                    }
                 }
             }
         }
@@ -250,6 +333,95 @@ bool CDbConnection::exec_sql(QString s)
     return b;
 }
 
+QString CDbConnection::get_last_change(void)
+{
+    QSqlQuery query;
+    QString s,sReturn;
+    if(m_bConnect)
+    {
+        s=QString::fromUtf8("SELECT * FROM info");
+        if(query.exec(s))
+        {
+            query.first();
+            if(query.isValid())
+            {
+                QSqlRecord record=query.record();
+                sReturn=query.value( record.indexOf("last_change")).toString();
+            }
+        }
+    }
+    return sReturn;
+}
+
+bool CDbConnection::write_last_change(QString sLastChange)
+{
+    bool b=false;
+    QString s;
+    QSqlQuery query;
+
+    //write
+    if(m_bConnect)
+    {
+        s=QString::fromUtf8("UPDATE info SET last_change='%1'").arg(sLastChange);
+        b=query.exec(s);
+    }
+    return b;
+}
+
+bool CDbConnection::check_article_at_wares(QString sWares, QString & sWaresFound, bool bWithDeleteArticle)
+{
+    bool b,bReturn=false;
+    int i,id,c,count;
+    QList<QString> ls,lsWares;
+    QString s,sCondition;
+    //-
+    if(m_bConnect==true && sWares.length()>0)
+    {
+        //split article's
+        lsWares=sWares.split("|");
+        for(i=0;i<lsWares.count();i++)
+        {
+            id=-1;
+
+            //split count & id
+            s=lsWares[i];
+            ls=s.split("x");
+            if(ls.count()==2)//count & article-id
+            {
+                count=ls[0].toInt(&b);
+                if(!b)
+                    id=-1;
+                else
+                {
+                    id=ls[1].toInt(&b);
+                    if(!b)
+                        id=-1;
+                }
+            }
+            //-
+            if(id>0)//cast ok?
+            {
+                //search article at db
+                sCondition=QString::fromUtf8("id = %1").arg(id);
+                c=article_get_count(sCondition,bWithDeleteArticle);
+                //-
+                if(c>0)
+                {//article found
+                    sWaresFound+=QString::fromUtf8("%1x").arg(count);
+                    sWaresFound+=QString::fromUtf8("%1|").arg(id);
+                }
+            }
+        }
+        //-
+        if(sWares==sWaresFound)
+            bReturn=true;
+    }
+    //-
+    ls.clear();
+    lsWares.clear();
+    return bReturn;
+}
+
 
 //---waregroup-------------------------------------------------------------------------------
 
@@ -261,8 +433,8 @@ bool CDbConnection::waregroup_add(CWaregroup & wg)
     int id=-1;
     bool b;
     QSqlQuery query;
-    QString s=QString("INSERT INTO waregroup (name,comment,parent_id) VALUES ('%1','%2',").arg(wg.get_name(),wg.get_comment());
-    s+=QString("%1)").arg(wg.get_parent_id());
+    QString s=QString::fromUtf8("INSERT INTO waregroup (name,comment,parent_id) VALUES ('%1','%2',").arg(wg.get_name(),wg.get_comment());
+    s+=QString::fromUtf8("%1)").arg(wg.get_parent_id());
     b=query.exec(s);//add ok?
     if(b)
     {
@@ -278,7 +450,7 @@ bool CDbConnection::waregroup_remove(int iId)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM waregroup WHERE id=%1").arg(iId);
+    QString s=QString::fromUtf8("DELETE FROM waregroup WHERE id=%1").arg(iId);
     bool b=query.exec(s);
     return b;
 }
@@ -289,11 +461,11 @@ bool CDbConnection::waregroup_update(CWaregroup & wg)
         return false;
 
     QSqlQuery query;
-    QString s=QString("UPDATE OR REPLACE waregroup SET ");
-    s+=QString("name='%1',").arg(wg.get_name());
-    s+=QString("comment='%1',").arg(wg.get_comment());
-    s+=QString("parent_id=%1").arg(wg.get_parent_id());
-    s+=QString(" WHERE id=%1").arg(wg.get_id());
+    QString s=QString::fromUtf8("UPDATE OR REPLACE waregroup SET ");
+    s+=QString::fromUtf8("name='%1',").arg(wg.get_name());
+    s+=QString::fromUtf8("comment='%1',").arg(wg.get_comment());
+    s+=QString::fromUtf8("parent_id=%1").arg(wg.get_parent_id());
+    s+=QString::fromUtf8(" WHERE id=%1").arg(wg.get_id());
 
     //exec sql-syntax
     bool b=query.exec(s);
@@ -305,9 +477,10 @@ bool CDbConnection::waregroup_get(QString sCondition, CWaregroup & wg)
     if(!m_bConnect||sCondition.length()<=0)//db open?
         return false;
     bool b=true;
+    wg.clear();
     QSqlQuery query;
     query.setForwardOnly(true);
-    QString s=QString("SELECT * FROM waregroup WHERE %1").arg(sCondition);
+    QString s=QString::fromUtf8("SELECT * FROM waregroup WHERE %1").arg(sCondition);
     if(query.exec(s))
     {
         query.first();
@@ -329,7 +502,8 @@ bool CDbConnection::waregroup_get(int iId, CWaregroup & wg)
 {
     if(!m_bConnect)//db open?
         return false;
-    QString sCondition=QString("id=%1").arg(iId);
+    wg.clear();
+    QString sCondition=QString::fromUtf8("id=%1").arg(iId);
     bool b=waregroup_get(sCondition,wg);
     if(b==true && wg.get_id()<1)//not found
         b=false;
@@ -339,10 +513,10 @@ bool CDbConnection::waregroup_get(int iId, CWaregroup & wg)
 QString CDbConnection::waregroup_get_name(int iId)
 {
     CWaregroup wg;
-    QString sCondition,name=QString("");
+    QString sCondition,name=QString::fromUtf8("");
     if(m_bConnect)//db open?
     {
-        sCondition=QString("id=%1").arg(iId);
+        sCondition=QString::fromUtf8("id=%1").arg(iId);
         if(waregroup_get(sCondition,wg))
             name=wg.get_name();
     }
@@ -356,18 +530,37 @@ int CDbConnection::waregroup_get_id(QString sName, int iParent)
     QString sCondition;
     if(m_bConnect)//db open?
     {
-        sCondition=QString("name='%1' AND ").arg(sName);
-        sCondition+=QString("parent_id=%1").arg(iParent);
+        sCondition=QString::fromUtf8("name='%1' AND ").arg(sName);
+        sCondition+=QString::fromUtf8("parent_id=%1").arg(iParent);
         if(waregroup_get(sCondition,wg))
             id=wg.get_id();
     }
     return id;
 }
 
+int CDbConnection::waregroup_get_id(QString sPath)
+{
+    int id=-1;
+    QStringList sls;
+    if(m_bConnect==true && sPath.length()>0)//db open?
+    {
+        sls=sPath.split("/");
+        while(sls.count()>0)
+        {
+            id=waregroup_get_id(sls[0],id);
+            if(id<=0)
+                break;
+            sls.removeFirst();
+        }
+    }
+    sls.clear();
+    return id;
+}
+
 QString CDbConnection::waregroup_get_path(int id,int iMaxLevel)//if iMaxLevel=-1 then complete
 {
     if(!m_bConnect)//db open?
-        return QString("");
+        return QString::fromUtf8("");
     int i=0;
     QString s;
     QList <QString> lsS;
@@ -386,14 +579,14 @@ QString CDbConnection::waregroup_get_path(int id,int iMaxLevel)//if iMaxLevel=-1
     else//part of path
     {
         i=lsS.count()-(lsS.count()-iMaxLevel)-1;
-        s+=QString("../");
+        s+=QString::fromUtf8("../");
     }
     //-
     for(;i>=0;i--)
     {
         s+=lsS[i];
         if(i>0)
-            s+=QString("/");
+            s+=QString::fromUtf8("/");
     }
     //-
     return s;
@@ -405,9 +598,9 @@ int CDbConnection::waregroup_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s=QString("SELECT count(id) FROM waregroup");
+        QString s=QString::fromUtf8("SELECT count(id) FROM waregroup");
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -420,13 +613,60 @@ int CDbConnection::waregroup_get_count(QString sCondition)
     return count;
 }
 
+int CDbConnection::waregroup_get_unknow_count(QString & sPath, int & iParent_id)
+{
+    int m,id,p,iReturn=0;
+    QStringList sls;
+    //-
+    iParent_id=-1;//default parent = root
+    if(sPath.length()>0)
+    {
+        //split
+        sls=sPath.split("/");
+        m=sls.count();
+        if(m>0)
+        {
+            //search in db
+            for(p=-1;sls.count()>0;)
+            {
+                id=waregroup_get_id(sls[0],p);
+                if(id>0)//found in db
+                {
+                    sls.removeFirst();
+                    p=id;//mark id
+                }
+                else
+                    break;//not found in db
+            }
+            iReturn=sls.count();
+            if(iReturn<m)//unknow's?
+            {
+                iParent_id=p;//parent = last found
+
+                //write unknow waregroup's -> path
+                sPath=QString::fromUtf8("");
+                while(sls.count()>0)
+                {
+                    sPath+=sls[0];
+                    sls.removeFirst();
+                    if(sls.count()>0)
+                        sPath+=QString::fromUtf8("/");
+                }
+            }
+        }
+    }
+    //-
+    sls.clear();
+    return iReturn;
+}
+
 bool CDbConnection::waregroup_get_all(QString sCondition, QList<int> & lsIds)
 {
     if(!m_bConnect)
         return false;
-    QString s("SELECT id FROM waregroup WHERE ");
+    QString s=QString::fromUtf8("SELECT id FROM waregroup WHERE ");
     s+=sCondition;//+condition
-    s+=QString(" ORDER BY name ASC");
+    s+=QString::fromUtf8(" ORDER BY name ASC");
     QList<int> ls;
     QSqlQuery query;
     query.setForwardOnly(true);
@@ -442,7 +682,7 @@ bool CDbConnection::waregroup_get_all(QString sCondition, QList<int> & lsIds)
     //sort by waregroup there have subwaregroups
     for(i=0;i<ls.count();i++)
     {
-        s=QString("parent_id=%1").arg(ls[i]);
+        s=QString::fromUtf8("parent_id=%1").arg(ls[i]);
         count=waregroup_get_count(s);
         if(count>0)//has subwaregroups
         {
@@ -463,7 +703,7 @@ bool CDbConnection::waregroup_get_all_subwaregroup(int iId,QList<int> & lsSubWar
         return false;
     int i;
     QList<int> lsIds;
-    QString sCondition=QString("parent_id=%1").arg(iId);
+    QString sCondition=QString::fromUtf8("parent_id=%1").arg(iId);
     waregroup_get_all(sCondition,lsIds);
     for(i=0;i<lsIds.count();i++)
     {
@@ -477,8 +717,8 @@ bool CDbConnection::waregroup_all_change_parent(int iOldParentId,int iNewParentI
 {
     if(!m_bConnect)
         return false;
-    QString s=QString("UPDATE waregroup SET parent_id=%1").arg(iNewParentId);
-    s+=QString(" WHERE parent_id=%1").arg(iOldParentId);
+    QString s=QString::fromUtf8("UPDATE waregroup SET parent_id=%1").arg(iNewParentId);
+    s+=QString::fromUtf8(" WHERE parent_id=%1").arg(iOldParentId);
     QSqlQuery query;
     bool b=query.exec(s);
     return b;
@@ -494,7 +734,7 @@ bool CDbConnection::maker_add(CMaker & mk)
     int id=-1;
     bool b;
     QSqlQuery query;
-    QString s=QString("INSERT INTO maker (name,adress,call_numbers,fax_numbers,email_adress,homepage,contect_person,comment)"
+    QString s=QString::fromUtf8("INSERT INTO maker (name,adress,call_numbers,fax_numbers,email_adress,homepage,contect_person,comment)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8')")
                     .arg(mk.get_name(),mk.get_adress(),mk.get_callnumber(),mk.get_faxnumber(),mk.get_email(),mk.get_homepage(),mk.get_contectperson(),mk.get_comment());
     b=query.exec(s);//add ok?
@@ -512,7 +752,7 @@ bool CDbConnection::maker_remove(int id)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM maker WHERE id=%1").arg(id);
+    QString s=QString::fromUtf8("DELETE FROM maker WHERE id=%1").arg(id);
     bool b=query.exec(s);
     return b;
 }
@@ -523,16 +763,16 @@ bool CDbConnection::maker_update(CMaker & mk)
         return false;
 
     QSqlQuery query;
-    QString s=QString("UPDATE OR REPLACE maker SET ");
-    s+=QString("name='%1',").arg(mk.get_name());
-    s+=QString("comment='%1',").arg(mk.get_comment());
-    s+=QString("adress='%1',").arg(mk.get_adress());
-    s+=QString("call_numbers='%1',").arg(mk.get_callnumber());
-    s+=QString("fax_numbers='%1',").arg(mk.get_faxnumber());
-    s+=QString("email_adress='%1',").arg(mk.get_email());
-    s+=QString("homepage='%1',").arg(mk.get_homepage());
-    s+=QString("contect_person='%1'").arg(mk.get_contectperson());
-    s+=QString(" WHERE id=%1").arg(mk.get_id());
+    QString s=QString::fromUtf8("UPDATE OR REPLACE maker SET ");
+    s+=QString::fromUtf8("name='%1',").arg(mk.get_name());
+    s+=QString::fromUtf8("comment='%1',").arg(mk.get_comment());
+    s+=QString::fromUtf8("adress='%1',").arg(mk.get_adress());
+    s+=QString::fromUtf8("call_numbers='%1',").arg(mk.get_callnumber());
+    s+=QString::fromUtf8("fax_numbers='%1',").arg(mk.get_faxnumber());
+    s+=QString::fromUtf8("email_adress='%1',").arg(mk.get_email());
+    s+=QString::fromUtf8("homepage='%1',").arg(mk.get_homepage());
+    s+=QString::fromUtf8("contect_person='%1'").arg(mk.get_contectperson());
+    s+=QString::fromUtf8(" WHERE id=%1").arg(mk.get_id());
 
     //exec sql-syntax
     bool b=query.exec(s);
@@ -543,7 +783,8 @@ bool CDbConnection::maker_get(QString sCondition, CMaker & mk)
 {
     if(!m_bConnect||sCondition.length()<=0)
         return false;
-    QString s=QString("SELECT * FROM maker WHERE %1").arg(sCondition);
+    mk.clear();
+    QString s=QString::fromUtf8("SELECT * FROM maker WHERE %1").arg(sCondition);
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -573,7 +814,8 @@ bool CDbConnection::maker_get(int iId,CMaker & mk)
 {
     if(!m_bConnect)//db open?
         return false;
-    QString sCondition=QString("id=%1").arg(iId);
+    mk.clear();
+    QString sCondition=QString::fromUtf8("id=%1").arg(iId);
     bool b=maker_get(sCondition,mk);
     if(b==true && mk.get_id()<1)//not found
         b=false;
@@ -583,10 +825,10 @@ bool CDbConnection::maker_get(int iId,CMaker & mk)
 QString CDbConnection::maker_get_name(int iId)
 {
     CMaker mk;
-    QString sCondition,name=QString("");
+    QString sCondition,name=QString::fromUtf8("");
     if(m_bConnect)//db open?
     {
-        sCondition=QString("id=%1").arg(iId);
+        sCondition=QString::fromUtf8("id=%1").arg(iId);
         if(maker_get(sCondition,mk))
             name=mk.get_name();
     }
@@ -597,7 +839,7 @@ int CDbConnection::maker_get_id(QString & sName)
 {
     int id=-1;
     CMaker mk;
-    QString sCondition=QString("name='%1'").arg(sName);
+    QString sCondition=QString::fromUtf8("name='%1'").arg(sName);
     if(m_bConnect)//db open?
     {
         if(maker_get(sCondition,mk))
@@ -612,9 +854,9 @@ int CDbConnection::maker_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT count(id) FROM maker");
+        QString s=QString::fromUtf8("SELECT count(id) FROM maker");
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -631,11 +873,11 @@ bool CDbConnection::maker_get_all(QString sCondition, QList<int> & lsIds, QStrin
 {
     if(!m_bConnect)
         return false;
-    QString s("SELECT * FROM maker");
+    QString s=QString::fromUtf8("SELECT * FROM maker");
     if(sCondition.length()>0)
-        s+=QString(" WHERE %1").arg(sCondition);//+condition
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);//+condition
     if(sOrderBy.length()>0)
-        s+=QString(" ORDER BY %1").arg(sOrderBy);//+order by
+        s+=QString::fromUtf8(" ORDER BY %1").arg(sOrderBy);//+order by
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -657,7 +899,7 @@ bool CDbConnection::dealer_add(CDealer & de)
     int id=-1;
     bool b;
     QSqlQuery query;
-    QString s=QString("INSERT INTO dealer (name,adress,call_numbers,fax_numbers,email_adress,homepage,contect_person,comment,customer_number)"
+    QString s=QString::fromUtf8("INSERT INTO dealer (name,adress,call_numbers,fax_numbers,email_adress,homepage,contect_person,comment,customer_number)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8','%9')").arg(de.get_name(),de.get_adress(),de.get_callnumber(),
                         de.get_faxnumber(),de.get_email(),de.get_homepage(),de.get_contectperson(),de.get_comment(),de.get_customernumber());
     //-
@@ -676,7 +918,7 @@ bool CDbConnection::dealer_remove(int id)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM dealer WHERE id=%1").arg(id);
+    QString s=QString::fromUtf8("DELETE FROM dealer WHERE id=%1").arg(id);
     bool b=query.exec(s);
     return b;
 }
@@ -687,17 +929,17 @@ bool CDbConnection::dealer_update(CDealer & de)
         return false;
 
     QSqlQuery query;
-    QString s=QString("UPDATE OR REPLACE dealer SET ");
-    s+=QString("name='%1',").arg(de.get_name());
-    s+=QString("comment='%1',").arg(de.get_comment());
-    s+=QString("adress='%1',").arg(de.get_adress());
-    s+=QString("call_numbers='%1',").arg(de.get_callnumber());
-    s+=QString("fax_numbers='%1',").arg(de.get_faxnumber());
-    s+=QString("email_adress='%1',").arg(de.get_email());
-    s+=QString("homepage='%1',").arg(de.get_homepage());
-    s+=QString("contect_person='%1',").arg(de.get_contectperson());
-    s+=QString("customer_number='%1'").arg(de.get_customernumber());
-    s+=QString(" WHERE id=%1").arg(de.get_id());
+    QString s=QString::fromUtf8("UPDATE OR REPLACE dealer SET ");
+    s+=QString::fromUtf8("name='%1',").arg(de.get_name());
+    s+=QString::fromUtf8("comment='%1',").arg(de.get_comment());
+    s+=QString::fromUtf8("adress='%1',").arg(de.get_adress());
+    s+=QString::fromUtf8("call_numbers='%1',").arg(de.get_callnumber());
+    s+=QString::fromUtf8("fax_numbers='%1',").arg(de.get_faxnumber());
+    s+=QString::fromUtf8("email_adress='%1',").arg(de.get_email());
+    s+=QString::fromUtf8("homepage='%1',").arg(de.get_homepage());
+    s+=QString::fromUtf8("contect_person='%1',").arg(de.get_contectperson());
+    s+=QString::fromUtf8("customer_number='%1'").arg(de.get_customernumber());
+    s+=QString::fromUtf8(" WHERE id=%1").arg(de.get_id());
 
     //exec sql-syntax
 
@@ -709,7 +951,8 @@ bool CDbConnection::dealer_get(QString sCondition, CDealer & de)
 {
     if(!m_bConnect||sCondition.length()<=0)
         return false;
-    QString s=QString("SELECT * FROM dealer WHERE %1").arg(sCondition);
+    de.clear();
+    QString s=QString::fromUtf8("SELECT * FROM dealer WHERE %1").arg(sCondition);
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -740,7 +983,8 @@ bool CDbConnection::dealer_get(int iId,CDealer & de)
 {
     if(!m_bConnect)//db open?
         return false;
-    QString sCondition=QString("id=%1").arg(iId);
+    de.clear();
+    QString sCondition=QString::fromUtf8("id=%1").arg(iId);
     bool b=dealer_get(sCondition,de);
     if(b==true && de.get_id()<1)//not found
         b=false;
@@ -750,10 +994,10 @@ bool CDbConnection::dealer_get(int iId,CDealer & de)
 QString CDbConnection::dealer_get_name(int iId)
 {
     CDealer de;
-    QString sCondition,name=QString("");
+    QString sCondition,name=QString::fromUtf8("");
     if(m_bConnect)//db open?
     {
-        sCondition=QString("id=%1").arg(iId);
+        sCondition=QString::fromUtf8("id=%1").arg(iId);
         if(dealer_get(sCondition,de))
             name=de.get_name();
     }
@@ -764,7 +1008,7 @@ int CDbConnection::dealer_get_id(QString & sName)
 {
     int id=-1;
     CDealer de;
-    QString sCondition=QString("name='%1'").arg(sName);
+    QString sCondition=QString::fromUtf8("name='%1'").arg(sName);
     if(m_bConnect)//db open?
     {
         if(dealer_get(sCondition,de))
@@ -779,9 +1023,9 @@ int CDbConnection::dealer_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT count(id) FROM dealer");
+        QString s=QString::fromUtf8("SELECT count(id) FROM dealer");
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -798,11 +1042,11 @@ bool CDbConnection::dealer_get_all(QString sCondition, QList<int> & lsIds,QStrin
 {
     if(!m_bConnect)
         return false;
-    QString s("SELECT * FROM dealer");
+    QString s=QString::fromUtf8("SELECT * FROM dealer");
     if(sCondition.length()>0)
-        s+=QString(" WHERE %1").arg(sCondition);//+condition
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);//+condition
     if(sOrderBy.length()>0)
-        s+=QString(" ORDER BY %1").arg(sOrderBy);//+order by
+        s+=QString::fromUtf8(" ORDER BY %1").arg(sOrderBy);//+order by
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -825,10 +1069,10 @@ bool CDbConnection::customer_add(CCustomer & cu)
     int id=-1;
     bool b;
     QSqlQuery query;
-    QString s=QString("INSERT INTO customer (name,comment,customer_number,first_name,city,postcode,street,call_numbers,fax_numbers,email_adress)"
+    QString s=QString::fromUtf8("INSERT INTO customer (name,comment,customer_number,first_name,city,postcode,street,call_numbers,fax_numbers,email_adress)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7',").arg(cu.get_name(),cu.get_comment(),
                         cu.get_customernumber(),cu.get_first_name(),cu.get_city(),cu.get_postcode(),cu.get_street());
-    s+=QString("'%1','%2','%3')").arg(cu.get_callnumber(),cu.get_faxnumber(),cu.get_email());
+    s+=QString::fromUtf8("'%1','%2','%3')").arg(cu.get_callnumber(),cu.get_faxnumber(),cu.get_email());
     b=query.exec(s);//add ok?
     if(b)
     {
@@ -844,7 +1088,7 @@ bool CDbConnection::customer_remove(int id)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM customer WHERE id=%1").arg(id);
+    QString s=QString::fromUtf8("DELETE FROM customer WHERE id=%1").arg(id);
     bool b=query.exec(s);
     return b;
 }
@@ -855,18 +1099,18 @@ bool CDbConnection::customer_update(CCustomer & cu)
         return false;
 
     QSqlQuery query;
-    QString s=QString("UPDATE OR REPLACE customer SET ");
-    s+=QString("name='%1',").arg(cu.get_name());
-    s+=QString("comment='%1',").arg(cu.get_comment());
-    s+=QString("first_name='%1',").arg(cu.get_first_name());
-    s+=QString("street='%1',").arg(cu.get_street());
-    s+=QString("postcode='%1',").arg(cu.get_postcode());
-    s+=QString("city='%1',").arg(cu.get_city());
-    s+=QString("customer_number='%1',").arg(cu.get_customernumber());
-    s+=QString("call_numbers='%1',").arg(cu.get_callnumber());
-    s+=QString("fax_numbers='%1',").arg(cu.get_faxnumber());
-    s+=QString("email_adress='%1'").arg(cu.get_email());
-    s+=QString(" WHERE id=%1").arg(cu.get_id());
+    QString s=QString::fromUtf8("UPDATE OR REPLACE customer SET ");
+    s+=QString::fromUtf8("name='%1',").arg(cu.get_name());
+    s+=QString::fromUtf8("comment='%1',").arg(cu.get_comment());
+    s+=QString::fromUtf8("first_name='%1',").arg(cu.get_first_name());
+    s+=QString::fromUtf8("street='%1',").arg(cu.get_street());
+    s+=QString::fromUtf8("postcode='%1',").arg(cu.get_postcode());
+    s+=QString::fromUtf8("city='%1',").arg(cu.get_city());
+    s+=QString::fromUtf8("customer_number='%1',").arg(cu.get_customernumber());
+    s+=QString::fromUtf8("call_numbers='%1',").arg(cu.get_callnumber());
+    s+=QString::fromUtf8("fax_numbers='%1',").arg(cu.get_faxnumber());
+    s+=QString::fromUtf8("email_adress='%1'").arg(cu.get_email());
+    s+=QString::fromUtf8(" WHERE id=%1").arg(cu.get_id());
 
     //exec sql-syntax
     bool b=query.exec(s);
@@ -877,7 +1121,8 @@ bool CDbConnection::customer_get(QString sCondition, CCustomer & cu)
 {
     if(!m_bConnect||sCondition.length()<=0)
         return false;
-    QString s=QString("SELECT * FROM customer WHERE %1").arg(sCondition);
+    cu.clear();
+    QString s=QString::fromUtf8("SELECT * FROM customer WHERE %1").arg(sCondition);
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -909,7 +1154,8 @@ bool CDbConnection::customer_get(int iId,CCustomer & cu)
 {
     if(!m_bConnect)//db open?
         return false;
-    QString sCondition=QString("id=%1").arg(iId);
+    cu.clear();
+    QString sCondition=QString::fromUtf8("id=%1").arg(iId);
     bool b=customer_get(sCondition,cu);
     if(b==true && cu.get_id()<1)//not found
         b=false;
@@ -922,9 +1168,9 @@ int CDbConnection::customer_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT count(id) FROM customer");
+        QString s=QString::fromUtf8("SELECT count(id) FROM customer");
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -941,10 +1187,10 @@ bool CDbConnection::customer_get_all(QString sCondition, QList<int> & lsIds)
 {
     if(!m_bConnect)
         return false;
-    QString s("SELECT id FROM customer");
+    QString s=QString::fromUtf8("SELECT id FROM customer");
     if(sCondition.length()>0)
-        s+=QString(" WHERE %1").arg(sCondition);//+condition
-    s+=QString(" ORDER BY name ASC");
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);//+condition
+    s+=QString::fromUtf8(" ORDER BY name ASC");
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -961,7 +1207,7 @@ QString CDbConnection::customer_get_customer_number_nomination(void)
 {
     QString s,s2;
     if(!m_bConnect)
-        return QString("");
+        return QString::fromUtf8("");
     //-get next id-
     int count,next_id=-1;
     QSqlQuery query( "SELECT MAX(id) FROM customer" );
@@ -971,8 +1217,8 @@ QString CDbConnection::customer_get_customer_number_nomination(void)
     //-check id free-
     for(;;next_id++)
     {
-        s=QString("%1").arg(next_id);
-        s2=QString("customer_number='%1'").arg(s);
+        s=QString::fromUtf8("%1").arg(next_id);
+        s2=QString::fromUtf8("customer_number='%1'").arg(s);
         count=customer_get_count(s2);//is free?
         if(count<=0)
             break;
@@ -991,15 +1237,15 @@ bool CDbConnection::article_add(CArticle & ar)
     int id=-1;
     bool b;
     QSqlQuery query;
-    QString s=QString("INSERT INTO article (name,comment,location,articlenumber,unit,articlenumber2,valuta,inventory,max_inventory,maker_id,waregroup_id,baseprice,salesprice,warning_limit)"
+    QString s=QString::fromUtf8("INSERT INTO article (name,comment,location,articlenumber,unit,articlenumber2,valuta,inventory,max_inventory,maker_id,waregroup_id,baseprice,salesprice,warning_limit)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7',").arg(ar.get_name(),ar.get_comment(),ar.get_location(),ar.get_articlenumber(),ar.get_unit(),ar.get_articlenumber2(),ar.get_valuta());
-    s+=QString("%1,").arg(ar.get_inventory());
-    s+=QString("%1,").arg(ar.get_max_inventory());
-    s+=QString("%1,").arg(ar.get_maker_id());
-    s+=QString("%1,").arg(ar.get_waregroup_id());
-    s+=QString("%1,").arg(ar.get_base_price());
-    s+=QString("%1,").arg(ar.get_sales_price());
-    s+=QString("%1)").arg(ar.get_warning_limit());
+    s+=QString::fromUtf8("%1,").arg(ar.get_inventory());
+    s+=QString::fromUtf8("%1,").arg(ar.get_max_inventory());
+    s+=QString::fromUtf8("%1,").arg(ar.get_maker_id());
+    s+=QString::fromUtf8("%1,").arg(ar.get_waregroup_id());
+    s+=QString::fromUtf8("%1,").arg(ar.get_base_price());
+    s+=QString::fromUtf8("%1,").arg(ar.get_sales_price());
+    s+=QString::fromUtf8("%1)").arg(ar.get_warning_limit());
     //-
     b=query.exec(s);//add ok?
     if(b)
@@ -1016,7 +1262,7 @@ bool CDbConnection::article_remove(int id)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM article WHERE id=%1").arg(id);
+    QString s=QString::fromUtf8("DELETE FROM article WHERE id=%1").arg(id);
     bool b=query.exec(s);
     return b;
 }
@@ -1027,7 +1273,7 @@ bool CDbConnection::article_set_delete(int id)
         return false;
 
     QSqlQuery query;
-    QString s=QString("UPDATE article SET delete_status=1 WHERE id=%1").arg(id);
+    QString s=QString::fromUtf8("UPDATE article SET delete_status=1 WHERE id=%1").arg(id);
     bool b=query.exec(s);
     return b;
 }
@@ -1038,23 +1284,23 @@ bool CDbConnection::article_update(CArticle & ar)
         return false;
 
     QSqlQuery query;
-    QString s=QString("UPDATE OR REPLACE article SET ");
-    s+=QString("name='%1',").arg(ar.get_name());
-    s+=QString("comment='%1',").arg(ar.get_comment());
-    s+=QString("location='%1',").arg(ar.get_location());
-    s+=QString("articlenumber='%1',").arg(ar.get_articlenumber());
-    s+=QString("unit='%1',").arg(ar.get_unit());
-    s+=QString("articlenumber2='%1',").arg(ar.get_articlenumber2());
-    s+=QString("valuta='%1',").arg(ar.get_valuta());
-    s+=QString("inventory=%1,").arg(ar.get_inventory());
-    s+=QString("max_inventory=%1,").arg(ar.get_max_inventory());
-    s+=QString("maker_id=%1,").arg(ar.get_maker_id());
-    s+=QString("baseprice=%1,").arg(ar.get_base_price());
-    s+=QString("salesprice=%1,").arg(ar.get_sales_price());
-    s+=QString("waregroup_id=%1,").arg(ar.get_waregroup_id());
-    s+=QString("warning_limit=%1,").arg(ar.get_warning_limit());
-    s+=QString("delete_status=%1").arg(ar.get_delete());
-    s+=QString(" WHERE id=%1").arg(ar.get_id());
+    QString s=QString::fromUtf8("UPDATE OR REPLACE article SET ");
+    s+=QString::fromUtf8("name='%1',").arg(ar.get_name());
+    s+=QString::fromUtf8("comment='%1',").arg(ar.get_comment());
+    s+=QString::fromUtf8("location='%1',").arg(ar.get_location());
+    s+=QString::fromUtf8("articlenumber='%1',").arg(ar.get_articlenumber());
+    s+=QString::fromUtf8("unit='%1',").arg(ar.get_unit());
+    s+=QString::fromUtf8("articlenumber2='%1',").arg(ar.get_articlenumber2());
+    s+=QString::fromUtf8("valuta='%1',").arg(ar.get_valuta());
+    s+=QString::fromUtf8("inventory=%1,").arg(ar.get_inventory());
+    s+=QString::fromUtf8("max_inventory=%1,").arg(ar.get_max_inventory());
+    s+=QString::fromUtf8("maker_id=%1,").arg(ar.get_maker_id());
+    s+=QString::fromUtf8("baseprice=%1,").arg(ar.get_base_price());
+    s+=QString::fromUtf8("salesprice=%1,").arg(ar.get_sales_price());
+    s+=QString::fromUtf8("waregroup_id=%1,").arg(ar.get_waregroup_id());
+    s+=QString::fromUtf8("warning_limit=%1,").arg(ar.get_warning_limit());
+    s+=QString::fromUtf8("delete_status=%1").arg(ar.get_delete());
+    s+=QString::fromUtf8(" WHERE id=%1").arg(ar.get_id());
 
     bool b=query.exec(s);
     return b;
@@ -1068,11 +1314,12 @@ bool CDbConnection::article_get(QString sCondition, CArticle & ar, bool bWithDel
     if(!bWithDeleteArticle)
     {
         if(sCondition.length()>0)//set?
-            sCondition+=QString(" AND ");
-        sCondition+=QString("delete_status = 0");
+            sCondition+=QString::fromUtf8(" AND ");
+        sCondition+=QString::fromUtf8("delete_status = 0");
     }
     //-
-    QString s=QString("SELECT * FROM article WHERE %1").arg(sCondition);
+    ar.clear();
+    QString s=QString::fromUtf8("SELECT * FROM article WHERE %1").arg(sCondition);
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -1109,7 +1356,8 @@ bool CDbConnection::article_get(int iId,CArticle & ar, bool bWithDeleteArticle)
 {
     if(!m_bConnect)//db open?
         return false;
-    QString sCondition=QString("id=%1").arg(iId);
+    ar.clear();
+    QString sCondition=QString::fromUtf8("id=%1").arg(iId);
     bool b=article_get(sCondition,ar,bWithDeleteArticle);
     if(b==true && ar.get_id()<1)//not found
         b=false;
@@ -1119,27 +1367,14 @@ bool CDbConnection::article_get(int iId,CArticle & ar, bool bWithDeleteArticle)
 QString CDbConnection::article_get_name(int iId, bool bWithDeleteArticle)
 {
     CArticle ar;
-    QString sCondition,name=QString("");
+    QString sCondition,name=QString::fromUtf8("");
     if(m_bConnect)//db open?
     {
-        sCondition=QString("id=%1").arg(iId);
+        sCondition=QString::fromUtf8("id=%1").arg(iId);
         if(article_get(sCondition,ar,bWithDeleteArticle))
             name=ar.get_name();
     }
     return name;
-}
-
-int CDbConnection::article_get_id(QString sName, bool bWithDeleteArticle)
-{
-    int id=-1;
-    CArticle ar;
-    QString sCondition=QString("name='%1'").arg(sName);
-    if(m_bConnect)//db open?
-    {
-        if(article_get(sCondition,ar,bWithDeleteArticle))
-            id=ar.get_id();
-    }
-    return id;
 }
 
 int CDbConnection::article_get_count(QString sCondition, bool bWithDeleteArticle)
@@ -1148,17 +1383,17 @@ int CDbConnection::article_get_count(QString sCondition, bool bWithDeleteArticle
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT count(id) FROM article");
+        QString s=QString::fromUtf8("SELECT count(id) FROM article");
         //-
         if(!bWithDeleteArticle)
         {
             if(sCondition.length()>0)//set?
-                sCondition+=QString(" AND ");
-            sCondition+=QString("delete_status = 0");
+                sCondition+=QString::fromUtf8(" AND ");
+            sCondition+=QString::fromUtf8("delete_status = 0");
         }
         //-
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -1171,20 +1406,21 @@ int CDbConnection::article_get_count(QString sCondition, bool bWithDeleteArticle
     return count;
 }
 
-bool CDbConnection::article_get_all(QString sCondition, QList<int> & lsIds, bool bWithDeleteArticle)
+bool CDbConnection::article_get_all(QString sCondition, QList<int> & lsIds, bool bWithDeleteArticle, QString sOrderBy)
 {
     if(!m_bConnect)
         return false;
-    QString s("SELECT id FROM article");
+    QString s=QString::fromUtf8("SELECT id FROM article");
     if(!bWithDeleteArticle)
     {
         if(sCondition.length()>0)//set?
-            sCondition+=QString(" AND ");
-        sCondition+=QString("delete_status = 0");
+            sCondition+=QString::fromUtf8(" AND ");
+        sCondition+=QString::fromUtf8("delete_status = 0");
     }
     if(sCondition.length()>0)
-        s+=QString(" WHERE %1").arg(sCondition);//+condition
-    s+=QString(" ORDER BY name ASC");
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);//+condition
+    if(sOrderBy.length()>0)
+        s+=QString::fromUtf8(" ORDER BY %1").arg(sOrderBy);
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -1197,12 +1433,70 @@ bool CDbConnection::article_get_all(QString sCondition, QList<int> & lsIds, bool
     return true;
 }
 
+bool CDbConnection::article_get_all_with_barcode(QList<int> & lsIds)
+{
+    if(!m_bConnect)
+        return false;
+
+    int i;
+    CArticle ar;
+    CEan eanBarcode;
+    QList<int> ls;
+    bool bBarcodeArticleNumber1,bBarcodeArticleNumber2;
+    QString s,condition=QString::fromUtf8("articlenumber  != '' OR articlenumber2 != ''");
+    bool b=article_get_all(condition,ls,false);
+
+    //-check barcode set-
+    if(b)
+    {
+        while(ls.count()>0)
+        {
+            //clear
+            ar.clear();
+            bBarcodeArticleNumber1=bBarcodeArticleNumber2=false;
+
+            //get article
+            if(article_get(ls[0],ar,false))
+            {
+                //get articlenumber & check is ean-8 or -13
+                for(i=0;i<2;i++)
+                {
+                    if(i==0)
+                        s=ar.get_articlenumber();//articlenumber 1
+                    else
+                        s=ar.get_articlenumber2();//articlenumber 2
+                    if(s.length()>0)//set?
+                    {
+                        eanBarcode.set_barcode(s);
+                        if(eanBarcode.is_ean_barcode())// is articlenumber == EAN-8 or -13?
+                        {
+                            if(i==0)
+                                bBarcodeArticleNumber1=true;
+                            else
+                                bBarcodeArticleNumber2=true;
+                        }
+                    }
+                }
+
+                //EAN-8 or -13 barcode set?
+                if(bBarcodeArticleNumber1==true || bBarcodeArticleNumber2==true)
+                    lsIds.push_back(ls[0]);
+            }
+            ls.removeFirst();
+        }
+    }
+    //-
+    ls.clear();
+    //-
+    return b;
+}
+
 bool CDbConnection::article_all_change_waregroup(int iOldWaregroupId,int iNewWaregroupId)
 {
     if(!m_bConnect)
         return false;
-    QString s=QString("UPDATE article SET waregroup_id=%1").arg(iNewWaregroupId);
-    s+=QString(" WHERE waregroup_id=%1").arg(iOldWaregroupId);
+    QString s=QString::fromUtf8("UPDATE article SET waregroup_id=%1").arg(iNewWaregroupId);
+    s+=QString::fromUtf8(" WHERE waregroup_id=%1").arg(iOldWaregroupId);
     QSqlQuery query;
     bool b=query.exec(s);
     return b;
@@ -1212,8 +1506,8 @@ bool CDbConnection::article_all_change_maker(int iOldMakerId, int iNewMakerId)
 {
     if(!m_bConnect)
         return false;
-    QString s=QString("UPDATE article SET maker_id=%1").arg(iNewMakerId);
-    s+=QString(" WHERE maker_id=%1").arg(iOldMakerId);
+    QString s=QString::fromUtf8("UPDATE article SET maker_id=%1").arg(iNewMakerId);
+    s+=QString::fromUtf8(" WHERE maker_id=%1").arg(iOldMakerId);
     QSqlQuery query;
     bool b=query.exec(s);
     return b;
@@ -1225,16 +1519,16 @@ bool CDbConnection::article_get_all_by_maker(QString sName,QList <int> & lsIds,b
         return false;
     QString sCondition;
     if(bLike)//search name like
-        sCondition=QString("name like '%%1%'").arg(sName);
+        sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
     else//search name=
-        sCondition=QString("name = '%1'").arg(sName);
+        sCondition=QString::fromUtf8("name = '%1'").arg(sName);
     QList <int> lsIdsMaker;
     //-search maker-
     maker_get_all(sCondition,lsIdsMaker);
     while(lsIdsMaker.count()>0)
     {
         //search all article where this maker
-        sCondition=QString("maker_id = %1").arg(lsIdsMaker[0]);
+        sCondition=QString::fromUtf8("maker_id = %1").arg(lsIdsMaker[0]);
         article_get_all(sCondition,lsIds,bWithDeleteArticle);
         //-
         lsIdsMaker.removeFirst();
@@ -1247,48 +1541,34 @@ bool CDbConnection::article_get_all_by_waregroup(QString sName,QList <int> & lsI
 {
     if(!m_bConnect)//db open?
         return false;
-    int i,j;
+
     QString sCondition;
-    if(bLike)//search name like
-        sCondition=QString("name like '%%1%'").arg(sName);
-    else//search name=
-        sCondition=QString("name = '%1'").arg(sName);
     QList <int> lsIdsWaregroup;
-    QList <int> lsIdsSubwaregroup;
-    //-search waregroups-
+
+    if(bLike)//search name like
+        sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
+    else//search name=
+        sCondition=QString::fromUtf8("name = '%1'").arg(sName);
+
+    //-search waregroup-
     waregroup_get_all(sCondition,lsIdsWaregroup);
+
+    if(sName.length()>=3)
+    {
+        //add all sub-waregroups from waregroup
+        for(int i=lsIdsWaregroup.count()-1;i>=0;i--)
+            waregroup_get_all_subwaregroup(lsIdsWaregroup[i],lsIdsWaregroup);
+    }
+
+    //get all article by waregroup ids
     while(lsIdsWaregroup.count()>0)
     {
-        //search all article where this waregroup
-        sCondition=QString("waregroup_id = %1").arg(lsIdsWaregroup[0]);
+        sCondition=QString::fromUtf8("waregroup_id = %1").arg(lsIdsWaregroup[0]);
         article_get_all(sCondition,lsIds,bWithDeleteArticle);
-        //search in subwaregroups
-        waregroup_get_all_subwaregroup(lsIdsWaregroup[0],lsIdsSubwaregroup);
-        while(lsIdsSubwaregroup.count()>0)
-        {
-            sCondition=QString("waregroup_id = %1").arg(lsIdsSubwaregroup[0]);
-            article_get_all(sCondition,lsIds,bWithDeleteArticle);
-            lsIdsSubwaregroup.removeFirst();
-        }
         //-
         lsIdsWaregroup.removeFirst();
-        lsIdsSubwaregroup.clear();
     }
     lsIdsWaregroup.clear();
-
-    //delete double article
-    for(i=0;i<lsIds.count();i++)
-    {
-        for(j=i+1;j<lsIds.count();j++)
-        {
-            if(lsIds[i]==lsIds[j])//double found?
-            {
-                lsIds.removeAt(j);//delete double
-                j--;
-            }
-        }
-    }
-    //-
     return true;
 }
 
@@ -1368,8 +1648,8 @@ unsigned int CDbConnection::article_get_inventory_on_date(int iArticleId,QDate d
         return 0;//not found
     int count=ar.get_inventory();//current count (default)
     //-
-    QString sCondition=QString("SELECT * FROM trade WHERE wares like '%x%1|%'").arg(iArticleId);
-    sCondition+=QString(" AND date > '%1' AND canceled=0").arg(dt.toString("yyyy-MM-dd"));
+    QString sCondition=QString::fromUtf8("SELECT * FROM trade WHERE wares like '%x%1|%'").arg(iArticleId);
+    sCondition+=QString::fromUtf8(" AND date > '%1' AND canceled=0").arg(dt.toString("yyyy-MM-dd"));
     int i,id,type,j;
     QStringList ls,ls2;
     QString sWares;
@@ -1424,11 +1704,11 @@ bool CDbConnection::ordering_add(COrdering & ord)
     int id=-1;
     bool b;
     QSqlQuery query;
-    QString s=QString("INSERT INTO ordering (comment,order_number,wares,dealer_id,date)"
+    QString s=QString::fromUtf8("INSERT INTO ordering (comment,order_number,wares,dealer_id,date)"
                       "VALUES ('%1','%2','%3',").arg(ord.get_comment(),ord.get_ordernumber(),ord.get_wares());
-    s+=QString("%1,").arg(ord.get_dealer_id());
+    s+=QString::fromUtf8("%1,").arg(ord.get_dealer_id());
     QDate dt=ord.get_date();
-    s+=QString("'%1')").arg(dt.toString("yyyy-MM-dd"));
+    s+=QString::fromUtf8("'%1')").arg(dt.toString("yyyy-MM-dd"));
 
     b=query.exec(s);//add ok?
     if(b)
@@ -1445,7 +1725,7 @@ bool CDbConnection::ordering_remove(int id)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM ordering WHERE id=%1").arg(id);
+    QString s=QString::fromUtf8("DELETE FROM ordering WHERE id=%1").arg(id);
     bool b=query.exec(s);
     return b;
 }
@@ -1457,14 +1737,14 @@ bool CDbConnection::ordering_update(COrdering & ord)
 
     QSqlQuery query;
     QDate dt;
-    QString s=QString("UPDATE OR REPLACE ordering SET ");
-    s+=QString("comment='%1',").arg(ord.get_comment());
-    s+=QString("order_number='%1',").arg(ord.get_ordernumber());
-    s+=QString("wares='%1',").arg(ord.get_wares());
-    s+=QString("dealer_id=%1,").arg(ord.get_dealer_id());
+    QString s=QString::fromUtf8("UPDATE OR REPLACE ordering SET ");
+    s+=QString::fromUtf8("comment='%1',").arg(ord.get_comment());
+    s+=QString::fromUtf8("order_number='%1',").arg(ord.get_ordernumber());
+    s+=QString::fromUtf8("wares='%1',").arg(ord.get_wares());
+    s+=QString::fromUtf8("dealer_id=%1,").arg(ord.get_dealer_id());
     dt=ord.get_date();
-    s+=QString("date='%1'").arg(dt.toString("yyyy-MM-dd"));
-    s+=QString(" WHERE id=%1").arg(ord.get_id());
+    s+=QString::fromUtf8("date='%1'").arg(dt.toString("yyyy-MM-dd"));
+    s+=QString::fromUtf8(" WHERE id=%1").arg(ord.get_id());
 
     //exec sql-syntax
     bool b=query.exec(s);
@@ -1475,8 +1755,9 @@ bool CDbConnection::ordering_get(QString sCondition, COrdering & ord)
 {
     if(!m_bConnect||sCondition.length()<=0)
         return false;
+    ord.clear();
     QDate dt;
-    QString s=QString("SELECT * FROM ordering WHERE %1").arg(sCondition);
+    QString s=QString::fromUtf8("SELECT * FROM ordering WHERE %1").arg(sCondition);
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -1504,7 +1785,8 @@ bool CDbConnection::ordering_get(int iId,COrdering & ord)
 {
     if(!m_bConnect)//db open?
         return false;
-    QString sCondition=QString("id=%1").arg(iId);
+    ord.clear();
+    QString sCondition=QString::fromUtf8("id=%1").arg(iId);
     bool b=ordering_get(sCondition,ord);
     if(b==true && ord.get_id()<1)//not found
         b=false;
@@ -1517,9 +1799,9 @@ int CDbConnection::ordering_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT count(id) FROM ordering");
+        QString s=QString::fromUtf8("SELECT count(id) FROM ordering");
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -1557,18 +1839,18 @@ QString CDbConnection::ordering_get_wares_list(int iId, int iMaxLength, bool bWi
                         if(s.length()>0)//found?
                         {
                             if(sReturn.length()>0)//not first article
-                                sReturn+=QString(" | ");
+                                sReturn+=QString::fromUtf8(" | ");
                             if(s.length()+sReturn.length()>iMaxLength)
                             {
-                                sReturn+=QString("...");
+                                sReturn+=QString::fromUtf8("...");
                                 break;
                             }
                             else
                             {
                                 if(!bWithCount)//article name only
-                                    sReturn+=QString("\"%1\"").arg(s);
+                                    sReturn+=QString::fromUtf8("\"%1\"").arg(s);
                                 else//with count
-                                    sReturn+=QString("\"%1x%2\"").arg(lsString[0],s);
+                                    sReturn+=QString::fromUtf8("\"%1x%2\"").arg(lsString[0],s);
                             }
                         }
                     }
@@ -1602,10 +1884,10 @@ QString CDbConnection::ordering_get_wares_list(QList<QString> & lsOrdering, int 
                     if(s.length()>0)//found?
                     {
                         if(sReturn.length()>0)//not first article
-                            sReturn+=QString("|");
+                            sReturn+=QString::fromUtf8("|");
                         if(s.length()+sReturn.length()>iMaxLength)
                         {
-                            sReturn+=QString("...");
+                            sReturn+=QString::fromUtf8("...");
                             break;
                         }
                         else
@@ -1623,9 +1905,9 @@ bool CDbConnection::ordering_get_all(QString sCondition, QList<int> & lsIds)
 {
     if(!m_bConnect)
         return false;
-    QString s("SELECT id FROM ordering");
+    QString s=QString::fromUtf8("SELECT id FROM ordering");
     if(sCondition.length()>0)
-        s+=QString(" WHERE %1").arg(sCondition);//+condition
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);//+condition
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -1644,16 +1926,16 @@ bool CDbConnection::ordering_get_all_by_dealer(QString sName,QList <int> & lsIds
         return false;
     QString sCondition;
     if(bLike)//search name like
-        sCondition=QString("name like '%%1%'").arg(sName);
+        sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
     else//search name=
-        sCondition=QString("name = '%1'").arg(sName);
+        sCondition=QString::fromUtf8("name = '%1'").arg(sName);
     QList <int> lsIdsDealer;
     //-search dealer-
     dealer_get_all(sCondition,lsIdsDealer);
     while(lsIdsDealer.count()>0)
     {
         //search all ordering where this dealer
-        sCondition=QString("dealer_id = %1").arg(lsIdsDealer[0]);
+        sCondition=QString::fromUtf8("dealer_id = %1").arg(lsIdsDealer[0]);
         ordering_get_all(sCondition,lsIds);
         //-
         lsIdsDealer.removeFirst();
@@ -1676,7 +1958,7 @@ bool CDbConnection::ordering_get_all_by_maker(QString sName,QList <int> & lsIds,
     while(lsIdsArticle.count()>0)
     {
         //search all ordering where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
         ordering_get_all(sCondition,lsIds);
         //-
         lsIdsArticle.removeFirst();
@@ -1699,7 +1981,7 @@ bool CDbConnection::ordering_get_all_by_waregroup(QString sName,QList <int> & ls
     while(lsIdsArticle.count()>0)
     {
         //search all ordering where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
         ordering_get_all(sCondition,lsIds);
         //-
         lsIdsArticle.removeFirst();
@@ -1714,16 +1996,16 @@ bool CDbConnection::ordering_get_all_by_article(QString sName,QList <int> & lsId
         return false;
     QString sCondition;
     if(bLike)//search name like
-        sCondition=QString("name like '%%1%'").arg(sName);
+        sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
     else//search name=
-        sCondition=QString("name = '%1'").arg(sName);
+        sCondition=QString::fromUtf8("name = '%1'").arg(sName);
     QList <int> lsIdsArticle;
     //-search article-
     article_get_all(sCondition,lsIdsArticle);
     while(lsIdsArticle.count()>0)
     {
         //search all ordering where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
         ordering_get_all(sCondition,lsIds);
         //-
         lsIdsArticle.removeFirst();
@@ -1739,12 +2021,12 @@ bool CDbConnection::ordering_get_all_by_articlenumber(QString sNumber,QList<int>
 
     QString sCondition("articlenumber");
     if(!bArticlenumber1)//nr.2?
-        sCondition+=QString("2");
+        sCondition+=QString::fromUtf8("2");
     //-
     if(bLike)//search name like
-        sCondition+=QString(" like '%%1%'").arg(sNumber);
+        sCondition+=QString::fromUtf8(" like '%%1%'").arg(sNumber);
     else
-        sCondition+=QString(" = '%1'").arg(sNumber);
+        sCondition+=QString::fromUtf8(" = '%1'").arg(sNumber);
     //-
     QList <int> lsIdsArticle;
     //-search article-
@@ -1752,7 +2034,7 @@ bool CDbConnection::ordering_get_all_by_articlenumber(QString sNumber,QList<int>
     while(lsIdsArticle.count()>0)
     {
         //search all ordering where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
         ordering_get_all(sCondition,lsIds);
         //-
         lsIdsArticle.removeFirst();
@@ -1766,7 +2048,7 @@ int CDbConnection::ordering_get_count_by_article(int iArticleId)
 
     if(!m_bConnect)//db open?
         return -1;
-    QString sCondition=QString("wares like '%x%1|%'").arg(iArticleId);
+    QString sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(iArticleId);
     QList <int> lsIds;
     QList<QString> lsS;
     QStringList lsS2;
@@ -1813,7 +2095,7 @@ int CDbConnection::ordering_get_count_by_article(int iArticleId)
 
 int CDbConnection::ordering_get_ordering_count_by_article(int iArticleId)
 {
-    QString sCondition=QString("wares like '%x%1|%'").arg(iArticleId);
+    QString sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(iArticleId);
     int iReturn=ordering_get_count(sCondition);
     //-
     return iReturn;
@@ -1823,8 +2105,8 @@ bool CDbConnection::ordering_all_change_dealer(int iOldDealerId, int iNewDealerI
 {
     if(!m_bConnect)
         return false;
-    QString s=QString("UPDATE ordering SET dealer_id=%1").arg(iNewDealerId);
-    s+=QString(" WHERE dealer_id=%1").arg(iOldDealerId);
+    QString s=QString::fromUtf8("UPDATE ordering SET dealer_id=%1").arg(iNewDealerId);
+    s+=QString::fromUtf8(" WHERE dealer_id=%1").arg(iOldDealerId);
     QSqlQuery query;
     bool b=query.exec(s);
     return b;
@@ -1839,16 +2121,16 @@ bool CDbConnection::trade_add(CTrade & tr)
     //-
     bool b;
     QSqlQuery query;
-    QString s=QString("INSERT INTO trade (comment,booking_number,wares,info_1,info_2,info_3,info_4,info_5,type,canceled,date)"
+    QString s=QString::fromUtf8("INSERT INTO trade (comment,booking_number,wares,info_1,info_2,info_3,info_4,info_5,type,canceled,date)"
                       "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8',").arg(tr.get_comment(),tr.get_booking_number(),tr.get_wares(),tr.get_info_1(),tr.get_info_2(),
                                                                               tr.get_info_3(),tr.get_info_4(),tr.get_info_5());
-    s+=QString("%1,").arg(tr.get_type());
+    s+=QString::fromUtf8("%1,").arg(tr.get_type());
     if(tr.get_canceled()==false)
-        s+=QString("0,");
+        s+=QString::fromUtf8("0,");
     else
-        s+=QString("1,");
+        s+=QString::fromUtf8("1,");
     QDate dt=tr.get_date();
-    s+=QString("'%1')").arg(dt.toString("yyyy-MM-dd"));
+    s+=QString::fromUtf8("'%1')").arg(dt.toString("yyyy-MM-dd"));
     //-
     b=query.exec(s);//add ok?
     return b;
@@ -1861,23 +2143,23 @@ bool CDbConnection::trade_update(CTrade & tr)
 
     QSqlQuery query;
     QDate dt;
-    QString s=QString("UPDATE OR REPLACE trade SET ");
-    s+=QString("comment='%1',").arg(tr.get_comment());
-    s+=QString("booking_number='%1',").arg(tr.get_booking_number());
-    s+=QString("wares='%1',").arg(tr.get_wares());
+    QString s=QString::fromUtf8("UPDATE OR REPLACE trade SET ");
+    s+=QString::fromUtf8("comment='%1',").arg(tr.get_comment());
+    s+=QString::fromUtf8("booking_number='%1',").arg(tr.get_booking_number());
+    s+=QString::fromUtf8("wares='%1',").arg(tr.get_wares());
     dt=tr.get_date();
-    s+=QString("date='%1',").arg(dt.toString("yyyy-MM-dd"));
-    s+=QString("info_1='%1',").arg(tr.get_info_1());
-    s+=QString("info_2='%1',").arg(tr.get_info_2());
-    s+=QString("info_3='%1',").arg(tr.get_info_3());
-    s+=QString("info_4='%1',").arg(tr.get_info_4());
-    s+=QString("info_5='%1',").arg(tr.get_info_5());
+    s+=QString::fromUtf8("date='%1',").arg(dt.toString("yyyy-MM-dd"));
+    s+=QString::fromUtf8("info_1='%1',").arg(tr.get_info_1());
+    s+=QString::fromUtf8("info_2='%1',").arg(tr.get_info_2());
+    s+=QString::fromUtf8("info_3='%1',").arg(tr.get_info_3());
+    s+=QString::fromUtf8("info_4='%1',").arg(tr.get_info_4());
+    s+=QString::fromUtf8("info_5='%1',").arg(tr.get_info_5());
     if(tr.get_canceled()==false)
-        s=QString("canceled=0,");
+        s=QString::fromUtf8("canceled=0,");
     else
-        s=QString("canceled=1,");
-    s+=QString("type=%1").arg(tr.get_type());
-    s+=QString(" WHERE booking_number='%1'").arg(tr.get_booking_number());
+        s=QString::fromUtf8("canceled=1,");
+    s+=QString::fromUtf8("type=%1").arg(tr.get_type());
+    s+=QString::fromUtf8(" WHERE booking_number='%1'").arg(tr.get_booking_number());
 
     //exec sql-syntax
     bool b=query.exec(s);
@@ -1889,7 +2171,7 @@ bool CDbConnection::trade_remove_all(QString sCondition)
     if(!m_bConnect || sCondition.length()<=0)//db open?  condition set?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM trade WHERE %1").arg(sCondition);
+    QString s=QString::fromUtf8("DELETE FROM trade WHERE %1").arg(sCondition);
     bool b=query.exec(s);
     return b;
 }
@@ -1898,8 +2180,9 @@ bool CDbConnection::trade_get(QString sBookingNumber ,CTrade & tr)
 {   
     if(!m_bConnect)
         return false;
+    tr.clear();
     QDate dt;
-    QString s=QString("SELECT * FROM trade WHERE booking_number='%1'").arg(sBookingNumber);
+    QString s=QString::fromUtf8("SELECT * FROM trade WHERE booking_number='%1'").arg(sBookingNumber);
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -1931,9 +2214,9 @@ bool CDbConnection::trade_get_all(QString sCondition,QList <QString> & lsBooking
     if(!m_bConnect)
         return false;
 
-    QString s("SELECT * FROM trade");
+    QString s=QString::fromUtf8("SELECT * FROM trade");
     if(sCondition.length()>0)
-        s+=QString(" WHERE %1").arg(sCondition);//+condition
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);//+condition
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -1950,7 +2233,7 @@ bool CDbConnection::trade_give_it_trades_with_article(int iArticleId)
 {
     if(!m_bConnect)//db open?
         return false;
-    QString s=QString("SELECT * FROM trade WHERE wares like '%x%1|%'").arg(iArticleId);
+    QString s=QString::fromUtf8("SELECT * FROM trade WHERE wares like '%x%1|%'").arg(iArticleId);
     QSqlQueryModel model;
     QSqlQuery query;
     query.exec(s);
@@ -1965,7 +2248,7 @@ bool CDbConnection::trade_set_canceled(QString sBookingNumber)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("UPDATE trade SET canceled=1 WHERE booking_number='%1'").arg(sBookingNumber);
+    QString s=QString::fromUtf8("UPDATE trade SET canceled=1 WHERE booking_number='%1'").arg(sBookingNumber);
     bool b=query.exec(s);
     return b;
 }
@@ -1976,9 +2259,9 @@ int CDbConnection::trade_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT count(booking_number) FROM trade");
+        QString s=QString::fromUtf8("SELECT count(booking_number) FROM trade");
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -1996,7 +2279,7 @@ QString CDbConnection::trade_get_next_free_booking_number(QDate dt)
 
     if(!m_bConnect)//db open?
         return "";
-    QString s2,s=QString("SELECT * FROM trade WHERE date='%1'").arg(dt.toString("yyyy-MM-dd"));
+    QString s2,s=QString::fromUtf8("SELECT * FROM trade WHERE date='%1'").arg(dt.toString("yyyy-MM-dd"));
     QSqlQueryModel model;
     QSqlQuery query;
     query.exec(s);
@@ -2006,9 +2289,9 @@ QString CDbConnection::trade_get_next_free_booking_number(QDate dt)
     //-check is free-
     for(;;count++)
     {
-        s=QString("%1/").arg(dt.toString("yyyy-MM-dd"));
-        s+=QString("%1").arg(count);
-        s2=QString("booking_number='%1'").arg(s);
+        s=QString::fromUtf8("%1/").arg(dt.toString("yyyy-MM-dd"));
+        s+=QString::fromUtf8("%1").arg(count);
+        s2=QString::fromUtf8("booking_number='%1'").arg(s);
         i=trade_get_count(s2);//is free?
         if(i<=0)
             break;
@@ -2042,18 +2325,18 @@ QString CDbConnection::trade_get_article_list(QString sBookingNumber, int iMaxLe
                         if(s.length()>0)//found?
                         {
                             if(sReturn.length()>0)//not first article
-                                sReturn+=QString(" | ");
+                                sReturn+=QString::fromUtf8(" | ");
                             if(s.length()+sReturn.length()>iMaxLength)
                             {
-                                sReturn+=QString("...");
+                                sReturn+=QString::fromUtf8("...");
                                 break;
                             }
                             else
                             {
                                 if(!bWithCount)
-                                    sReturn+=QString("\"%1\"").arg(s);//only article name
+                                    sReturn+=QString::fromUtf8("\"%1\"").arg(s);//only article name
                                 else//with count
-                                    sReturn+=QString("\"%1x%2\"").arg(lsString[0],s);
+                                    sReturn+=QString::fromUtf8("\"%1x%2\"").arg(lsString[0],s);
                             }
                         }
                     }
@@ -2081,8 +2364,8 @@ bool CDbConnection::trade_get_all_by_maker(QString sName,QString sDates,QList <Q
     while(lsIdsArticle.count()>0)
     {
         //search all ordering where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
-        sCondition+=QString(" AND %1").arg(sDates);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition+=QString::fromUtf8(" AND %1").arg(sDates);
         trade_get_all(sCondition,lsBookingNumber);
         //-
         lsIdsArticle.removeFirst();
@@ -2105,8 +2388,8 @@ bool CDbConnection::trade_get_all_by_waregroup(QString sName,QString sDates,QLis
     while(lsIdsArticle.count()>0)
     {
         //search all trades where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
-        sCondition+=QString(" AND %1").arg(sDates);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition+=QString::fromUtf8(" AND %1").arg(sDates);
         trade_get_all(sCondition,lsBookingNumber);
         //-
         lsIdsArticle.removeFirst();
@@ -2121,17 +2404,17 @@ bool CDbConnection::trade_get_all_by_article(QString sName,QString sDates,QList 
         return false;
     QString sCondition;
     if(bLike)//search name like
-        sCondition=QString("name like '%%1%'").arg(sName);
+        sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
     else//search name=
-        sCondition=QString("name = '%1'").arg(sName);
+        sCondition=QString::fromUtf8("name = '%1'").arg(sName);
     QList <int> lsIdsArticle;
     //-search article-
     article_get_all(sCondition,lsIdsArticle,true);
     while(lsIdsArticle.count()>0)
     {
         //search all trades where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
-        sCondition+=QString(" AND %1").arg(sDates);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition+=QString::fromUtf8(" AND %1").arg(sDates);
         trade_get_all(sCondition,lsBookingNumber);
         //-
         lsIdsArticle.removeFirst();
@@ -2147,12 +2430,12 @@ bool CDbConnection::trade_get_all_by_articlenumber(QString sNumber,QString sDate
 
     QString sCondition("articlenumber");
     if(!bArticlenumber1)//nr.2?
-        sCondition+=QString("2");
+        sCondition+=QString::fromUtf8("2");
     //-
     if(bLike)//search name like
-        sCondition+=QString(" like '%%1%'").arg(sNumber);
+        sCondition+=QString::fromUtf8(" like '%%1%'").arg(sNumber);
     else
-        sCondition+=QString(" = '%1'").arg(sNumber);
+        sCondition+=QString::fromUtf8(" = '%1'").arg(sNumber);
     //-
     QList <int> lsIdsArticle;
     //-search article-
@@ -2160,8 +2443,8 @@ bool CDbConnection::trade_get_all_by_articlenumber(QString sNumber,QString sDate
     while(lsIdsArticle.count()>0)
     {
         //search all trades where this article
-        sCondition=QString("wares like '%x%1|%'").arg(lsIdsArticle[0]);
-        sCondition+=QString(" AND %1").arg(sDates);
+        sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsArticle[0]);
+        sCondition+=QString::fromUtf8(" AND %1").arg(sDates);
         trade_get_all(sCondition,lsBookingNumber);
         //-
         lsIdsArticle.removeFirst();
@@ -2180,15 +2463,15 @@ int CDbConnection::trade_get_all_count_by_maker(QString sName, QDate dtFrom, QDa
         QList<int> lsIdsM,lsIdsA;
         QString sCondition;
         if(bLike)
-            sCondition=QString("name like '%%1%'").arg(sName);
+            sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
         else
-            sCondition=QString("name = '%1'").arg(sName);
+            sCondition=QString::fromUtf8("name = '%1'").arg(sName);
         //-
         if(maker_get_all(sCondition,lsIdsM))//get all maker
         {
             while(lsIdsM.count()>0)//get all article by maker id
             {
-                sCondition=QString("maker_id = %1").arg(lsIdsM[0]);
+                sCondition=QString::fromUtf8("maker_id = %1").arg(lsIdsM[0]);
                 if(!article_get_all(sCondition,lsIdsA,true))
                 {
                     b=false;
@@ -2203,11 +2486,11 @@ int CDbConnection::trade_get_all_count_by_maker(QString sName, QDate dtFrom, QDa
             {
                 while(lsIdsA.count()>0)
                 {
-                    sCondition=QString("wares like '%x%1|%'").arg(lsIdsA[0]);
+                    sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsA[0]);
                     if(dtTo>dtFrom)
-                        sCondition+=QString(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
+                        sCondition+=QString::fromUtf8(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
                     else
-                        sCondition+=QString(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
+                        sCondition+=QString::fromUtf8(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
                     j=trade_get_count(sCondition);
                     if(j>0)
                         i+=j;
@@ -2239,15 +2522,15 @@ int CDbConnection::trade_get_all_count_by_waregroup(QString sName, QDate dtFrom,
         QList<int> lsIdsW,lsIdsA;
         QString sCondition;
         if(bLike)
-            sCondition=QString("name like '%%1%'").arg(sName);
+            sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
         else
-            sCondition=QString("name = '%1'").arg(sName);
+            sCondition=QString::fromUtf8("name = '%1'").arg(sName);
         //-
         if(waregroup_get_all(sCondition,lsIdsW))//get all waregroup
         {
             while(lsIdsW.count()>0)//get all article by waregroup id
             {
-                sCondition=QString("waregroup_id = %1").arg(lsIdsW[0]);
+                sCondition=QString::fromUtf8("waregroup_id = %1").arg(lsIdsW[0]);
                 if(!article_get_all(sCondition,lsIdsA,true))
                 {
                     b=false;
@@ -2262,11 +2545,11 @@ int CDbConnection::trade_get_all_count_by_waregroup(QString sName, QDate dtFrom,
             {
                 while(lsIdsA.count()>0)
                 {
-                    sCondition=QString("wares like '%x%1|%'").arg(lsIdsA[0]);
+                    sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsA[0]);
                     if(dtTo>dtFrom)
-                        sCondition+=QString(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
+                        sCondition+=QString::fromUtf8(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
                     else
-                        sCondition+=QString(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
+                        sCondition+=QString::fromUtf8(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
                     j=trade_get_count(sCondition);
                     if(j>0)
                         i+=j;
@@ -2298,19 +2581,19 @@ int CDbConnection::trade_get_all_count_by_article(QString sName, QDate dtFrom, Q
         QList<int> lsIdsA;
         QString sCondition;
         if(bLike)
-            sCondition=QString("name like '%%1%'").arg(sName);
+            sCondition=QString::fromUtf8("name like '%%1%'").arg(sName);
         else
-            sCondition=QString("name = '%1'").arg(sName);
+            sCondition=QString::fromUtf8("name = '%1'").arg(sName);
         //-
         if(article_get_all(sCondition,lsIdsA,true))//get all article
         {
             while(lsIdsA.count()>0)
             {
-                sCondition=QString("wares like '%x%1|%'").arg(lsIdsA[0]);
+                sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsA[0]);
                 if(dtTo>dtFrom)
-                    sCondition+=QString(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
+                    sCondition+=QString::fromUtf8(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
                 else
-                    sCondition+=QString(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
+                    sCondition+=QString::fromUtf8(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
                 j=trade_get_count(sCondition);
                 if(j>0)
                     i+=j;
@@ -2343,27 +2626,27 @@ int CDbConnection::trade_get_all_count_by_articlenumber(QString sNumber, QDate d
         if(bArticlenumber1)
         {
             if(bLike)
-                sCondition=QString("articlenumber like '%%1%'").arg(sNumber);
+                sCondition=QString::fromUtf8("articlenumber like '%%1%'").arg(sNumber);
             else
-                sCondition=QString("articlenumber = '%1'").arg(sNumber);
+                sCondition=QString::fromUtf8("articlenumber = '%1'").arg(sNumber);
         }
         else
         {
             if(bLike)
-                sCondition=QString("articlenumber2 like '%%1%'").arg(sNumber);
+                sCondition=QString::fromUtf8("articlenumber2 like '%%1%'").arg(sNumber);
             else
-                sCondition=QString("articlenumber2 = '%1'").arg(sNumber);
+                sCondition=QString::fromUtf8("articlenumber2 = '%1'").arg(sNumber);
         }
         //-
         if(article_get_all(sCondition,lsIdsA,true))//get all article
         {
             while(lsIdsA.count()>0)
             {
-                sCondition=QString("wares like '%x%1|%'").arg(lsIdsA[0]);
+                sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsIdsA[0]);
                 if(dtTo>dtFrom)
-                    sCondition+=QString(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
+                    sCondition+=QString::fromUtf8(" AND date >= '%1' AND date <='%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
                 else
-                    sCondition+=QString(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
+                    sCondition+=QString::fromUtf8(" AND date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
                 j=trade_get_count(sCondition);
                 if(j>0)
                     i+=j;
@@ -2420,7 +2703,7 @@ bool CDbConnection::trade_check_cancel_possible(QString sBookingNumber,QString &
                         c=(int)ar.get_inventory()-lsArticleCounts[i];
                         if(c<0)//if cur.inventory - trade article count < 0 -> error
                         {
-                            sErrorString=QString("Der aktuelle Bestand des Artikels  \"%1\" ist kleiner als dessen Anzahl in der zu stornierendenn Buchung.").arg(ar.get_name());
+                            sErrorString=QString::fromUtf8("Der aktuelle Bestand des Artikels  \"%1\" ist kleiner als dessen Anzahl in der zu stornierendenn Buchung.").arg(ar.get_name());
                             b=false;
                             break;//error
                         }
@@ -2429,8 +2712,8 @@ bool CDbConnection::trade_check_cancel_possible(QString sBookingNumber,QString &
                         dt=QDate::currentDate();//cur.date
                         while(dt>dtTrade)
                         {
-                            sCondition=QString("wares like '%x%1|%'").arg(lsArticleIds[i]);
-                            sCondition+=QString(" AND date = '%1' AND canceled=0").arg(dt.toString("yyyy-MM-dd"));
+                            sCondition=QString::fromUtf8("wares like '%x%1|%'").arg(lsArticleIds[i]);
+                            sCondition+=QString::fromUtf8(" AND date = '%1' AND canceled=0").arg(dt.toString("yyyy-MM-dd"));
                             b=trade_get_all(sCondition,lsBookingnumbers);//get all trades from trade on date
                             if(b)
                             {
@@ -2480,12 +2763,12 @@ bool CDbConnection::trade_check_cancel_possible(QString sBookingNumber,QString &
             bReturn=true;//canceled possible
         else
         {
-            sErrorString=QString("Der Bestand des Artikels \"%1\" wäre nach der Stornierung der Buchung am '%2'").arg(ar.get_name(),dtMark.toString("dd.MM.yyyy"));
-            sErrorString+=QString(" bei '%1").arg(invMark);
+            sErrorString=QString::fromUtf8("Der Bestand des Artikels \"%1\" wäre nach der Stornierung der Buchung am '%2'").arg(ar.get_name(),dtMark.toString("dd.MM.yyyy"));
+            sErrorString+=QString::fromUtf8(" bei '%1").arg(invMark);
             s=ar.get_unit();
             if(s.length()>0)
-                sErrorString+=QString(" %1'").arg(s);
-            sErrorString+=QString("'.");
+                sErrorString+=QString::fromUtf8(" %1'").arg(s);
+            sErrorString+=QString::fromUtf8("'.");
         }
     }
     //-
@@ -2511,9 +2794,9 @@ bool CDbConnection::trade_update_all_info(int iNumber, int iTradeType, QString s
 
     CTrade trade;
     QList<QString> ls;
-    QString sTableRowName=QString("info_%1").arg(iNumber);
-    QString sCondition=QString("type = %1").arg(iTradeType);
-    sCondition+=QString(" AND %1 = '%2'").arg(sTableRowName,sOld);
+    QString sTableRowName=QString::fromUtf8("info_%1").arg(iNumber);
+    QString sCondition=QString::fromUtf8("type = %1").arg(iTradeType);
+    sCondition+=QString::fromUtf8(" AND %1 = '%2'").arg(sTableRowName,sOld);
     //-
     if(trade_get_all(sCondition, ls))//search all trades where info = old
     {
@@ -2543,9 +2826,9 @@ bool CDbConnection::logbook_add(CLogbook & lg)
     bool b;
     QDateTime dt_ti=lg.get_date_time();
     QSqlQuery query;
-    QString s=QString("INSERT INTO logbook (date_time, text, type)"
+    QString s=QString::fromUtf8("INSERT INTO logbook (date_time, text, type)"
                       "VALUES ('%1','%2',").arg(dt_ti.toString("yyyy-MM-dd hh:mm:ss"),lg.get_text());
-    s+=QString("%1)").arg(lg.get_type());
+    s+=QString::fromUtf8("%1)").arg(lg.get_type());
     //-
     b=query.exec(s);//add ok?
     //-
@@ -2557,9 +2840,9 @@ bool CDbConnection::logbook_remove_all(QString sCondition)
     if(!m_bConnect)//db open?
         return false;
     QSqlQuery query;
-    QString s=QString("DELETE FROM logbook");
+    QString s=QString::fromUtf8("DELETE FROM logbook");
     if(sCondition.length()>0)//set?
-        s+=QString(" WHERE %1").arg(sCondition);
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
     bool b=query.exec(s);
     return b;
 }
@@ -2568,7 +2851,7 @@ bool CDbConnection::logbook_get(QDateTime dt_tiDateTime,CLogbook & lg)
 {
     if(!m_bConnect)
         return false;
-    QString s=QString("SELECT * FROM logbook WHERE date_time='%1'").arg(dt_tiDateTime.toString("yyyy-MM-dd hh:mm:ss"));
+    QString s=QString::fromUtf8("SELECT * FROM logbook WHERE date_time='%1'").arg(dt_tiDateTime.toString("yyyy-MM-dd hh:mm:ss"));
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -2591,11 +2874,11 @@ bool CDbConnection::logbook_get_all(QString sCondition, QList<QDateTime> & lsDtT
     if(!m_bConnect)
         return false;
 
-    QString s("SELECT * FROM logbook");
+    QString s=QString::fromUtf8("SELECT * FROM logbook");
     if(sCondition.length()>0)
-        s+=QString(" WHERE %1").arg(sCondition);//+condition
+        s+=QString::fromUtf8(" WHERE %1").arg(sCondition);//+condition
     if(sOrderBy.length()>0)
-        s+=QString(" ORDER BY %1").arg(sOrderBy);//+condition
+        s+=QString::fromUtf8(" ORDER BY %1").arg(sOrderBy);//+condition
     QSqlQuery query;
     query.setForwardOnly(true);
     bool b=query.exec(s);
@@ -2614,9 +2897,9 @@ int CDbConnection::logbook_get_count(QString sCondition)
     //-
     if(m_bConnect)//db open?
     {
-        QString s("SELECT count(date_time) FROM logbook");
+        QString s=QString::fromUtf8("SELECT count(date_time) FROM logbook");
         if(sCondition.length()>0)
-            s+=QString(" WHERE %1").arg(sCondition);
+            s+=QString::fromUtf8(" WHERE %1").arg(sCondition);
         QSqlQuery query;
         if(query.exec(s))
         {
@@ -2637,11 +2920,11 @@ bool CDbConnection::logbook_create_new(CWaregroup & wg, CLogbook & lg)
     QString s2,s;
     //-
     s2=waregroup_get_path(wg.get_id());
-    s=QString("\"%1\"").arg(s2);
+    s=QString::fromUtf8("\"%1\"").arg(s2);
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-
@@ -2660,7 +2943,7 @@ bool CDbConnection::logbook_create_edit(CWaregroup & wg, CLogbook & lg, bool bMa
 
     int i;
     bool b=true;
-    QString s3,s2,s=QString("");
+    QString s3,s2,s=QString::fromUtf8("");
     QDateTime dt_ti;
     QList<QString> lsC,lsB,lsA;//before & after & comment
     static CWaregroup wgMark=CWaregroup();
@@ -2683,11 +2966,11 @@ bool CDbConnection::logbook_create_edit(CWaregroup & wg, CLogbook & lg, bool bMa
             if(wg.get_parent_id()!=wgMark.get_parent_id())
             {
                 if(wgMark.get_parent_id()==-1)
-                    s3=QString("Hauptverzeichnis");
+                    s3=QString::fromUtf8("Hauptverzeichnis");
                 else
                     s3=waregroup_get_name(wgMark.get_parent_id());
                 if(wg.get_parent_id()==-1)
-                    s2=QString("Hauptverzeichnis");
+                    s2=QString::fromUtf8("Hauptverzeichnis");
                 else
                  s2=waregroup_get_name(wg.get_parent_id());
                 lsB.push_back(s3);
@@ -2707,12 +2990,12 @@ bool CDbConnection::logbook_create_edit(CWaregroup & wg, CLogbook & lg, bool bMa
             else
             {
                 s2=waregroup_get_path(wg.get_id());
-                s=QString("Pfad:\"%1\" ").arg(s2);
+                s=QString::fromUtf8("Pfad:\"%1\" ").arg(s2);
                 while(lsB.count()>0)
                 {
                     if(s.length()>0)
-                        s+=QString(" ");
-                    s2=QString("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
+                        s+=QString::fromUtf8(" ");
+                    s2=QString::fromUtf8("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
                     s+=s2;
                     //-
                     lsC.removeFirst();
@@ -2729,7 +3012,7 @@ bool CDbConnection::logbook_create_edit(CWaregroup & wg, CLogbook & lg, bool bMa
                 if(s.length()>300)
                 {
                     s.resize(297);
-                    s+=QString("...");
+                    s+=QString::fromUtf8("...");
                 }
                 lg.set_text(s);
             }
@@ -2754,11 +3037,11 @@ bool CDbConnection::logbook_create_new(CMaker & mk, CLogbook & lg)
     QString s2,s;
     //-
     s2=mk.get_name();
-    s=QString("\"%1\"").arg(s2);
+    s=QString::fromUtf8("\"%1\"").arg(s2);
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-
@@ -2777,7 +3060,7 @@ bool CDbConnection::logbook_create_edit(CMaker & mk, CLogbook & lg, bool bMark)
 
     int i;
     bool b=true;
-    QString s2,s=QString("");
+    QString s2,s=QString::fromUtf8("");
     QDateTime dt_ti;
     QList<QString> lsC,lsB,lsA;//before & after & comment
     static CMaker mkMark=CMaker();
@@ -2846,12 +3129,12 @@ bool CDbConnection::logbook_create_edit(CMaker & mk, CLogbook & lg, bool bMark)
             else
             {
                 s2=mk.get_name();
-                s=QString("Name:\"%1\" ").arg(s2);
+                s=QString::fromUtf8("Name:\"%1\" ").arg(s2);
                 while(lsB.count()>0)
                 {
                     if(s.length()>0)
-                        s+=QString(" ");
-                    s2=QString("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
+                        s+=QString::fromUtf8(" ");
+                    s2=QString::fromUtf8("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
                     s+=s2;
                     //-
                     lsC.removeFirst();
@@ -2868,7 +3151,7 @@ bool CDbConnection::logbook_create_edit(CMaker & mk, CLogbook & lg, bool bMark)
                 if(s.length()>300)
                 {
                     s.resize(297);
-                    s+=QString("...");
+                    s+=QString::fromUtf8("...");
                 }
                 lg.set_text(s);
             }
@@ -2893,11 +3176,11 @@ bool CDbConnection::logbook_create_new(CDealer & de, CLogbook & lg)
     QString s2,s;
     //-
     s2=de.get_name();
-    s=QString("\"%1\"").arg(s2);
+    s=QString::fromUtf8("\"%1\"").arg(s2);
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-
@@ -2916,7 +3199,7 @@ bool CDbConnection::logbook_create_edit(CDealer & de, CLogbook & lg, bool bMark)
 
     int i;
     bool b=true;
-    QString s2,s=QString("");
+    QString s2,s=QString::fromUtf8("");
     QDateTime dt_ti;
     QList<QString> lsC,lsB,lsA;//before & after & comment
     static CDealer deMark=CDealer();
@@ -2991,12 +3274,12 @@ bool CDbConnection::logbook_create_edit(CDealer & de, CLogbook & lg, bool bMark)
             else
             {
                 s2=de.get_name();
-                s=QString("\"%1\" ").arg(s2);
+                s=QString::fromUtf8("\"%1\" ").arg(s2);
                 while(lsB.count()>0)
                 {
                     if(s.length()>0)
-                        s+=QString(" ");
-                    s2=QString("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
+                        s+=QString::fromUtf8(" ");
+                    s2=QString::fromUtf8("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
                     s+=s2;
                     //-
                     lsC.removeFirst();
@@ -3013,7 +3296,7 @@ bool CDbConnection::logbook_create_edit(CDealer & de, CLogbook & lg, bool bMark)
                 if(s.length()>300)
                 {
                     s.resize(297);
-                    s+=QString("...");
+                    s+=QString::fromUtf8("...");
                 }
                 lg.set_text(s);
             }
@@ -3038,11 +3321,11 @@ bool CDbConnection::logbook_create_new(CCustomer & cu, CLogbook & lg)
     QString s2,s;
     //-
     s2=cu.get_name();
-    s=QString("Name:\"%1, %2\" PLZ,Ort:\"%3, %4\" KnNr:\"%5\"").arg(cu.get_name(),cu.get_first_name(),cu.get_postcode(),cu.get_city(),cu.get_customernumber());
+    s=QString::fromUtf8("Name:\"%1, %2\" PLZ,Ort:\"%3, %4\" KnNr:\"%5\"").arg(cu.get_name(),cu.get_first_name(),cu.get_postcode(),cu.get_city(),cu.get_customernumber());
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-
@@ -3061,7 +3344,7 @@ bool CDbConnection::logbook_create_edit(CCustomer & cu, CLogbook & lg, bool bMar
 
     int i;
     bool b=true;
-    QString s2,s=QString("");
+    QString s2,s=QString::fromUtf8("");
     QDateTime dt_ti;
     QList<QString> lsC,lsB,lsA;//before & after & comment
     static CCustomer cuMark=CCustomer();
@@ -3077,9 +3360,9 @@ bool CDbConnection::logbook_create_edit(CCustomer & cu, CLogbook & lg, bool bMar
             //after setting changed
             if(cu.get_name()!=cuMark.get_name() || cu.get_first_name()!=cuMark.get_first_name())
             {
-                s2=QString("%1, %2").arg(cuMark.get_name(),cuMark.get_first_name());
+                s2=QString::fromUtf8("%1, %2").arg(cuMark.get_name(),cuMark.get_first_name());
                 lsB.push_back(s2);
-                s2=QString("%1, %2").arg(cu.get_name(),cu.get_first_name());
+                s2=QString::fromUtf8("%1, %2").arg(cu.get_name(),cu.get_first_name());
                 lsA.push_back(s2);
                 lsC.push_back("Name:");
             }
@@ -3098,9 +3381,9 @@ bool CDbConnection::logbook_create_edit(CCustomer & cu, CLogbook & lg, bool bMar
             }
             if(cu.get_postcode()!=cuMark.get_postcode() || cu.get_city()!=cuMark.get_city())
             {
-                s2=QString("%1, %2").arg(cuMark.get_postcode(),cuMark.get_city());
+                s2=QString::fromUtf8("%1, %2").arg(cuMark.get_postcode(),cuMark.get_city());
                 lsB.push_back(s2);
-                s2=QString("%1, %2").arg(cu.get_postcode(),cu.get_city());
+                s2=QString::fromUtf8("%1, %2").arg(cu.get_postcode(),cu.get_city());
                 lsA.push_back(s2);
                 lsC.push_back("PLZ,Ort:");
             }
@@ -3134,12 +3417,12 @@ bool CDbConnection::logbook_create_edit(CCustomer & cu, CLogbook & lg, bool bMar
                 b=false;
             else
             {
-                s=QString("KnNr:\"%1\" ").arg(cu.get_customernumber());
+                s=QString::fromUtf8("KnNr:\"%1\" ").arg(cu.get_customernumber());
                 while(lsB.count()>0)
                 {
                     if(s.length()>0)
-                        s+=QString(" ");
-                    s2=QString("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
+                        s+=QString::fromUtf8(" ");
+                    s2=QString::fromUtf8("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
                     s+=s2;
                     //-
                     lsC.removeFirst();
@@ -3156,7 +3439,7 @@ bool CDbConnection::logbook_create_edit(CCustomer & cu, CLogbook & lg, bool bMar
                 if(s.length()>300)
                 {
                     s.resize(297);
-                    s+=QString("...");
+                    s+=QString::fromUtf8("...");
                 }
                 lg.set_text(s);
             }
@@ -3182,11 +3465,11 @@ bool CDbConnection::logbook_create_new(CArticle & ar, CLogbook & lg)
     //-
     sP=waregroup_get_path(ar.get_waregroup_id(),3);
     sM=maker_get_name(ar.get_maker_id());
-    s=QString("Bez:\"%1\" Hersteller:\"%2\" Warengruppe:\"%3\"").arg(ar.get_name(),sM,sP);
+    s=QString::fromUtf8("Bez:\"%1\" Hersteller:\"%2\" Warengruppe:\"%3\"").arg(ar.get_name(),sM,sP);
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-
@@ -3205,7 +3488,7 @@ bool CDbConnection::logbook_create_edit(CArticle & ar, CLogbook & lg, bool bMark
 
     int i;
     bool b=true;
-    QString s2,s=QString("");
+    QString s2,s=QString::fromUtf8("");
     QDateTime dt_ti;
     QList<QString> lsC,lsB,lsA;//before & after & comment
     static CArticle arMark=CArticle();
@@ -3255,33 +3538,33 @@ bool CDbConnection::logbook_create_edit(CArticle & ar, CLogbook & lg, bool bMark
             }
             if(ar.get_base_price()!=arMark.get_base_price())
             {
-                s2=QString("%1").arg(arMark.get_base_price());
+                s2=QString::fromUtf8("%1").arg(arMark.get_base_price());
                 lsB.push_back(s2);
-                s2=QString("%1").arg(ar.get_base_price());
+                s2=QString::fromUtf8("%1").arg(ar.get_base_price());
                 lsA.push_back(s2);
                 lsC.push_back("EK:");
             }
             if(ar.get_sales_price()!=arMark.get_sales_price())
             {
-                s2=QString("%1").arg(arMark.get_sales_price());
+                s2=QString::fromUtf8("%1").arg(arMark.get_sales_price());
                 lsB.push_back(s2);
-                s2=QString("%1").arg(ar.get_sales_price());
+                s2=QString::fromUtf8("%1").arg(ar.get_sales_price());
                 lsA.push_back(s2);
                 lsC.push_back("VK:");
             }
             if(ar.get_inventory()!=arMark.get_inventory())
             {
-                s2=QString("%1").arg(arMark.get_inventory());
+                s2=QString::fromUtf8("%1").arg(arMark.get_inventory());
                 lsB.push_back(s2);
-                s2=QString("%1").arg(ar.get_inventory());
+                s2=QString::fromUtf8("%1").arg(ar.get_inventory());
                 lsA.push_back(s2);
                 lsC.push_back("Bst:");
             }
             if(ar.get_max_inventory()!=arMark.get_max_inventory())
             {
-                s2=QString("%1").arg(arMark.get_max_inventory());
+                s2=QString::fromUtf8("%1").arg(arMark.get_max_inventory());
                 lsB.push_back(s2);
-                s2=QString("%1").arg(ar.get_max_inventory());
+                s2=QString::fromUtf8("%1").arg(ar.get_max_inventory());
                 lsA.push_back(s2);
                 lsC.push_back("M.Bst:");
             }
@@ -3301,7 +3584,7 @@ bool CDbConnection::logbook_create_edit(CArticle & ar, CLogbook & lg, bool bMark
             {
                 lsB.push_back(arMark.get_valuta());
                 lsA.push_back(ar.get_valuta());
-                lsC.push_back("Währung:");
+                lsC.push_back(QString::fromUtf8("Währung:"));
             }
             if(ar.get_comment()!=arMark.get_comment())
             {
@@ -3315,12 +3598,12 @@ bool CDbConnection::logbook_create_edit(CArticle & ar, CLogbook & lg, bool bMark
                 b=false;
             else
             {
-                s=QString("Bez:\"%1\" ").arg(ar.get_name());
+                s=QString::fromUtf8("Bez:\"%1\" ").arg(ar.get_name());
                 while(lsB.count()>0)
                 {
                     if(s.length()>0)
-                        s+=QString(" ");
-                    s2=QString("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
+                        s+=QString::fromUtf8(" ");
+                    s2=QString::fromUtf8("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
                     s+=s2;
                     //-
                     lsC.removeFirst();
@@ -3337,7 +3620,7 @@ bool CDbConnection::logbook_create_edit(CArticle & ar, CLogbook & lg, bool bMark
                 if(s.length()>300)
                 {
                     s.resize(297);
-                    s+=QString("...");
+                    s+=QString::fromUtf8("...");
                 }
                 lg.set_text(s);
             }
@@ -3349,7 +3632,7 @@ bool CDbConnection::logbook_create_edit(CArticle & ar, CLogbook & lg, bool bMark
 
 bool CDbConnection::logbook_create_copy(QString sArticleNameSource, QString sArticleNameCopy, CLogbook & lg)
 {
-    QString s=QString("Kopie \"%1\" erstellt von \"%2\"").arg(sArticleNameCopy,sArticleNameSource);
+    QString s=QString::fromUtf8("Kopie \"%1\" erstellt von \"%2\"").arg(sArticleNameCopy,sArticleNameSource);
     lg.set_text(s);
     lg.set_type(LOGBOOK_TYPE_ARTICLE_COPY);
     QDateTime dt_ti=QDateTime(QDate().currentDate(),QTime().currentTime());
@@ -3372,11 +3655,11 @@ bool CDbConnection::logbook_create_new(COrdering & ord, CLogbook & lg)
     QString s2,s;
     //-
     s2=dealer_get_name(ord.get_dealer_id());
-    s=QString("Bestelldt:\"%1\" Bestellnr:\"%2\" Händler:\"%3\"").arg(ord.get_date().toString("dd.MM.yyyy"),ord.get_ordernumber(),s2);
+    s=QString::fromUtf8("Bestelldt:\"%1\" Bestellnr:\"%2\" Händler:\"%3\"").arg(ord.get_date().toString("dd.MM.yyyy"),ord.get_ordernumber(),s2);
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-
@@ -3396,7 +3679,7 @@ bool CDbConnection::logbook_create_edit(COrdering & ord, CLogbook & lg, bool bMa
     int i;
     bool b=true;
     QList<QString> ls;
-    QString s2,s=QString("");
+    QString s2,s=QString::fromUtf8("");
     QDateTime dt_ti;
     QList<QString> lsC,lsB,lsA;//before & after & comment
     static COrdering ordMark=COrdering();
@@ -3428,7 +3711,7 @@ bool CDbConnection::logbook_create_edit(COrdering & ord, CLogbook & lg, bool bMa
                 lsB.push_back(s2);
                 s2=dealer_get_name(ord.get_dealer_id());
                 lsA.push_back(s2);
-                lsC.push_back("Händler:");
+                lsC.push_back(QString::fromUtf8("Händler:"));
             }
             if(ord.get_comment()!=ordMark.get_comment())
             {
@@ -3454,12 +3737,12 @@ bool CDbConnection::logbook_create_edit(COrdering & ord, CLogbook & lg, bool bMa
                 b=false;
             else
             {
-                s=QString("Bestellnr:\"%1\" ").arg(ord.get_ordernumber());
+                s=QString::fromUtf8("Bestellnr:\"%1\" ").arg(ord.get_ordernumber());
                 while(lsB.count()>0)
                 {
                     if(s.length()>0)
-                        s+=QString(" ");
-                    s2=QString("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
+                        s+=QString::fromUtf8(" ");
+                    s2=QString::fromUtf8("%1\"%2\"->\"%3\"").arg(lsC[0],lsB[0],lsA[0]);
                     s+=s2;
                     //-
                     lsC.removeFirst();
@@ -3476,7 +3759,7 @@ bool CDbConnection::logbook_create_edit(COrdering & ord, CLogbook & lg, bool bMa
                 if(s.length()>300)
                 {
                     s.resize(297);
-                    s+=QString("...");
+                    s+=QString::fromUtf8("...");
                 }
                 lg.set_text(s);
             }
@@ -3500,11 +3783,11 @@ bool CDbConnection::logbook_create_new(CTrade & tr, CLogbook & lg)
 
     QString s;
     //-
-    s=QString("Buchungsnr:\"%1\"").arg(tr.get_booking_number());
+    s=QString::fromUtf8("Buchungsnr:\"%1\"").arg(tr.get_booking_number());
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-
@@ -3530,11 +3813,11 @@ bool CDbConnection::logbook_create_canceled(CTrade & tr, CLogbook & lg)
 
     QString s;
     //-
-    s=QString("Buchungsnr:\"%1\"").arg(tr.get_booking_number());
+    s=QString::fromUtf8("Buchungsnr:\"%1\"").arg(tr.get_booking_number());
     if(s.length()>300)
     {
         s.resize(297);
-        s+=QString("...");
+        s+=QString::fromUtf8("...");
     }
     lg.set_text(s);
     //-

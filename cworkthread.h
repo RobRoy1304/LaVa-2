@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@
 #define WORK_ARTICLE_GET_ALL_BY_WAREGROUP 47
 #define WORK_ARTICLE_GET_INVENTORY_ON_DATE 48
 #define WORK_ARTICLE_UPDATE_ALL_COUNT 49
+#define WORK_ARTICLE_GET_ALL_WITH_BARCODE 50
 
 //ordering
 #define WORK_ORDERING_GET_ALL 60
@@ -110,6 +111,7 @@
 #define WORK_BALANCELIST_UPDATE_TABLEWIDGET 130
 #define WORK_WARNLIST_UPDATE_TABLEWIDGET 131
 #define WORK_INVENTORYS_ON_DATE_UPDATE_TABLEWIDGET 132
+#define WORK_INVENTORYLIST_UPDATE_TABLEWIDGET 133
 
 
 //----------------------------------------------------------

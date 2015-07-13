@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ bool CWorkThread::stop_thread(void)
         return false;
     //stop thread
     m_bBreakThread=true;
-    while(isRunning()) {msleep(200);}
+    while(isRunning()) {msleep(500);}
     return true;
 }
 
@@ -286,6 +286,11 @@ void CWorkThread::run(void)
                     if(m_pMemory->get_tablewidget()!=NULL && m_pMemory->get_int_list() !=NULL && m_pMemory->get_int()!=NULL)
                         m_bReturn=m_pWidgets->article_update_tablewidget(m_pMemory->get_tablewidget(),*m_pMemory->get_int_list(),*m_pMemory->get_int(),-1);
                 }
+                if(m_iWork==WORK_ARTICLE_GET_ALL_WITH_BARCODE)
+                {
+                    if(m_pMemory->get_int_list()!=NULL)
+                        m_bReturn=m_pDbInterface->article_get_all_with_barcode(*m_pMemory->get_int_list());
+                }
 
                 //ordering-----------------------------
                 if(m_iWork==WORK_ORDERING_GET_ALL)
@@ -377,7 +382,7 @@ void CWorkThread::run(void)
                 if(m_iWork==WORK_TRADE_UPDATE_TABLEWIDGET)
                 {
                     if(m_pMemory->get_tablewidget()!=NULL && m_pMemory->get_string_list() !=NULL)
-                        m_bReturn=m_pWidgets->trade_update_tablewidget(m_pMemory->get_tablewidget(),*m_pMemory->get_string_list(),QString(""));
+                        m_bReturn=m_pWidgets->trade_update_tablewidget(m_pMemory->get_tablewidget(),*m_pMemory->get_string_list(),QString::fromUtf8(""));
                 }
                 if(m_iWork==WORK_TRADE_UPDATE_TABLEWIDGET_WARES_LIST)
                 {
@@ -482,6 +487,11 @@ void CWorkThread::run(void)
                 {
                     if(m_pMemory->get_tablewidget()!=NULL && m_pMemory->get_date()!=NULL)
                         m_bReturn=m_pWidgets->inventorys_on_date_update_tablewidget(m_pMemory->get_tablewidget(),*m_pMemory->get_date());
+                }
+                if(m_iWork==WORK_INVENTORYLIST_UPDATE_TABLEWIDGET)
+                {
+                    if(m_pMemory->get_tablewidget()!=NULL)
+                        m_bReturn=m_pWidgets->inventorylist_update_tablewidget(m_pMemory->get_tablewidget());
                 }
             }
             //-clear-------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    m_iTimerId=-1;
     m_bUpdateTableTrade=m_bUpdateTableTradeWarelist=m_bUpdateTableOrdering=m_bUpdateTableOrderingWarelist=true;
     m_bUpdateTableWaregroup=m_bUpdateTableMaker=m_bUpdateTableDealer=m_bUpdateTableCustomer=m_bUpdateListLogbook=true;
     m_bUpdateTableInventory=m_bUpdateTableArticle=false;
@@ -38,22 +39,22 @@ MainWindow::MainWindow(QWidget *parent)
     //hide statusbar
     ui->statusBar->hide();
 
-    //database path
-    if(QFile::exists(QDir::homePath()+QString("/lava2/")))//aplication(lava2) installed?
-        m_sDbPath=QDir::homePath()+QString("/lava2/");
-    else
-        m_sDbPath=QDir::currentPath()+QString("/");//not installed
-
     //hide columns from tree widget
     ui->treeWidgetWaregroup->hideColumn(2);//id column
     ui->treeWidgetWaregroup->hideColumn(3);//parent_id column
 
+    //set db in class CLastDBChange
+    m_LastDbChange.set_db(&m_db);
+
+    //print
+    m_print_job.set_db(&m_thread);
+
     //year's combo box's
     QString s;
     QDate dt=QDate::currentDate();
-    for(int year=dt.year();year>=2009;year--)//fill year combo trade+logbook
+    for(int year=dt.year();year>=2011;year--)//fill year combo trade+logbook
     {
-        s=QString("%1").arg(year);
+        s=QString::fromUtf8("%1").arg(year);
         ui->comboBoxTradeMaskYear->insertItem(ui->comboBoxTradeMaskYear->count(),s);
         ui->comboBoxLogbookMaskYear->insertItem(ui->comboBoxTradeMaskYear->count(),s);
     }
@@ -67,29 +68,29 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableWidgetOrdering->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeWidgetWaregroup->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->tableWidgetTrade->setContextMenuPolicy(Qt::CustomContextMenu);
-    m_pContextMenuDefault=new QMenu(QString("context_default"),this);
+    m_pContextMenuDefault=new QMenu(QString::fromUtf8("context_default"),this);
     if(m_pContextMenuDefault!=NULL)
     {
-        m_pContextMenuDefault->addAction(QString("neu"));
-        m_pContextMenuDefault->addAction(QString("bearbeiten"));
-        m_pContextMenuDefault->addAction(QString("loeschen"));
+        m_pContextMenuDefault->addAction(QString::fromUtf8("neu"));
+        m_pContextMenuDefault->addAction(QString::fromUtf8("bearbeiten"));
+        m_pContextMenuDefault->addAction(QString::fromUtf8("loeschen"));
     }
-    m_pContextMenuTrade=new QMenu(QString("context_trade"),this);
+    m_pContextMenuTrade=new QMenu(QString::fromUtf8("context_trade"),this);
     if(m_pContextMenuTrade!=NULL)
     {
-        m_pContextMenuTrade->addAction(QString("Wareneingang"));
-        m_pContextMenuTrade->addAction(QString("Warenausgang"));
-        m_pContextMenuTrade->addAction(QString("Wareneingang(Bestellung)"));
-        m_pContextMenuTrade->addAction(QString("Warenausgang(Kunde)"));
-        m_pContextMenuTrade->addAction(QString("stornieren"));
+        m_pContextMenuTrade->addAction(QString::fromUtf8("Wareneingang"));
+        m_pContextMenuTrade->addAction(QString::fromUtf8("Warenausgang"));
+        m_pContextMenuTrade->addAction(QString::fromUtf8("Wareneingang(Bestellung)"));
+        m_pContextMenuTrade->addAction(QString::fromUtf8("Warenausgang(Kunde)"));
+        m_pContextMenuTrade->addAction(QString::fromUtf8("stornieren"));
     }
-    m_pContextMenuArticle=new QMenu(QString("context_article"),this);
+    m_pContextMenuArticle=new QMenu(QString::fromUtf8("context_article"),this);
     if(m_pContextMenuArticle!=NULL)
     {
-        m_pContextMenuArticle->addAction(QString("neu"));
-        m_pContextMenuArticle->addAction(QString("bearbeiten"));
-        m_pContextMenuArticle->addAction(QString("kopieren"));
-        m_pContextMenuArticle->addAction(QString("loeschen"));
+        m_pContextMenuArticle->addAction(QString::fromUtf8("neu"));
+        m_pContextMenuArticle->addAction(QString::fromUtf8("bearbeiten"));
+        m_pContextMenuArticle->addAction(QString::fromUtf8("kopieren"));
+        m_pContextMenuArticle->addAction(QString::fromUtf8("loeschen"));
     }
 
     //connects context menus
@@ -202,7 +203,6 @@ MainWindow::MainWindow(QWidget *parent)
     //menu
     connect(ui->menuDbBackupCreate,SIGNAL(triggered()),this,SLOT(menu_db_backup_create()));
     connect(ui->menuDbBackupLoad,SIGNAL(triggered()),this,SLOT(menu_db_backup_load()));
-    connect(ui->menuDbImportFromLava1,SIGNAL(triggered()),this,SLOT(menu_db_import_from_lava1()));
     connect(ui->menuDbClear,SIGNAL(triggered()),this,SLOT(menu_db_clear()));
     connect(ui->menuQuit,SIGNAL(triggered()),this,SLOT(menu_tool_close()));
     connect(ui->menuAbout,SIGNAL(triggered()),this,SLOT(menu_about()));
@@ -210,6 +210,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->menuListBalanceList,SIGNAL(triggered()),this,SLOT(menu_balance_list()));
     connect(ui->menuListUnderWarnLimit,SIGNAL(triggered()),this,SLOT(menu_article_under_warnlimit()));
     connect(ui->menuListInventoryDate,SIGNAL(triggered()),this,SLOT(menu_inventorys_on_date()));
+    connect(ui->menuListInv,SIGNAL(triggered()),this,SLOT(menu_inventorys_list()));
+    connect(ui->menuListValueOfGoods,SIGNAL(triggered()),this,SLOT(menu_list_value_of_goods()));
     connect(ui->menuPrinterLogbookDateView,SIGNAL(triggered()),this,SLOT(menu_print_logbook()));
     connect(ui->menuPrinterMakerSel,SIGNAL(triggered()),this,SLOT(menu_print_maker_selection()));
     connect(ui->menuPrinterMakerOView,SIGNAL(triggered()),this,SLOT(menu_print_maker_overview()));
@@ -235,6 +237,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->menuExportDealer,SIGNAL(triggered()),this,SLOT(menu_export_dealer()));
     connect(ui->menuExportCustomer,SIGNAL(triggered()),this,SLOT(menu_export_customer()));
     connect(ui->menuExportLogbook,SIGNAL(triggered()),this,SLOT(menu_export_logbook()));
+    connect(ui->menuImportFromCSV,SIGNAL(triggered()),this,SLOT(menu_import_from_csv()));
+    connect(ui->menuBarcodeOverview,SIGNAL(triggered()),this,SLOT(menu_barcode_overview()));
 }
 
 MainWindow::~MainWindow()
@@ -244,16 +248,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    event=NULL;
+    if(event==NULL)
+        event=NULL;
 
     //check article inv under warning limit
     QMessageBox msg(QMessageBox::Warning,"","");
-    msg.setWindowTitle(QString("Achtung!"));
+    msg.setWindowTitle(QString::fromUtf8("Achtung!"));
     QString s;
     int count=inventory_get_count_of_arctile_under_limit();
     if(count>0)
     {
-        s=QString("Es gibt %1 Artikel deren Lagerbestand unter dem Warnungslimit liegt.").arg(count);
+        s=QString::fromUtf8("Es gibt %1 Artikel deren Lagerbestand unter dem Warnungslimit liegt.").arg(count);
         msg.setText(s);
         msg.exec();
     }
@@ -261,7 +266,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //set last session in db-
     QDateTime dtTi=QDateTime().currentDateTime();
     if(m_db.is_db_connect())
-        m_db.set_last_session(dtTi);
+        m_db.write_last_session(dtTi);
 
     //context menu's
     if(m_pContextMenuDefault!=NULL)
@@ -272,7 +277,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
         delete m_pContextMenuArticle;
 
     //clear
-    killTimer(m_iTimerId);
+    if(m_iTimerId!=-1)
+        killTimer(m_iTimerId);
+
     m_thread.stop_thread();
     m_db.close_db();
 
@@ -284,6 +291,17 @@ void MainWindow::resizeEvent  ( QResizeEvent * event )
 {
     widgets_position(event->size());
     QMainWindow::resizeEvent(event);
+}
+
+void MainWindow::set_user(QString s)
+{
+    QString title;
+    if(s.length()>0)
+    {
+        title=QString::fromUtf8("lava2 - user: %1").arg(s);
+        setWindowTitle(title);
+    }
+    m_sUser=s;
 }
 
 bool MainWindow::init(void)
@@ -502,64 +520,6 @@ bool MainWindow::widgets_position(QSize szScreen)
     return true;
 }
 
-bool MainWindow::open_db(void)
-{
-    QDateTime dtTiLastSession;
-    QDateTime dtTi=QDateTime().currentDateTime();
-    QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(tr("Fehler!"));
-    QString s,s2,sFile=m_sDbPath+QString("lava.sqlite");
-    bool b=false;
-    //-
-    if(!QFile::exists(sFile))
-    {
-        s=QString("Die Datenbank-Datei \"lava.sqlite\" befindet sich nicht in dem Ordner \"%1\"!").arg(m_sDbPath);
-        msg.setText(s);
-        msg.exec();
-    }
-    else
-    {
-        if(!m_db.open_db(sFile,QString("localhost")))//open db?
-        {
-            s=m_db.last_error();
-            s2=QString("Die Datenbank-Datei \"lava.sqlite\" konnte nicht geöffnet werden!\nerror:%1").arg(s);
-            msg.setText(s2);
-            msg.exec();
-        }
-        else
-        {
-            if(!m_db.check_database_file(true))
-            {
-                s2=QString("Die Datenbank-Datei \"lava.sqlite\" ist beschädigt oder nicht kompatibel.");
-                msg.setText(s2);
-                msg.exec();
-            }
-            else
-            {
-                b=true;
-                //check last session(time) and current
-                dtTiLastSession=m_db.get_last_session();
-                if(dtTiLastSession>QDateTime(QDate(0,0,0),QTime(0,0,0)))//set?
-                {
-                    if(dtTiLastSession.date()>dtTi.date())
-                    {
-                        s2=QString("Bitte prüfen Sie Ihre Systemzeit-/datumseinstellungen Ihres Betriebssystems. Das Datum Ihrer letzten Sitzung "
-                                   "ist grösser als das aktuelle Datum. Falsche Einstellungen können die chronologische Reihenfolge der Artikelmengen"
-                                   " beim Warenausgang beeinflussen.");
-                        msg.setText(s2);
-                        msg.exec();
-                    }
-                }
-            }
-        }
-    }
-    //-
-    if(!b)
-        m_db.close_db();
-    //-
-    return b;
-}
-
 bool MainWindow::fill_all_table(bool bFillArticleAndInvTableNew)
 {
     m_bUpdateTableTrade=m_bUpdateTableTradeWarelist=m_bUpdateTableOrdering=m_bUpdateTableOrderingWarelist=m_bUpdateTableArticle=true;
@@ -575,10 +535,32 @@ bool MainWindow::fill_all_table(bool bFillArticleAndInvTableNew)
         m_widgets.set_block_signal_and_sort(ui->tableWidgetArticle,true,false);//faster
         m_widgets.remove_all_rows(ui->tableWidgetArticle);
         m_widgets.set_block_signal_and_sort(ui->tableWidgetArticle,false,true);
+        m_widgets.set_block_signal_and_sort(ui->tableWidgetTrade,true,false);//faster
+        m_widgets.remove_all_rows(ui->tableWidgetTrade);
+        m_widgets.set_block_signal_and_sort(ui->tableWidgetTrade,false,true);
         //-
         inventory_mask_set();
         article_mask_set();
-        m_bUpdateTableArticle=m_bUpdateTableInventory=false;
+        trade_mask_set();
+        ordering_mask_set();
+        m_bUpdateTableArticle=m_bUpdateTableInventory=m_bUpdateTableTrade=m_bUpdateTableTradeWarelist=false;
+    }
+    return true;
+}
+
+bool MainWindow::fill_logbook_count(void)
+{
+    int i;
+    QString s;
+
+    if(m_db.is_db_connect())
+    {
+        i=m_db.get_logbook_count();
+        if(i>0)
+        {
+            s=QString::fromUtf8("%1").arg(i);
+            ui->lineEditCountItemLog->setText(s);
+        }
     }
     return true;
 }
@@ -670,59 +652,57 @@ bool MainWindow::settings(bool bUpdate)
     CSettings settings;
     QList<QString> lsSType,lsSValues,lsSUpdateType,lsSUpdateValue;
     //-
-    lsSType.push_back(QString("TAB_ORDER"));
+    lsSType.push_back(QString::fromUtf8("TAB_ORDER"));
     //-
-    lsSType.push_back(QString("INVENTORY_TABLE_COLUMNS_WIDTHS"));
-    lsSType.push_back(QString("SORT_ORDER_INVENTORY"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_INV"));
-    lsSType.push_back(QString("MASK_SELECTION_INVENTORY"));
-    lsSType.push_back(QString("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT"));
+    lsSType.push_back(QString::fromUtf8("INVENTORY_TABLE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_INVENTORY"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_MAIN_INV"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_INVENTORY"));
+    lsSType.push_back(QString::fromUtf8("INVENTORY_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT"));
     //-
-    lsSType.push_back(QString("TRADE_TABLE_COLUMNS_WIDTHS_OVIEW"));
-    lsSType.push_back(QString("SORT_ORDER_TRADE_OVIEW"));
-    lsSType.push_back(QString("TRADE_TABLE_COLUMNS_WIDTHS_WARES"));
-    lsSType.push_back(QString("SORT_ORDER_TRADE_WARES"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_TRADE"));
-    lsSType.push_back(QString("MASK_SELECTION_TRADE"));
-    lsSType.push_back(QString("MASK_SELECTION_TRADE_PERIOD"));
+    lsSType.push_back(QString::fromUtf8("TRADE_TABLE_COLUMNS_WIDTHS_OVIEW"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_TRADE_OVIEW"));
+    lsSType.push_back(QString::fromUtf8("TRADE_TABLE_COLUMNS_WIDTHS_WARES"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_TRADE_WARES"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_MAIN_TRADE"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_TRADE"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_TRADE_PERIOD"));
     //-
-    lsSType.push_back(QString("ORDERING_TABLE_COLUMNS_WIDTHS_OVIEW"));
-    lsSType.push_back(QString("SORT_ORDER_ORDERING_OVIEW"));
-    lsSType.push_back(QString("ORDERING_TABLE_COLUMNS_WIDTHS_WARES"));
-    lsSType.push_back(QString("SORT_ORDER_ORDERING_WARES"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_ORDERING"));
-    lsSType.push_back(QString("MASK_SELECTION_ORDERING"));
+    lsSType.push_back(QString::fromUtf8("ORDERING_TABLE_COLUMNS_WIDTHS_OVIEW"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_ORDERING_OVIEW"));
+    lsSType.push_back(QString::fromUtf8("ORDERING_TABLE_COLUMNS_WIDTHS_WARES"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_ORDERING_WARES"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_MAIN_ORDERING"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_ORDERING"));
     //-
-    lsSType.push_back(QString("ARTICLE_TABLE_COLUMNS_WIDTHS"));
-    lsSType.push_back(QString("SORT_ORDER_ARTICLE"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_ARTICLE"));
-    lsSType.push_back(QString("MASK_SELECTION_ARTICLE"));
-    lsSType.push_back(QString("ARTICLE_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT"));
+    lsSType.push_back(QString::fromUtf8("ARTICLE_TABLE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_ARTICLE"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_MAIN_ARTICLE"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_ARTICLE"));
+    lsSType.push_back(QString::fromUtf8("ARTICLE_TABLE_COLUMNS_ORDER_VISIBLE_ALIGMENT"));
     //-
-    lsSType.push_back(QString("WAREGROUP_TREE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("WAREGROUP_TREE_COLUMNS_WIDTHS"));
     //-
-    lsSType.push_back(QString("MAKER_TABLE_COLUMNS_WIDTHS"));
-    lsSType.push_back(QString("SORT_ORDER_MAKER"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_MAKER"));
-    lsSType.push_back(QString("MASK_SELECTION_MAKER"));
+    lsSType.push_back(QString::fromUtf8("MAKER_TABLE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_MAKER"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_MAIN_MAKER"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_MAKER"));
     //-
-    lsSType.push_back(QString("DEALER_TABLE_COLUMNS_WIDTHS"));
-    lsSType.push_back(QString("SORT_ORDER_DEALER"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_DEALER"));
-    lsSType.push_back(QString("MASK_SELECTION_DEALER"));
+    lsSType.push_back(QString::fromUtf8("DEALER_TABLE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_DEALER"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_MAIN_DEALER"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_DEALER"));
     //-
-    lsSType.push_back(QString("CUSTOMER_TABLE_COLUMNS_WIDTHS"));
-    lsSType.push_back(QString("SORT_ORDER_CUSTOMER"));
-    lsSType.push_back(QString("AUTO_CHECKBOX_MAIN_CUSTOMER"));
-    lsSType.push_back(QString("MASK_SELECTION_CUSTOMER"));
+    lsSType.push_back(QString::fromUtf8("CUSTOMER_TABLE_COLUMNS_WIDTHS"));
+    lsSType.push_back(QString::fromUtf8("SORT_ORDER_CUSTOMER"));
+    lsSType.push_back(QString::fromUtf8("AUTO_CHECKBOX_MAIN_CUSTOMER"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_CUSTOMER"));
     //-
-    lsSType.push_back(QString("MASK_SELECTION_LOGBOOK"));
-    lsSType.push_back(QString("LOGBOOK_COUNT"));
+    lsSType.push_back(QString::fromUtf8("MASK_SELECTION_LOGBOOK"));
 
     //load
-    int count;
     QString s;
-    bool b2,b=settings.load(lsSType,lsSValues);
+    bool b=settings.load(lsSType,lsSValues);
     if(b && lsSValues.count()==lsSType.count())
     {
         if(!bUpdate)//set
@@ -791,17 +771,6 @@ bool MainWindow::settings(bool bUpdate)
 
             //--logbook--
             settings.set_combobox(ui->comboBoxMaskLogbook,lsSValues[37],0);//mask selection
-            //count
-            count=lsSValues[38].toInt(&b2,10);
-            if(!b2)
-                count=100;
-            else
-            {
-                if(count<0 || count>9999)
-                    count=100;
-            }
-            s=QString("%1").arg(count);
-            ui->lineEditCountItemLog->setText(s);
         }
         if(bUpdate)//write
         {
@@ -1014,13 +983,6 @@ bool MainWindow::settings(bool bUpdate)
                 lsSUpdateType.push_back(lsSType[37]);
                 lsSUpdateValue.push_back(lsSValues[37]);
             }
-            //count
-            s=ui->lineEditCountItemLog->text();
-            if(s!=lsSValues[38])//update?
-            {
-                lsSUpdateType.push_back(lsSType[38]);
-                lsSUpdateValue.push_back(lsSValues[38]);
-            }
 
 
             //----write----
@@ -1028,7 +990,7 @@ bool MainWindow::settings(bool bUpdate)
                 b=settings.write(lsSUpdateType,lsSUpdateValue);
 
             //remove flag 'programm_running'
-            settings.remove_line(QString("PROGRAM_RUNNING"));
+            settings.remove_line(QString::fromUtf8("PROGRAM_RUNNING"));
         }
     }
     //-
@@ -1051,14 +1013,13 @@ bool MainWindow::check_first_start(void)
     //-
     if(!bGiveItSetting)//first start?
     {
-        msgAgreement.setWindowTitle(QString("Nutzungsbedingungen:"));
-        s=QString("Dieses Programm(LaVa 2) steht unter der open-source-Lizenz GNU-GPL v3. Es entstehen für die Nutzung "
+        msgAgreement.setWindowTitle(QString::fromUtf8("Nutzungsbedingungen:"));
+        s=QString::fromUtf8("Dieses Programm(LaVa 2) steht unter der open-source-Lizenz GNU-GPL v3. Es entstehen für die Nutzung "
                   "keine Kosten. Der Autor entbindet sich von jeglichen Haftungsansprüchen, gleich welcher Art. "
-                  "Das Programm befindet sich momentan noch im Beta-Status und ist somit noch nicht für "
-                  "den produktiven Einsatz gedacht.\n\nSind Sie mit diesen Bedingungen einverstanden?");
+                  "\n\nSind Sie mit diesen Bedingungen einverstanden?");
         msgAgreement.setText(s);
-        msgAgreement.addButton(QString("Ja"),QMessageBox::YesRole);
-        noButton=msgAgreement.addButton(QString("Nein"),QMessageBox::NoRole);
+        msgAgreement.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+        noButton=msgAgreement.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
         msgAgreement.exec();
         if(msgAgreement.clickedButton()==noButton)
             bReturn=false;
@@ -1077,17 +1038,17 @@ bool MainWindow::check_run_the_program(void)
     //-
     if(settings.is_program_running())//run the program?
     {
-        msgWarning.setWindowTitle(QString("Warnung"));
-        s=QString("Das Programm läuft bereits oder wurde das letzte Mal gewaltsam beendet. Bitte überprüfen Sie das!");
+        msgWarning.setWindowTitle(QString::fromUtf8("Warnung"));
+        s=QString::fromUtf8("Das Programm läuft bereits oder wurde das letzte Mal gewaltsam beendet. Bitte überprüfen Sie das!\n(beim nächsten Programmstart wird diese Meldung nicht mehr angezeigt)");
         msgWarning.setText(s);
         msgWarning.exec();
-        settings.remove_line(QString("PROGRAM_RUNNING"));
+        settings.remove_line(QString::fromUtf8("PROGRAM_RUNNING"));
         bReturn=true;
     }
     else
     {
-        s=QString("PROGRAM_RUNNING");//set program running
-        settings.write(s,QString(""));
+        s=QString::fromUtf8("PROGRAM_RUNNING");//set program running
+        settings.write(s,QString::fromUtf8(""));
     }
     return bReturn;
 }
@@ -1185,17 +1146,17 @@ bool MainWindow::receiv_context_menu(QAction * pAction)
     if(pAction==NULL)
         return false;
 
-    if(pAction->text()==QString("Wareneingang"))
+    if(pAction->text()==QString::fromUtf8("Wareneingang"))
         trade_incoming();
-    if(pAction->text()==QString("Warenausgang"))
+    if(pAction->text()==QString::fromUtf8("Warenausgang"))
         trade_outgoing();
-    if(pAction->text()==QString("Wareneingang(Bestellung)"))
+    if(pAction->text()==QString::fromUtf8("Wareneingang(Bestellung)"))
         trade_ordering_incoming();
-    if(pAction->text()==QString("Warenausgang(Kunde)"))
+    if(pAction->text()==QString::fromUtf8("Warenausgang(Kunde)"))
         trade_outgoing_customer();
-    if(pAction->text()==QString("stornieren"))
+    if(pAction->text()==QString::fromUtf8("stornieren"))
         trade_canceled();
-    if(pAction->text()==QString("neu"))
+    if(pAction->text()==QString::fromUtf8("neu"))
     {//new
         if(ui->tableWidgetArticle->hasFocus())//article
             article_new();
@@ -1210,7 +1171,7 @@ bool MainWindow::receiv_context_menu(QAction * pAction)
         else if(ui->tableWidgetOrdering->hasFocus())//ordering
             ordering_new();
     }
-    if(pAction->text()==QString("bearbeiten"))
+    if(pAction->text()==QString::fromUtf8("bearbeiten"))
     {//edit
         if(ui->tableWidgetArticle->hasFocus())//article
             article_edit();
@@ -1225,7 +1186,7 @@ bool MainWindow::receiv_context_menu(QAction * pAction)
         else if(ui->tableWidgetOrdering->hasFocus())//ordering
             ordering_edit();
     }
-    if(pAction->text()==QString("loeschen"))
+    if(pAction->text()==QString::fromUtf8("loeschen"))
     {//delete
         if(ui->tableWidgetArticle->hasFocus())//article
             article_delete();
@@ -1240,7 +1201,7 @@ bool MainWindow::receiv_context_menu(QAction * pAction)
         else if(ui->tableWidgetOrdering->hasFocus())//ordering
             ordering_delete();
     }
-    if(pAction->text()==QString("kopieren"))
+    if(pAction->text()==QString::fromUtf8("kopieren"))
     {//copy
         article_copy();//article
     }
@@ -1341,43 +1302,133 @@ void MainWindow::timerEvent(QTimerEvent *event)
 {
     static QDate mark_date=QDate(0,0,0);
     static bool mark_messagebox_error_open=false;
+    static QString mark_error_string=QString::fromUtf8("");
 
+    bool bQuit=false;
     QMessageBox msg(QMessageBox::Critical,"","");
-    QString s,s2;
+    QMessageBox msg2(QMessageBox::Information,"","");
+    msg2.setWindowTitle(QString::fromUtf8("Achtung!"));
+    msg2.setText(QString::fromUtf8("Eine andere Programminstanz ist dabei eine Sicherung zu laden, ein Neustart des Programmes zur Wiederherstellung der Datenbankverbindung ist nötig!"));
+    QString s,s2,title;
     QDate dt=QDate().currentDate();
+    int type,id;
 
-    //check db-error
-    s=m_db.last_error();
-    if(s.length()>3)//error db?
+    //title back
+    title=windowTitle();
+    if(title.indexOf(QString::fromUtf8("user"))<0)
     {
-        if(!mark_messagebox_error_open)//msg not open ?
-        {
-            mark_messagebox_error_open=true;
-            s2=msg.text();
-            s2+=QString("\n%1").arg(s);
-            msg.setWindowTitle("error - database");
-            msg.exec();
-            mark_messagebox_error_open=false;
-        }
+        title=QString::fromUtf8("lava2 - user: %1").arg(m_sUser);
+        setWindowTitle(title);
     }
 
-    //new date?
-    if(mark_date==QDate(0,0,0))
-        mark_date=dt;
-    else if(dt>mark_date)
-    {//new day?->update mask trade date list
+    //db change from another client?
+    if(m_LastDbChange.check_update_last_change())
+    {
+        //info in main title
+         setWindowTitle(QString::fromUtf8("lava2 - Datenbank wurde von einer anderer Programminstanz verändert..."));
 
-        if(dt.year()>mark_date.year() && mark_date!=QDate(0,0,0))//new year?
+         s=m_LastDbChange.get_last_change();//get fom db
+         //-
+         if(m_LastDbChange.get_data_from_last_change_string(type,id,s))//split string
+         {
+             if(type==LC_ACTION_UPDATE_ORDER_QUIT)
+             {
+                 msg2.exec();
+                 bQuit=true;
+             }
+             else
+             {
+                 //update table's
+                 //maker
+                 if(type==LC_ACTION_UPDATE_MAKER || type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG)
+                     m_bUpdateTableMaker=true;
+
+                 //dealer
+                 if(type==LC_ACTION_UPDATE_DEALER || type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_ORDERING_DEALER)
+                     m_bUpdateTableDealer=true;
+
+                 //waregroup
+                 if(type==LC_ACTION_UPDATE_WAREGROUP || type==LC_ACTION_UPDATE_ALL ||type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG)
+                     m_bUpdateTableWaregroup=true;
+
+                 //customer
+                 if(type==LC_ACTION_UPDATE_CUSTOMER || type==LC_ACTION_UPDATE_ALL)
+                     m_bUpdateTableCustomer=true;
+
+                 //article
+                 if(type==LC_ACTION_UPDATE_ARTICLE_INV || type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG)
+                     m_bUpdateTableArticle=true;
+
+                 //ordering
+                 if(type==LC_ACTION_UPDATE_ORDERING || type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_ORDERING_DEALER || type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG
+                         || type==LC_ACTION_UPDATE_INVENTORY_TRADE_ORDERING)
+                     m_bUpdateTableOrdering=m_bUpdateTableOrderingWarelist=true;
+
+                 //trade
+                 if(type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG || type==LC_ACTION_UPDATE_INVENTORY_TRADE || type==LC_ACTION_UPDATE_INVENTORY_TRADE_ORDERING)
+                     m_bUpdateTableTrade=m_bUpdateTableTradeWarelist=true;
+
+                 //inventory
+                 if(type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_ARTICLE_INV || type==LC_ACTION_UPDATE_INVENTORY_TRADE || type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG
+                         || type==LC_ACTION_UPDATE_INVENTORY_TRADE_ORDERING)
+                     m_bUpdateTableInventory=true;
+
+                 //logbook count
+                 if(type==LC_ACTION_UPDATE_LOGBOOK_COUNT || type==LC_ACTION_UPDATE_ALL)
+                 {
+                     fill_logbook_count();
+                 }
+
+                 //logbook ever update
+                 m_bUpdateListLogbook=true;
+
+                 //update current index of tab-widget
+                 update_table_by_current_tab(ui->tabWidget->currentIndex());
+             }
+         }
+    }
+
+    //-
+    if(!bQuit)
+    {
+        //check db-error
+        s=m_db.last_error();
+        if(s.length()>3 && s!=mark_error_string)//error db?
         {
-            s=QString("%1").arg(dt.year());
-            ui->comboBoxTradeMaskYear->insertItem(0,s);
+            if(!mark_messagebox_error_open)//msg not open ?
+            {
+                mark_error_string=s;//mark
+                mark_messagebox_error_open=true;
+                s2=msg.text();
+                s2+=QString::fromUtf8("\n%1").arg(s);
+                msg.setWindowTitle("error - database");
+                msg.exec();
+                mark_messagebox_error_open=false;
+            }
+        }
+
+        //new date?
+        if(mark_date==QDate(0,0,0))
+            mark_date=dt;
+        else if(dt>mark_date)
+        {//new day?->update mask trade date list
+
+            if(dt.year()>mark_date.year() && mark_date!=QDate(0,0,0))//new year?
+            {
+                s=QString::fromUtf8("%1").arg(dt.year());
+                ui->comboBoxTradeMaskYear->insertItem(0,s);
+            }
+            //-
+            trade_mask_date_changed();
+            mark_date=dt;
         }
         //-
-        trade_mask_date_changed();
-        mark_date=dt;
+        m_iTimerId=event->timerId();
     }
-    //-
-    m_iTimerId=event->timerId();
+    if(bQuit)
+    {
+        close();
+    }
 }
 
 
@@ -1416,7 +1467,7 @@ bool MainWindow::waregroup_update_count(QString sCondition)
     m_thread.set_work(WORK_WAREGROUP_GET_COUNT,&memory);
     if(i<0)//error
         return false;
-    QString s=QString("%1").arg(i);
+    QString s=QString::fromUtf8("%1").arg(i);
     ui->labelCountWaregroup->setText(s);
     return true;
 }
@@ -1433,6 +1484,7 @@ bool MainWindow::waregroup_new()
         return false;
     CWaregroup wg;
     CLogbook lg;
+    QString s;
     CInputDialogWaregroup dlg;
     //-
     if(m_db.is_db_connect()==true)
@@ -1453,6 +1505,10 @@ bool MainWindow::waregroup_new()
                 //logbook
                 if(m_db.logbook_create_new(wg,lg))
                     logbook_insert(lg);
+
+                //set last change in db -> another clients update table
+                s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_WAREGROUP,wg.get_id());// create string
+                m_LastDbChange.write_last_change(s);//write in db
             }
         }
     }
@@ -1465,6 +1521,7 @@ bool MainWindow::waregroup_edit(void)
         return false;
     CWaregroup wg;
     CLogbook lg;
+    QString s;
     CInputDialogWaregroup dlg;
     bool b=true;
     int id=-1;
@@ -1497,6 +1554,10 @@ bool MainWindow::waregroup_edit(void)
                     //logbook after
                     if(m_db.logbook_create_edit(wg,lg,false))
                         logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
@@ -1525,12 +1586,12 @@ bool MainWindow::waregroup_delete(void)
     //-
     QString s;
     QMessageBox msg(QMessageBox::Question,"","");
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
 
     //-how many article with this waregroup??
-    s=QString("waregroup_id=%1").arg(iId);
+    s=QString::fromUtf8("waregroup_id=%1").arg(iId);
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -1539,15 +1600,15 @@ bool MainWindow::waregroup_delete(void)
     //-
     if(count>0)//article with this waregroup found?
     {
-        s=QString("Es gibt %1 Artikel in der Warengruppe ").arg(count);
-        s+=QString("'%1' !!!").arg(ls[0]->text(0));
-        s+=QString("\nSoll die Warengruppe '%1' wirklich gelöscht werden?").arg(ls[0]->text(0));
-        s+=QString("\n(Artikel werden in die übergeordnete Gruppe verschoben)");
+        s=QString::fromUtf8("Es gibt %1 Artikel in der Warengruppe ").arg(count);
+        s+=QString::fromUtf8("'%1' !!!").arg(ls[0]->text(0));
+        s+=QString::fromUtf8("\nSoll die Warengruppe '%1' wirklich gelöscht werden?").arg(ls[0]->text(0));
+        s+=QString::fromUtf8("\n(Artikel werden in die übergeordnete Gruppe verschoben)");
         msg.setText(s);
     }
     else
     {
-        s=QString("Soll die Warengruppe '%1' wirklich gelöscht werden?").arg(ls[0]->text(0));
+        s=QString::fromUtf8("Soll die Warengruppe '%1' wirklich gelöscht werden?").arg(ls[0]->text(0));
         msg.setText(s);
     }
     //-
@@ -1587,6 +1648,10 @@ bool MainWindow::waregroup_delete(void)
             }
             //logbook
             logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return b;
@@ -1645,7 +1710,7 @@ bool MainWindow::maker_update_count(void)
 
     int row=ui->tableWidgetMaker->rowCount();
     int count;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -1654,8 +1719,8 @@ bool MainWindow::maker_update_count(void)
         return false;
     //-
     if(row!=count)
-        s=QString("%1/").arg(row);
-    s+=QString("%1").arg(count);
+        s=QString::fromUtf8("%1/").arg(row);
+    s+=QString::fromUtf8("%1").arg(count);
     ui->labelCountMaker->setText(s);
     //-
     return true;
@@ -1700,23 +1765,23 @@ bool MainWindow::maker_mask_set(void)
     memory.set_int_list(&lsInt);
     //-
     if(s.length()<=0)//no mask
-        sCondition=QString("");
+        sCondition=QString::fromUtf8("");
     else if(iIndex==0)//name
-        sCondition=QString("name like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("name like '%%1%'").arg(s);
     else if(iIndex==1)//adress
-        sCondition=QString("adress like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("adress like '%%1%'").arg(s);
     else if(iIndex==2)//call number
-        sCondition=QString("call_numbers like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("call_numbers like '%%1%'").arg(s);
     else if(iIndex==3)//fax
-        sCondition=QString("fax_numbers like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("fax_numbers like '%%1%'").arg(s);
     else if(iIndex==4)//email
-        sCondition=QString("email_adress like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("email_adress like '%%1%'").arg(s);
     else if(iIndex==5)//homepage
-        sCondition=QString("homepage like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("homepage like '%%1%'").arg(s);
     else if(iIndex==6)//contakt pers.
-        sCondition=QString("cotakt_person like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("cotakt_person like '%%1%'").arg(s);
     else if(iIndex==7)//comment
-        sCondition=QString("comment like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("comment like '%%1%'").arg(s);
     //-
     b=m_thread.set_work(WORK_MAKER_GET_ALL,&memory);
     if(!b)
@@ -1740,6 +1805,7 @@ bool MainWindow::maker_new(void)
     if(!m_db.is_db_connect())
         return false;
     bool b=true;
+    QString s;
     CMaker mk;
     CLogbook lg;
     CInputDialogMaker dlg;
@@ -1759,6 +1825,10 @@ bool MainWindow::maker_new(void)
             //logbook
             if(m_db.logbook_create_new(mk,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_MAKER,mk.get_id());// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return b;
@@ -1773,6 +1843,7 @@ bool MainWindow::maker_edit(void)
     CInputDialogMaker dlg;
     bool b=true;
     int iId;
+    QString s;
 
     if(m_widgets.get_selected_table_item_value(ui->tableWidgetMaker,iId))//select?
     {
@@ -1804,9 +1875,21 @@ bool MainWindow::maker_edit(void)
                     //logbook after
                     if(m_db.logbook_create_edit(mk,lg,false))
                         logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
+    }
+
+    //check delete by another client & user will not created new
+    if(mk.get_id()>0)
+    {
+        s=QString::fromUtf8("id = %1").arg(mk.get_id());
+        if(m_db.maker_get_count(s)<=0)
+            maker_mask_set();//update table
     }
     //-
     return b;
@@ -1823,8 +1906,8 @@ bool MainWindow::maker_delete(void)
     CMaker mk;
     QString s;
     QMessageBox msg(QMessageBox::Question,"","");
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
     QList <int> lsArIds;
     CPointerMemory memory;
@@ -1835,21 +1918,21 @@ bool MainWindow::maker_delete(void)
     if(m_db.maker_get(iId,mk))//get maker
     {
         m_db.logbook_create_remove(mk,lg);//create logbook
-        s=QString("maker_id=%1").arg(iId);
+        s=QString::fromUtf8("maker_id=%1").arg(iId);
 
         b=m_thread.set_work(WORK_ARTICLE_GET_ALL,&memory);
         if(b)
         {
             if(lsArIds.count()>0)//article with this maker found?
             {
-                s=QString("Es gibt %1 Artikel von dem Hersteller ").arg(lsArIds.count());
-                s+=QString("'%1' !!!").arg(mk.get_name());
-                s+=QString("\nSoll der Hersteller wirklich gelöscht werden?");
+                s=QString::fromUtf8("Es gibt %1 Artikel von dem Hersteller ").arg(lsArIds.count());
+                s+=QString::fromUtf8("'%1' !!!").arg(mk.get_name());
+                s+=QString::fromUtf8("\nSoll der Hersteller wirklich gelöscht werden?");
                 msg.setText(s);
             }
             else
             {
-                s=QString("Soll der Hersteller '%1' wirklich gelöscht werden?").arg(mk.get_name());
+                s=QString::fromUtf8("Soll der Hersteller '%1' wirklich gelöscht werden?").arg(mk.get_name());
                 msg.setText(s);
             }
             //-
@@ -1881,6 +1964,10 @@ bool MainWindow::maker_delete(void)
 
                     //logbook insert
                     logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
@@ -1942,7 +2029,7 @@ bool MainWindow::dealer_update_count(void)
 
     int row=ui->tableWidgetDealer->rowCount();
     int count;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -1951,8 +2038,8 @@ bool MainWindow::dealer_update_count(void)
         return false;
     //-
     if(row!=count)
-        s=QString("%1/").arg(row);
-    s+=QString("%1").arg(count);
+        s=QString::fromUtf8("%1/").arg(row);
+    s+=QString::fromUtf8("%1").arg(count);
     ui->labelCountDealer->setText(s);
     //-
     return true;
@@ -1996,25 +2083,25 @@ bool MainWindow::dealer_mask_set(void)
     memory.set_int_list(&lsInt);
     //-
     if(s.length()<=0)//no mask
-        sCondition=QString("");
+        sCondition=QString::fromUtf8("");
     else if(iIndex==0)//name
-        sCondition=QString("name like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("name like '%%1%'").arg(s);
     else if(iIndex==1)//customer_number
-        sCondition=QString("customer_number like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("customer_number like '%%1%'").arg(s);
     else if(iIndex==2)//adress
-        sCondition=QString("adress like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("adress like '%%1%'").arg(s);
     else if(iIndex==3)//call number
-        sCondition=QString("call_numbers like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("call_numbers like '%%1%'").arg(s);
     else if(iIndex==4)//fax
-        sCondition=QString("fax_numbers like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("fax_numbers like '%%1%'").arg(s);
     else if(iIndex==5)//email
-        sCondition=QString("email_adress like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("email_adress like '%%1%'").arg(s);
     else if(iIndex==6)//homepage
-        sCondition=QString("homepage like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("homepage like '%%1%'").arg(s);
     else if(iIndex==7)//contakt pers.
-        sCondition=QString("cotakt_person like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("cotakt_person like '%%1%'").arg(s);
     else if(iIndex==8)//comment
-        sCondition=QString("comment like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("comment like '%%1%'").arg(s);
     //-
     b=m_thread.set_work(WORK_DEALER_GET_ALL,&memory);
     if(!b)
@@ -2039,10 +2126,11 @@ bool MainWindow::dealer_new(void)
         return false;
     bool b=true;
     CDealer de;
+    QString s;
     CLogbook lg;
     CInputDialogDealer dlg;
     dlg.set_thread(&m_thread);
-    dlg.setWindowTitle("neuer Händler");
+    dlg.setWindowTitle(QString::fromUtf8("neuer Händler"));
     if(dlg.exec())
     {//pressed ok
         dlg.get_data(de);// get input data
@@ -2057,6 +2145,10 @@ bool MainWindow::dealer_new(void)
             //logbook
             if(m_db.logbook_create_new(de,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_DEALER,de.get_id());// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return b;
@@ -2067,6 +2159,7 @@ bool MainWindow::dealer_edit(void)
     if(!m_db.is_db_connect())
         return false;
     CDealer de;
+    QString s;
     CLogbook lg;
     CInputDialogDealer dlg;
     bool b=true;
@@ -2083,7 +2176,7 @@ bool MainWindow::dealer_edit(void)
             //-
             dlg.set_data(de);
             dlg.set_thread(&m_thread);
-            dlg.setWindowTitle("Händler bearbeiten");
+            dlg.setWindowTitle(QString::fromUtf8("Händler bearbeiten"));
             if(dlg.exec())
             {
                 dlg.get_data(de);
@@ -2098,9 +2191,21 @@ bool MainWindow::dealer_edit(void)
                     //logbook after
                     if(m_db.logbook_create_edit(de,lg,false))
                         logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_ORDERING_DEALER,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
+    }
+
+    //check delete by another client & user will not created new
+    if(de.get_id()>0)
+    {
+        s=QString::fromUtf8("id = %1").arg(de.get_id());
+        if(m_db.dealer_get_count(s)<=0)
+            dealer_mask_set();//update table
     }
     //-
     return b;
@@ -2115,8 +2220,8 @@ bool MainWindow::dealer_delete(void)
     int i=-1,iId;
     QString s;
     QMessageBox msg(QMessageBox::Question,"","");
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
     QList <int> lsOrdIds;
     CPointerMemory memory;
@@ -2128,21 +2233,21 @@ bool MainWindow::dealer_delete(void)
     m_widgets.get_selected_table_item_value(ui->tableWidgetDealer,iId);//get id
     if(m_db.dealer_get(iId,de))//get dealer
     {
-        s=QString("dealer_id=%1").arg(iId);
+        s=QString::fromUtf8("dealer_id=%1").arg(iId);
         m_db.logbook_create_remove(de,lg);//create logbook
         b=m_thread.set_work(WORK_ORDERING_GET_ALL,&memory);
         if(b)
         {
             if(lsOrdIds.count()>0)//ordering with dealer found?
             {
-                s=QString("Es gibt %1 Bestellungen beim Händler").arg(lsOrdIds.count());
-                s+=QString(" '%1'").arg(de.get_name());
-                s+=QString("\nSoll der Händler wirklich gelöscht werden?");
+                s=QString::fromUtf8("Es gibt %1 Bestellungen beim Händler").arg(lsOrdIds.count());
+                s+=QString::fromUtf8(" '%1'").arg(de.get_name());
+                s+=QString::fromUtf8("\nSoll der Händler wirklich gelöscht werden?");
                 msg.setText(s);
             }
             else
             {
-                s=QString("Soll der Händler '%1' wirklich gelöscht werden?").arg(de.get_name());
+                s=QString::fromUtf8("Soll der Händler '%1' wirklich gelöscht werden?").arg(de.get_name());
                 msg.setText(s);
             }
             //-
@@ -2169,6 +2274,10 @@ bool MainWindow::dealer_delete(void)
 
                     //logbook
                     logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_ORDERING_DEALER,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
@@ -2227,7 +2336,7 @@ bool MainWindow::customer_update_count(void)
 {
     int row=ui->tableWidgetCustomer->rowCount();
     int count;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -2236,8 +2345,8 @@ bool MainWindow::customer_update_count(void)
         return false;
     //-
     if(row!=count)
-        s=QString("%1/").arg(row);
-    s+=QString("%1").arg(count);
+        s=QString::fromUtf8("%1/").arg(row);
+    s+=QString::fromUtf8("%1").arg(count);
     ui->labelCountCustomer->setText(s);
     //-
     return true;
@@ -2295,25 +2404,25 @@ bool MainWindow::customer_mask_set(void)
     else
     {
         if(index==0)//customer number
-            sCondition=QString("customer_number like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("customer_number like '%%1%'").arg(s);
         else if(index==1)//name
-            sCondition=QString("name like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("name like '%%1%'").arg(s);
         else if(index==2)//first name
-            sCondition=QString("first_name like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("first_name like '%%1%'").arg(s);
         else if(index==3)//street
-            sCondition=QString("street like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("street like '%%1%'").arg(s);
         else if(index==4)//postcode
-            sCondition=QString("postcode like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("postcode like '%%1%'").arg(s);
         else if(index==5)//city
-            sCondition=QString("city like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("city like '%%1%'").arg(s);
         else if(index==6)//comment
-            sCondition=QString("comment like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("comment like '%%1%'").arg(s);
         else if(index==7)//comment
-            sCondition=QString("call_numbers like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("call_numbers like '%%1%'").arg(s);
         else if(index==8)//comment
-            sCondition=QString("fax_numbers like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("fax_numbers like '%%1%'").arg(s);
         else if(index==9)//comment
-            sCondition=QString("email_adress like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("email_adress like '%%1%'").arg(s);
         //-
         memory.set_string(&sCondition);
         b=m_thread.set_work(WORK_CUSTOMER_GET_ALL,&memory);
@@ -2343,6 +2452,7 @@ bool MainWindow::customer_new(void)
         return false;
     bool b=true;
     CLogbook lg;
+    QString s;
     CCustomer cu;
     CInputDialogCustomer dlg;
     dlg.set_db(&m_thread);
@@ -2362,6 +2472,10 @@ bool MainWindow::customer_new(void)
             //logbook
             if(m_db.logbook_create_new(cu,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_CUSTOMER,cu.get_id());// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return b;
@@ -2376,7 +2490,7 @@ bool MainWindow::customer_edit(void)
     CInputDialogCustomer dlg;
     bool b=true;
     int iId=-1;
-    QString sMark;
+    QString s,sMark;
 
     if(m_widgets.get_selected_table_item_value(ui->tableWidgetCustomer,iId))//select?
     {
@@ -2415,8 +2529,20 @@ bool MainWindow::customer_edit(void)
                 //logbook after
                 if(m_db.logbook_create_edit(cu,lg,false))
                     logbook_insert(lg);
+
+                //set last change in db -> another clients update table
+                s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_CUSTOMER,cu.get_id());// create string
+                m_LastDbChange.write_last_change(s);//write in db
             }
         }
+    }
+
+    //check delete by another client & user will not created new
+    if(cu.get_id()>0)
+    {
+        s=QString::fromUtf8("id = %1").arg(cu.get_id());
+        if(m_db.customer_get_count(s)<=0)
+            customer_mask_set();//update table
     }
     //-
     return b;
@@ -2433,8 +2559,8 @@ bool MainWindow::customer_delete(void)
     CCustomer cu;
     QString sMark,s;
     QMessageBox msg(QMessageBox::Question,"","");
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
     //-
     m_widgets.get_selected_table_item_value(ui->tableWidgetCustomer,iId);//get id
@@ -2443,7 +2569,7 @@ bool MainWindow::customer_delete(void)
         sMark=cu.get_customernumber();//mark number
         m_db.logbook_create_remove(cu,lg);//create logbook
 
-        s=QString("Soll der Kunde '%1,%2' wirklich gelöscht werden?").arg(cu.get_name(),cu.get_first_name());
+        s=QString::fromUtf8("Soll der Kunde '%1,%2' wirklich gelöscht werden?").arg(cu.get_name(),cu.get_first_name());
         msg.setText(s);
         //-
         msg.exec();
@@ -2462,8 +2588,12 @@ bool MainWindow::customer_delete(void)
                 logbook_insert(lg);
 
                 //update trade info by customer
-                customer_update_customernumber_trade(sMark,QString("Kunde gelöscht"));
+                customer_update_customernumber_trade(sMark,QString::fromUtf8("Kunde gelöscht"));
                 trade_widgetitem_clicked();//update trade info
+
+                //set last change in db -> another clients update table
+                s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_CUSTOMER,cu.get_id());// create string
+                m_LastDbChange.write_last_change(s);//write in db
             }
         }
     }
@@ -2490,7 +2620,7 @@ bool MainWindow::article_update_count(void)
 {
     int row=ui->tableWidgetArticle->rowCount();
     int count;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -2499,8 +2629,8 @@ bool MainWindow::article_update_count(void)
         return false;
     //-
     if(row!=count)
-        s=QString("%1/").arg(row);
-    s+=QString("%1").arg(count);
+        s=QString::fromUtf8("%1/").arg(row);
+    s+=QString::fromUtf8("%1").arg(count);
     ui->labelCountArticle->setText(s);
     //-
     return true;
@@ -2560,32 +2690,32 @@ bool MainWindow::article_mask_set(void)
     else
     {
         if(index==0)//name
-            sCondition=QString("name like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("name like '%%1%'").arg(s);
         else if(index==1)//articlenumber
-            sCondition=QString("articlenumber like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("articlenumber like '%%1%'").arg(s);
         else if(index==2)//2.articlenumber
-            sCondition=QString("articlenumber2 like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("articlenumber2 like '%%1%'").arg(s);
         else if(index==9)//location
-            sCondition=QString("location like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("location like '%%1%'").arg(s);
         else if(index==10)//unit
-            sCondition=QString("unit like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("unit like '%%1%'").arg(s);
         else if(index==11)//valuta
-            sCondition=QString("valuta like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("valuta like '%%1%'").arg(s);
         else if(index==12)//comment
-            sCondition=QString("comment like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("comment like '%%1%'").arg(s);
         else if(index>4 && index<9) //basprice /salesprice
         {
             fInput=s.toFloat(&b);
             if(b)
             {
                 if(index==5)//basep. <
-                    sCondition=QString("baseprice < %1").arg(fInput);
+                    sCondition=QString::fromUtf8("baseprice < %1").arg(fInput);
                 else if(index==6)//basep. >
-                    sCondition=QString("baseprice > %1").arg(fInput);
+                    sCondition=QString::fromUtf8("baseprice > %1").arg(fInput);
                 else if(index==7)//salesp.inv. <
-                    sCondition=QString("salesprice < %1").arg(fInput);
+                    sCondition=QString::fromUtf8("salesprice < %1").arg(fInput);
                 else if(index==8)//salesp..inv. >
-                    sCondition=QString("salesprice > %1").arg(fInput);
+                    sCondition=QString::fromUtf8("salesprice > %1").arg(fInput);
             }
             else{}
         }
@@ -2618,9 +2748,11 @@ bool MainWindow::article_new(void)
         return false;
 
     bool b=true;
+    int iType=LC_ACTION_UPDATE_ARTICLE_INV;
     CArticle ar;
     CLogbook lg;
     CMaker mk;
+    QString s;
     CInputDialogArticle dlg;
     dlg.set_thread(&m_thread);//set db object
     dlg.init();
@@ -2642,12 +2774,14 @@ bool MainWindow::article_new(void)
                     maker_update_info();
                     maker_check_user_input();
                 }
+                iType=LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG;
             }
             if(dlg.m_iNewWaregroupId>0)//new waregroup add?
             {
                 waregroup_update_tree(dlg.m_iNewWaregroupId);
                 waregroup_update_count();
                 waregroup_check_user_input();
+                iType=LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG;
             }
             m_widgets.article_insert_row(ui->tableWidgetArticle,ar,FORMAT_ONE,ITEM_POSITION_BOTTOM,true);
             m_widgets.inventory_insert_row(ui->tableWidgetInventory,ar,ITEM_POSITION_BOTTOM,true);
@@ -2658,6 +2792,10 @@ bool MainWindow::article_new(void)
             //logbook
             if(m_db.logbook_create_new(ar,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(iType,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return b;
@@ -2669,6 +2807,7 @@ bool MainWindow::article_edit(void)
         return false;
 
     bool b=true;
+    QString s;
     CArticle ar;
     CMaker mk;
     CLogbook lg;
@@ -2686,18 +2825,13 @@ bool MainWindow::article_edit(void)
             //-
             dlg.set_thread(&m_thread);//set thread
             dlg.init(ar.get_waregroup_id());
-            dlg.m_sMarkArticleName=ar.get_name();
-            dlg.m_sMarkArticleNumber1=ar.get_articlenumber();
-            dlg.m_sMarkArticleNumber2=ar.get_articlenumber2();
             dlg.set_data(ar);
             dlg.setWindowTitle("Artikel bearbeiten");
             if(dlg.exec())
             {
                 dlg.get_data(ar);
                 b=m_db.article_update(ar);
-                if(!b)//error
-                {}
-                else
+                if(b)
                 {
                     if(dlg.m_iNewMakerId>0)//new maker add?
                     {
@@ -2728,9 +2862,21 @@ bool MainWindow::article_edit(void)
                     //logbook after
                     if(m_db.logbook_create_edit(ar,lg,false))
                         logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
+    }
+
+    //check delete by another client & user will not created new
+    if(ar.get_id()>0)
+    {
+        s=QString::fromUtf8("id = %1").arg(ar.get_id());
+        if(m_db.article_get_count(s)<=0)
+            article_mask_set();//update table
     }
     return b;
 }
@@ -2747,9 +2893,12 @@ bool MainWindow::article_copy(void)
     CPointerMemory memory;
     memory.set_string(&sCondition);
     memory.set_int(&count);
+    QMessageBox msg(this);
+    msg.setWindowTitle(QString::fromUtf8("Fehler"));
+    msg.setText(QString::fromUtf8("Der Artikel der als Quelle dienen sollte wurde zwischenzeitlich von einem anderen client gelöscht."));
     QInputDialog dlg(this);
     dlg.setWindowTitle("Artikel kopieren");
-    dlg.setOkButtonText(QString("Kopie erstellen"));
+    dlg.setOkButtonText(QString::fromUtf8("Kopie erstellen"));
     CArticle ar;
     int iId=-1;
 
@@ -2759,36 +2908,49 @@ bool MainWindow::article_copy(void)
             b=false;
         else
         {
-            s=QString("Artikelbezeichnung der Kopie von \"%1\":").arg(ar.get_name());
+            s=QString::fromUtf8("Artikelbezeichnung der Kopie von \"%1\":").arg(ar.get_name());
             dlg.setLabelText(s);
-            s=ar.get_name()+QString(" Kopie");
+            s=ar.get_name()+QString::fromUtf8(" Kopie");
             dlg.setTextValue(s);
             //-
             do
             {
                 iReturn=dlg.exec();
-                sCondition=QString("name='%1'").arg(dlg.textValue());
+                sCondition=QString::fromUtf8("name='%1'").arg(dlg.textValue());
                 m_thread.set_work(WORK_ARTICLE_GET_COUNT,&memory);
                 if(count>0 && iReturn!=QDialog::Rejected)
                     QMessageBox::warning(this,"Fehler!","Ein Artikel mit dieser Beschreibung existiert bereits!");
             }while(iReturn!=QDialog::Rejected && count>0);
             //-
-            if(iReturn==QDialog::Accepted && count<=0)
+            if(iReturn==QDialog::Accepted)
             {//ok? -> copy
-                m_db.logbook_create_copy(ar.get_name(),dlg.textValue(),lg);//create logbook
-                ar.set_name(dlg.textValue());//set copy name
-                ar.set_articlenumber(QString(""));//copy has another article numbers
-                ar.set_articlenumber2(QString(""));
-                if(m_db.article_add(ar))//add in db
-                {
-                    //update displays
-                    m_widgets.article_insert_row(ui->tableWidgetArticle,ar,FORMAT_ONE,ITEM_POSITION_BOTTOM,true);
-                    m_widgets.inventory_insert_row(ui->tableWidgetInventory,ar,ITEM_POSITION_BOTTOM,true);
-                    article_update_count();
-                    inventory_update_count();
 
-                    //logbook
-                    logbook_insert(lg);
+                //check delete by another client (	interim )
+                s=QString::fromUtf8("id = %1").arg(ar.get_id());
+                if(m_db.article_get_count(s)<=0)
+                {//error , is delete
+                    msg.exec();
+                    article_mask_set();//update table
+                }
+                else
+                {
+                    m_db.logbook_create_copy(ar.get_name(),dlg.textValue(),lg);//create logbook
+                    ar.set_name(dlg.textValue());//set copy name
+                    if(m_db.article_add(ar))//add in db
+                    {
+                        //update displays
+                        m_widgets.article_insert_row(ui->tableWidgetArticle,ar,FORMAT_ONE,ITEM_POSITION_BOTTOM,true);
+                        m_widgets.inventory_insert_row(ui->tableWidgetInventory,ar,ITEM_POSITION_BOTTOM,true);
+                        article_update_count();
+                        inventory_update_count();
+
+                        //logbook
+                        logbook_insert(lg);
+
+                        //set last change in db -> another clients update table
+                        s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_ARTICLE_INV,-1);// create string
+                        m_LastDbChange.write_last_change(s);//write in db
+                    }
                 }
             }
         }
@@ -2821,7 +2983,7 @@ bool MainWindow::article_delete(void)
         bGiveItTrades=m_thread.set_work(WORK_TRADE_GIVE_IT_WITH_ARTICLE,&memory);
 
         //find count of ordering with this article
-        s=QString("wares like '%x%1|%'").arg(iId);
+        s=QString::fromUtf8("wares like '%x%1|%'").arg(iId);
         memory.clear();
         memory.set_string(&s);
         memory.set_int(&i);
@@ -2829,19 +2991,19 @@ bool MainWindow::article_delete(void)
         if(i>0)//orderings with this article?
         {
             msg.setWindowTitle("!");
-            s=QString("Es gibt %1 Bestellung(en) mit diesem Artikel, ändern Sie die Bestellung(en) bevor dieser Artikel gelöscht werden kann!").arg(i);
+            s=QString::fromUtf8("Es gibt %1 Bestellung(en) mit diesem Artikel, ändern Sie die Bestellung(en) bevor dieser Artikel gelöscht werden kann!").arg(i);
             msg.setText(s);
             msg.exec();
             b=false;
         }
         else
         {
-            QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-            msg.addButton(QString("Nein"),QMessageBox::NoRole);
+            QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+            msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
             msg.setWindowTitle("?");
-            s=QString("Soll der Artikel '%1' wirklich gelöscht werden?").arg(ar.get_name());
+            s=QString::fromUtf8("Soll der Artikel '%1' wirklich gelöscht werden?").arg(ar.get_name());
             if(bGiveItTrades)
-                s+=QString("\n(Es existieren Buchungen mit diesen Artikel!)");
+                s+=QString::fromUtf8("\n(Es existieren Buchungen mit diesen Artikel!)");
             msg.setText(s);
             //-
             msg.exec();
@@ -2863,6 +3025,10 @@ bool MainWindow::article_delete(void)
 
                     //logbook after
                     logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
@@ -2891,7 +3057,7 @@ bool MainWindow::ordering_update_count(void)
 {
     int row=ui->tableWidgetOrdering->rowCount();
     int count;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -2900,8 +3066,8 @@ bool MainWindow::ordering_update_count(void)
         return false;
     //-
     if(row!=count)
-        s=QString("%1/").arg(row);
-    s+=QString("%1").arg(count);
+        s=QString::fromUtf8("%1/").arg(row);
+    s+=QString::fromUtf8("%1").arg(count);
     ui->labelCountOrdering->setText(s);
     //-
     return true;
@@ -2967,7 +3133,7 @@ bool MainWindow::ordering_mask_set(void)
     else if(index==0)//dealer
         iWork=WORK_ORDERING_GET_ALL_BY_DEALER;
     else if(index==5)//order number
-        sCondition=QString("order_number like '%1%'").arg(s);
+        sCondition=QString::fromUtf8("order_number like '%1%'").arg(s);
     else if(index==6)//article
         iWork=WORK_ORDERING_GET_ALL_BY_ARTICLE;
     else if(index==7)//maker
@@ -2985,7 +3151,7 @@ bool MainWindow::ordering_mask_set(void)
         iWork=WORK_ORDERING_GET_ALL_BY_ARTICLENUMBER;
     }
     else if(index==11)//comment
-        sCondition=QString("comment like '%%1%'").arg(s);
+        sCondition=QString::fromUtf8("comment like '%%1%'").arg(s);
     //-date
     else if(index==1)//date from - to
     {
@@ -2997,7 +3163,7 @@ bool MainWindow::ordering_mask_set(void)
             {
                 s2=m_widgets.check_date(ls[1]);
                 if(s2.length()>0)// date 2 right
-                    sCondition=QString("date >= '%1' AND date <= '%2'").arg(s,s2);
+                    sCondition=QString::fromUtf8("date >= '%1' AND date <= '%2'").arg(s,s2);
                 else{}
             }
             else{}
@@ -3010,11 +3176,11 @@ bool MainWindow::ordering_mask_set(void)
         if(s2.length()>0)//date right
         {
             if(index==2)// date <
-                sCondition=QString("date < '%1'").arg(s2);
+                sCondition=QString::fromUtf8("date < '%1'").arg(s2);
             else if(index==3)//date =
-                sCondition=QString("date = '%1'").arg(s2);
+                sCondition=QString::fromUtf8("date = '%1'").arg(s2);
             else if(index==4)//date >
-                sCondition=QString("date > '%1'").arg(s2);
+                sCondition=QString::fromUtf8("date > '%1'").arg(s2);
         }
     }
     //-update table-
@@ -3045,7 +3211,9 @@ bool MainWindow::ordering_new(void)
     if(!m_db.is_db_connect())
         return false;
 
+    int iType=LC_ACTION_UPDATE_ORDERING;
     bool b=true;
+    QString s;
     CLogbook lg;
     CDealer de;
     COrdering ord;
@@ -3063,6 +3231,7 @@ bool MainWindow::ordering_new(void)
                 dealer_update_info();
                 dealer_update_count();
                 dealer_check_user_input();
+                iType=LC_ACTION_UPDATE_ORDERING_DEALER;
             }
         }
         //-
@@ -3079,6 +3248,10 @@ bool MainWindow::ordering_new(void)
             //logbook
             if(m_db.logbook_create_new(ord,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(iType,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return b;
@@ -3089,6 +3262,8 @@ bool MainWindow::ordering_edit(void)
     if(!m_db.is_db_connect())
         return false;
 
+    int iType=LC_ACTION_UPDATE_ORDERING;
+    QString s;
     bool b=true;
     COrdering ord;
     CLogbook lg;
@@ -3122,6 +3297,7 @@ bool MainWindow::ordering_edit(void)
                             dealer_update_info();
                             dealer_update_count();
                             dealer_check_user_input();
+                            iType=LC_ACTION_UPDATE_ORDERING_DEALER;
                         }
                     }
                     m_widgets.ordering_update_row(ui->tableWidgetOrdering,ord,FORMAT_ONE,true);
@@ -3131,9 +3307,21 @@ bool MainWindow::ordering_edit(void)
                     //logbook after
                     if(m_db.logbook_create_edit(ord,lg,false))
                         logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(iType,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
+    }
+
+    //check delete by another client
+    if(ord.get_id()>0)
+    {
+        s=QString::fromUtf8("id = %1").arg(ord.get_id());
+        if(m_db.ordering_get_count(s)<=0)
+            ordering_mask_set();//update table
     }
     return b;
 }
@@ -3148,8 +3336,8 @@ bool MainWindow::ordering_delete(void)
     CLogbook lg;
     QString s;
     QMessageBox msg(QMessageBox::Question,"","");
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
     msg.setWindowTitle("?");
     //-
     int iId;
@@ -3158,7 +3346,7 @@ bool MainWindow::ordering_delete(void)
     {
         m_db.logbook_create_remove(ord,lg);//create logbook
 
-        s=QString("Soll die Bestellung Nummer '%1' wirklich gelöscht werden?").arg(ord.get_ordernumber());
+        s=QString::fromUtf8("Soll die Bestellung Nummer '%1' wirklich gelöscht werden?").arg(ord.get_ordernumber());
         msg.setText(s);
         msg.exec();
         if(msg.clickedButton()==yesButton)
@@ -3174,6 +3362,10 @@ bool MainWindow::ordering_delete(void)
 
                 //logbook after
                 logbook_insert(lg);
+
+                //set last change in db -> another clients update table
+                s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_ORDERING,-1);// create string
+                m_LastDbChange.write_last_change(s);//write in db
             }
         }
     }
@@ -3286,7 +3478,7 @@ bool MainWindow::trade_update_count(void)
 
     int row=ui->tableWidgetTrade->rowCount();
     int count;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -3295,8 +3487,8 @@ bool MainWindow::trade_update_count(void)
         return false;
     //-
     if(row!=count)
-        s=QString("%1/").arg(row);
-    s+=QString("%1").arg(count);
+        s=QString::fromUtf8("%1/").arg(row);
+    s+=QString::fromUtf8("%1").arg(count);
     ui->labelCountTrade->setText(s);
     //-
     return true;
@@ -3403,8 +3595,8 @@ bool MainWindow::trade_check_diff_ordering(int iOrdId, CTrade & tr)
             diff=countO-countT;
             if(diff>0)
             {
-                s=QString("%1x").arg(diff);//count(diff)
-                s+=QString("%1").arg(id);//a.id
+                s=QString::fromUtf8("%1x").arg(diff);//count(diff)
+                s+=QString::fromUtf8("%1").arg(id);//a.id
                 lsO[i]=s;//set diff.
              }
              else
@@ -3460,12 +3652,12 @@ bool MainWindow::trade_mask_date_changed(void)
     if(!m_widgets.trade_get_selecteted_mask_date(s,last_index,dtF,dtT))
         return false;
     //-
-    dtF.setYMD(year,dtF.month(),dtF.day());
+    dtF.setDate(year,dtF.month(),dtF.day());
     if(dtF>QDate().currentDate())
         dtF=QDate().currentDate();
     if(dtF.day()>dtF.daysInMonth())
         dtF.setDate(dtF.year(),dtF.month(),dtF.daysInMonth());
-    dtT.setYMD(year,dtT.month(),dtT.day());
+    dtT.setDate(year,dtT.month(),dtT.day());
     if(dtT>QDate().currentDate())
         dtT=QDate().currentDate();
     if(dtF.day()>dtF.daysInMonth())
@@ -3558,18 +3750,18 @@ bool MainWindow::trade_mask_set(bool bRefreshDateList)
         }
     }
     //dates
-    sCondition=QString("date >= '%1' AND date <= '%2'").arg(dtFrom.toString(QString("yyyy-MM-dd")),dtTo.toString(QString("yyyy-MM-dd")));
+    sCondition=QString::fromUtf8("date >= '%1' AND date <= '%2'").arg(dtFrom.toString(QString::fromUtf8("yyyy-MM-dd")),dtTo.toString(QString::fromUtf8("yyyy-MM-dd")));
 
     //onther rules
     if(sRules.length()>0)
     {
         if(index_rules==0)//bookingnumber
         {
-            s=QString("booking_number like '%%1%'").arg(sRules);
+            s=QString::fromUtf8("booking_number like '%%1%'").arg(sRules);
         }
         if(index_rules==1)//comment
         {
-            s=QString("comment like '%%1%'").arg(sRules);
+            s=QString::fromUtf8("comment like '%%1%'").arg(sRules);
         }
         if(index_rules==2)//article name
         {
@@ -3594,27 +3786,27 @@ bool MainWindow::trade_mask_set(bool bRefreshDateList)
         }
         if(index_rules==7)//dealer
         {
-            s=QString("info_2 like '%%1%'").arg(sRules);
-            s+=QString(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
+            s=QString::fromUtf8("info_2 like '%%1%'").arg(sRules);
+            s+=QString::fromUtf8(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
         }
         if(index_rules==8)//ordering number
         {
-            s=QString("info_1 like '%%1%'").arg(sRules);
-            s+=QString(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
+            s=QString::fromUtf8("info_1 like '%%1%'").arg(sRules);
+            s+=QString::fromUtf8(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
         }
         if(index_rules==9)//customer name
         {
-            s=QString("info_2 like '%%1%'").arg(sRules);
-            s+=QString(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
+            s=QString::fromUtf8("info_2 like '%%1%'").arg(sRules);
+            s+=QString::fromUtf8(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
         }
         if(index_rules==10)//ordering number
         {
-            s=QString("info_1 like '%%1%'").arg(sRules);
-            s+=QString(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
+            s=QString::fromUtf8("info_1 like '%%1%'").arg(sRules);
+            s+=QString::fromUtf8(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
         }
         //-
         if(index_rules<2 || index_rules>6)//booking_number or comment or dealer or customer
-            sCondition+=QString(" AND %1").arg(s);
+            sCondition+=QString::fromUtf8(" AND %1").arg(s);
     }
 
     //get records
@@ -3623,7 +3815,7 @@ bool MainWindow::trade_mask_set(bool bRefreshDateList)
     memory.set_string2(&sRules);
     memory.set_bool(&bFirst);
 
-    s=QString("");
+    s=QString::fromUtf8("");
     if(!m_thread.set_work(iWork,&memory))
     {}
     else
@@ -3653,7 +3845,7 @@ bool MainWindow::trade_incoming(void)
         return false;
 
     //get date mask
-    QString si;
+    QString s,si;
     si=ui->listWidgetTradeMaskDate->item(ui->listWidgetTradeMaskDate->currentRow())->text();
     QDate dtFrom,dtTo;
     if(!m_widgets.trade_get_selecteted_mask_date(si,ui->comboBoxTradeMaskDate->currentIndex(),dtFrom,dtTo))
@@ -3668,7 +3860,7 @@ bool MainWindow::trade_incoming(void)
     //-
     CTrade tr;
     CInputDlgTrade dlg;
-    dlg.set_db(&m_thread);
+    dlg.set(&m_thread,false);
     dlg.setWindowTitle("Wareneingang");
     dlg.set_booking_number_nomination();
     if(dlg.exec())
@@ -3693,6 +3885,10 @@ bool MainWindow::trade_incoming(void)
             //logbook
             if(m_db.logbook_create_new(tr,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INVENTORY_TRADE,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return true;
@@ -3704,7 +3900,7 @@ bool MainWindow::trade_outgoing(void)
         return false;
 
     //get date mask
-    QString si;
+    QString s,si;
     si=ui->listWidgetTradeMaskDate->item(ui->listWidgetTradeMaskDate->currentRow())->text();
     QDate dtFrom,dtTo;
     if(!m_widgets.trade_get_selecteted_mask_date(si,ui->comboBoxTradeMaskDate->currentIndex(),dtFrom,dtTo))
@@ -3719,8 +3915,7 @@ bool MainWindow::trade_outgoing(void)
     //-
     CTrade tr;
     CInputDlgTrade dlg;
-    dlg.set_db(&m_thread);
-    dlg.set_outgoing();
+    dlg.set(&m_thread,true);
     dlg.setWindowTitle("Warenausgang");
     dlg.set_booking_number_nomination();
     if(dlg.exec())
@@ -3746,6 +3941,10 @@ bool MainWindow::trade_outgoing(void)
             //logbook
             if(m_db.logbook_create_new(tr,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INVENTORY_TRADE,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return true;
@@ -3765,10 +3964,10 @@ bool MainWindow::trade_ordering_incoming(void)
     //-
 
     QMessageBox msg(QMessageBox::Question,"","");
-    QPushButton * noButton=msg.addButton(QString("Nein"),QMessageBox::NoRole);
-    msg.addButton(QString("Ja"),QMessageBox::YesRole);
+    QPushButton * noButton=msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
+    msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
     msg.setWindowTitle("?");
-    QString s=QString("Die Bestellung ist nicht vollständig eingegangen, soll die Bestellung trotzdem gelöscht werden?\n(bei 'nein' wird die Differenz in der Bestellung gespeichert)");
+    QString s=QString::fromUtf8("Die Bestellung ist nicht vollständig eingegangen, soll die Bestellung trotzdem gelöscht werden?\n(bei 'nein' wird die Differenz in der Bestellung gespeichert)");
     msg.setText(s);
     //-
     CLogbook lg;
@@ -3781,7 +3980,7 @@ bool MainWindow::trade_ordering_incoming(void)
     memory.set_int(&type);
     memory.set_string_list(&ls);
     CInputDlgOrderingIncoming dlg;
-    dlg.setWindowTitle(QString("Wareneingang(Bestellung)"));
+    dlg.setWindowTitle(QString::fromUtf8("Wareneingang(Bestellung)"));
     dlg.set_thread(&m_thread);
     dlg.init();//fill tables
     if(dlg.exec())
@@ -3823,6 +4022,10 @@ bool MainWindow::trade_ordering_incoming(void)
                 //logbook
                 if(m_db.logbook_create_new(tr,lg))
                     logbook_insert(lg);
+
+                //set last change in db -> another clients update table
+                s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INVENTORY_TRADE_ORDERING,-1);// create string
+                m_LastDbChange.write_last_change(s);//write in db
             }
         }
     }
@@ -3841,6 +4044,7 @@ bool MainWindow::trade_outgoing_customer(void)
     if(!m_widgets.trade_get_selecteted_mask_date(si,ui->comboBoxTradeMaskDate->currentIndex(),dtFrom,dtTo))
         return false;
     //-
+    QString s;
     CLogbook lg;
     int type;
     QList<QString> ls;
@@ -3876,6 +4080,10 @@ bool MainWindow::trade_outgoing_customer(void)
             //logbook
             if(m_db.logbook_create_new(tr,lg))
                 logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INVENTORY_TRADE,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return true;
@@ -3889,6 +4097,7 @@ bool MainWindow::trade_canceled(void)
     bool b=false;
     int iSwitchType;
     QMessageBox msg;
+    QMessageBox msg2(QMessageBox::Information,"","");
     CTrade tr;
     CLogbook lg;
     QList<QString> lsS;
@@ -3908,46 +4117,60 @@ bool MainWindow::trade_canceled(void)
                     b=m_thread.set_work(WORK_TRADE_CHECK_CANCEL_POSSIBLE,&memory);//check trade possible
                     if(!b)
                     {//canceled is not possible
-                        s=QString("Die Buchung kann nicht storniert werden da es zwischenzeitlich zu negativen Bestand kommen würde,"
+                        s=QString::fromUtf8("Die Buchung kann nicht storniert werden da es zwischenzeitlich zu negativen Bestand kommen würde,"
                                   "beachten Sie die chronologische Reihenfolge!");
                         if(sErr.length()>0)
-                            s+=QString("\n(%1)").arg(sErr);
+                            s+=QString::fromUtf8("\n(%1)").arg(sErr);
                         msg.setWindowTitle("!");
                         msg.setText(s);
                         msg.exec();
                     }
                     if(b)
                     {//canceled is possible
-                        s=QString("Möchten Sie wirklich die Buchnung mit der Nummer '%1' stornieren?").arg(sBookingNumber);
-                        QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-                        msg.addButton(QString("Nein"),QMessageBox::NoRole);
+                        s=QString::fromUtf8("Möchten Sie wirklich die Buchnung mit der Nummer '%1' stornieren?").arg(sBookingNumber);
+                        QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+                        msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
                         msg.setWindowTitle("?");
                         msg.setText(s);
                         msg.exec();
                         if(msg.clickedButton()==yesButton)
                         {
-                            tr.set_canceled(true);
-                            m_db.trade_set_canceled(sBookingNumber);//set canceled in db
-                            m_widgets.trade_update_row(ui->tableWidgetTrade,tr,true);//update table item
-
-                            //update articles counts
-                            if(tr.get_type()==TYPE_INCOMING || tr.get_type()==TYPE_ORDERING_INCOMING)
-                                iSwitchType=TYPE_OUTGOING;
-                            else
-                                iSwitchType=TYPE_INCOMING;
-                            tr.get_wares(lsS);
-                            memory.clear();
-                            memory.set_string_list(&lsS);
-                            memory.set_int(&iSwitchType);
-                            if(!m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
-                                b=false;//error
+                            //another client cancel the trade in the interim?
+                            if(m_db.trade_is_canceled(sBookingNumber))
+                            {
+                                msg2.setWindowTitle("!");
+                                msg2.setText("Der Warengang wurde von einer anderen Programminstanz bereits storniert!");
+                                msg2.exec();
+                            }
                             else
                             {
-                                inventory_mask_set();//update inventory table
+                                tr.set_canceled(true);
+                                m_db.trade_set_canceled(sBookingNumber);//set canceled in db
+                                m_widgets.trade_update_row(ui->tableWidgetTrade,tr,true);//update table item
 
-                                //logbook
-                                if(m_db.logbook_create_canceled(tr,lg))
-                                    logbook_insert(lg);
+                                //update articles counts
+                                if(tr.get_type()==TYPE_INCOMING || tr.get_type()==TYPE_ORDERING_INCOMING)
+                                    iSwitchType=TYPE_OUTGOING;
+                                else
+                                    iSwitchType=TYPE_INCOMING;
+                                tr.get_wares(lsS);
+                                memory.clear();
+                                memory.set_string_list(&lsS);
+                                memory.set_int(&iSwitchType);
+                                if(!m_thread.set_work(WORK_ARTICLE_UPDATE_ALL_COUNT,&memory))
+                                    b=false;//error
+                                else
+                                {
+                                    inventory_mask_set();//update inventory table
+
+                                    //logbook
+                                    if(m_db.logbook_create_canceled(tr,lg))
+                                        logbook_insert(lg);
+
+                                    //set last change in db -> another clients update table
+                                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_INVENTORY_TRADE,-1);// create string
+                                    m_LastDbChange.write_last_change(s);//write in db
+                                }
                             }
                         }
                     }
@@ -3970,7 +4193,7 @@ bool MainWindow::inventory_update_count(void)
 
     int row=ui->tableWidgetInventory->rowCount();
     int count;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
@@ -3979,8 +4202,8 @@ bool MainWindow::inventory_update_count(void)
         return false;
     //-
     if(row!=count)
-        s=QString("%1/").arg(row);
-    s+=QString("%1").arg(count);
+        s=QString::fromUtf8("%1/").arg(row);
+    s+=QString::fromUtf8("%1").arg(count);
     ui->labelCountInventory->setText(s);
     //-
     return true;
@@ -3992,7 +4215,7 @@ int MainWindow::inventory_get_count_of_arctile_under_limit(void)
         return 0;
 
     int count=0;
-    QString sCondition=QString("article.inventory < article.warning_limit");
+    QString sCondition=QString::fromUtf8("article.inventory < article.warning_limit");
     CPointerMemory memory;
     memory.set_int(&count);
     memory.set_string(&sCondition);
@@ -4054,6 +4277,7 @@ bool MainWindow::inventory_mask_set(void)
     int input=-1,index=ui->comboBoxMaskInventory->currentIndex();
     bool b=true,b2;
 
+
     //search by ???
 
     if(s.length()<=0)//no mask
@@ -4084,30 +4308,30 @@ bool MainWindow::inventory_mask_set(void)
     else
     {
         if(index==6)//name
-            sCondition=QString("name like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("name like '%%1%'").arg(s);
         else if(index==7)//articlenumber
-            sCondition=QString("articlenumber like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("articlenumber like '%%1%'").arg(s);
         else if(index==8)//2.articlenumber
-            sCondition=QString("articlenumber2 like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("articlenumber2 like '%%1%'").arg(s);
         else if(index==11)//location
-            sCondition=QString("location like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("location like '%%1%'").arg(s);
         else if(index==12)//unit
-            sCondition=QString("unit like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("unit like '%%1%'").arg(s);
         else if(index==13)//comment
-            sCondition=QString("comment like '%%1%'").arg(s);
+            sCondition=QString::fromUtf8("comment like '%%1%'").arg(s);
         else if(index>=0 && index<4)//inventory / max.inventory
         {
             input=s.toInt(&b,10);
             if(b)//is number
             {
                 if(index==0)//inv. <
-                    sCondition=QString("inventory < %1").arg(input);
+                    sCondition=QString::fromUtf8("inventory < %1").arg(input);
                 else if(index==1)//inv. >
-                    sCondition=QString("inventory > %1").arg(input);
+                    sCondition=QString::fromUtf8("inventory > %1").arg(input);
                 else if(index==2)//max.inv. <
-                    sCondition=QString("max_inventory < %1").arg(input);
+                    sCondition=QString::fromUtf8("max_inventory < %1").arg(input);
                 else if(index==3)//max.inv. >
-                    sCondition=QString("max_inventory > %1").arg(input);
+                    sCondition=QString::fromUtf8("max_inventory > %1").arg(input);
             }
             else{}
         }
@@ -4166,7 +4390,7 @@ bool MainWindow::logbook_update_count(void)
     bool b=true;
     QDate dt=logbook_get_selected_date();
     int count,count2;
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count2);
@@ -4178,16 +4402,16 @@ bool MainWindow::logbook_update_count(void)
     if(b)
     {
         memory.set_int(&count);
-        s=QString("date_time like '%1%'").arg(dt.toString("yyyy-MM-dd"));
+        s=QString::fromUtf8("date_time like '%1%'").arg(dt.toString("yyyy-MM-dd"));
         m_thread.set_work(WORK_LOGBOOK_GET_COUNT,&memory);
         if(count<0)
             b=false;
         else
         {
-            s=QString("");
+            s=QString::fromUtf8("");
             if(count!=count2)
-                s=QString("%1/").arg(count);
-            s+=QString("%1").arg(count2);
+                s=QString::fromUtf8("%1/").arg(count);
+            s+=QString::fromUtf8("%1").arg(count2);
             ui->labelCountLogbook->setText(s);
         }
     }
@@ -4197,11 +4421,20 @@ bool MainWindow::logbook_update_count(void)
 
 bool MainWindow::logbook_insert(CLogbook & lg)
 {
+    QString s;
     bool b,bMask=true;
     int index=ui->comboBoxMaskLogbook->currentIndex();
     QDate dt2,dt=logbook_get_selected_date();
     QDateTime dt_ti=lg.get_date_time();
     dt2=dt_ti.date();
+
+    //username set? -> add in logbook text
+    if(m_sUser.length()>0)//user name set?
+    {
+        s=QString::fromUtf8("user: %1 - %2").arg(m_sUser,lg.get_text());
+        lg.set_text(s);
+    }
+
     //-
     if(index==1)
     {
@@ -4307,7 +4540,7 @@ bool MainWindow::logbook_check_items_over_count(void)
     int max_count=s.toInt(&b,10);//get max count
     if(b)
     {
-        s=QString("");
+        s=QString::fromUtf8("");
         m_thread.set_work(WORK_LOGBOOK_GET_COUNT,&memory);//get item count logbook
         if(log_count>max_count)//over?
         {
@@ -4318,7 +4551,7 @@ bool MainWindow::logbook_check_items_over_count(void)
                 {
                     memory.clear();
                     s2=ls[max_count].toString("yyyy-MM-dd hh:mm:ss");
-                    s=QString("date_time <= '%1'").arg(s2);
+                    s=QString::fromUtf8("date_time <= '%1'").arg(s2);
                     memory.set_string(&s);
                     if(m_thread.set_work(WORK_LOGBOOK_REMOVE_ALL,&memory))
                         b2=true;//found/remove -> update widgets
@@ -4339,7 +4572,7 @@ bool MainWindow::logbook_date_mask_year_changed(void)
 
     int year=logbook_get_selected_year();
     QDate dt=logbook_get_selected_date();
-    dt.setYMD(year,dt.month(),dt.day());
+    dt.setDate(year,dt.month(),dt.day());
     QDate dtCurrent=QDate().currentDate();
     if(dt>dtCurrent)
         dt=dtCurrent;
@@ -4409,19 +4642,22 @@ bool MainWindow::logbook_change_count_of_item(void)
     int new_count,cur_count=s.toInt(&b,10);
     if(b)
     {
-        new_count=QInputDialog::getInt(this,QString("Anzahl ändern"),QString("neue Anzahl(min.10):"),cur_count,10,9999,1,&b);
+        new_count=QInputDialog::getInt(this,QString::fromUtf8("Anzahl ändern"),QString::fromUtf8("neue Anzahl(min.10):"),cur_count,10,9999,1,&b);
         if(b)
         {//pressed ok
             if(cur_count!=new_count)
             {//changed?
-                s=QString("%1").arg(new_count);
+                s=QString::fromUtf8("%1").arg(new_count);
                 ui->lineEditCountItemLog->setText(s);//set new count
+
+                //write to db
+                m_db.write_logbook_count(new_count);
 
                 //logbook
                 lg.set_type(LOGBOOK_TYPE_OTHER);
                 lg.set_date_time(QDateTime::currentDateTime());
-                s=QString("Anzahl der letzten zu speichernden Logbucheinträge von %1 auf ").arg(cur_count);
-                s+=QString("%1 geändert").arg(new_count);
+                s=QString::fromUtf8("Anzahl der letzten zu speichernden Logbucheinträge von %1 auf ").arg(cur_count);
+                s+=QString::fromUtf8("%1 geändert").arg(new_count);
                 lg.set_text(s);
                 logbook_insert(lg);
 
@@ -4430,6 +4666,10 @@ bool MainWindow::logbook_change_count_of_item(void)
                     logbook_mask_set();//over-> update list
                     logbook_refresh_datelist();//update list
                 }
+
+                //set last change in db -> another clients update count
+                s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_LOGBOOK_COUNT,-1);// create string
+                m_LastDbChange.write_last_change(s);//write in db
             }
         }
     }
@@ -4442,16 +4682,16 @@ bool MainWindow::logbook_clear(void)
         return false;
 
     bool b=false;
-    QString s("");
+    QString s=QString::fromUtf8("");
     CLogbook lg;
     CPointerMemory memory;
     memory.set_string(&s);
 
     QMessageBox msg(QMessageBox::Question,"","");
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
-    msg.setWindowTitle(QString("Achtung!"));
-    msg.setText(QString("Möchten Sie wirklich alle Logbucheinträge löschen ?"));
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
+    msg.setWindowTitle(QString::fromUtf8("Achtung!"));
+    msg.setText(QString::fromUtf8("Möchten Sie wirklich alle Logbucheinträge löschen ?"));
     msg.exec();
     if(msg.clickedButton()==yesButton)
     {
@@ -4463,8 +4703,12 @@ bool MainWindow::logbook_clear(void)
             //logbook
             lg.set_type(LOGBOOK_TYPE_OTHER);
             lg.set_date_time(QDateTime::currentDateTime());
-            lg.set_text(QString("alle Logbucheinträge gelöscht"));
+            lg.set_text(QString::fromUtf8("alle Logbucheinträge gelöscht"));
             logbook_insert(lg);
+
+            //set last change in db -> another clients update table
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_LOGBOOK,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
         }
     }
     return b;
@@ -4477,11 +4721,19 @@ bool MainWindow::menu_db_backup_create(void)
     if(!m_db.is_db_connect())
         return false;
 
+    QFile file(m_sDbPath);
+    QFileInfo file_info;
+    CLogbook lg;
+    QMessageBox msg(QMessageBox::Critical,"","");
+    msg.setWindowTitle(QString::fromUtf8("Fehler"));
+    QDateTime dtTi=QDateTime::currentDateTime();
+
+
     //load backup-path
     QDir dir;
     CSettings settings;
     QString s,s2,sBackupPath;
-    if(settings.load(QString("BACKUP_PATH"),s))//load backup path
+    if(settings.load(QString::fromUtf8("BACKUP_PATH"),s))//load backup path
     {
         if(s.length()>0)
         {
@@ -4491,49 +4743,45 @@ bool MainWindow::menu_db_backup_create(void)
         }
     }
 
-    QFileInfo file_info;
-    CLogbook lg;
-    QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("Fehler"));
-    QDateTime dtTi=QDateTime::currentDateTime();
-    QString sReadFile=m_sDbPath+QString("lava.sqlite");
+    //get db path folder
+    QStringList ls;
+    QString sDbPathFolder;
+    ls=m_sDbPath.split("/");
+    for(int i=0;i<ls.count()-1;i++)
+        sDbPathFolder+=ls[i]+QString::fromUtf8("/");
+    ls.clear();
 
+    //set default path+name(backup file)
     QString sWriteFile;
     if(sBackupPath.length()>0)//backup path load?
-        sWriteFile=sBackupPath+QString("/%1.sqlite").arg(dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+        sWriteFile=sBackupPath+QString::fromUtf8("/%1.sqlite").arg(dtTi.toString(QString::fromUtf8("hh-mm-ss_dd-MM-yyyy")));
     else//default path
-        sWriteFile=m_sDbPath+QString("/%1.sqlite").arg(dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+        sWriteFile=sDbPathFolder+QString::fromUtf8("/%1.sqlite").arg(dtTi.toString(QString::fromUtf8("hh-mm-ss_dd-MM-yyyy")));
 
-    QFile file(sReadFile);
-    sWriteFile=QFileDialog::getSaveFileName(this,QString("Sicherung erstellen"),sWriteFile);
-    QStringList ls;
-
+    //open file dialog
+    sWriteFile=QFileDialog::getSaveFileName(this,QString::fromUtf8("Sicherung erstellen"),sWriteFile);
     if(sWriteFile.length()>0)//file dialog finish with 'save'?
     {
         //file info (permission)
-        s=QString("");
-        ls=sWriteFile.split("/");
-        for(int i=0;i<ls.count()-1;i++)
-            s+=ls[i]+QString("/");
-        file_info.setFile(s);
+        file_info.setFile(sDbPathFolder);
         if(!file_info.permission(QFile::WriteUser))
         {
-            msg.setText(QString("Sie haben keine Schreibrechte an diesem Ort!"));
+            msg.setText(QString::fromUtf8("Sie haben keine Schreibrechte an diesem Ort!"));
             msg.exec();
         }
         else
         {
             //user overwrite current db? ->error
-            if(sReadFile==sWriteFile)
+            if(m_sDbPath==sWriteFile)
             {
-                s=QString("Sie können nicht die aktuelle Datenbankdatei überschreiben!");
+                s=QString::fromUtf8("Sie können nicht die aktuelle Datenbankdatei überschreiben!");
                 msg.setText(s);
                 msg.exec();
             }
             else
             {
                 //save backup path
-                settings.write(QString("BACKUP_PATH"),file_info.filePath());
+                settings.write(QString::fromUtf8("BACKUP_PATH"),file_info.filePath());
 
                 //check give it file?
                 if(QFile(sWriteFile).exists())
@@ -4541,12 +4789,12 @@ bool MainWindow::menu_db_backup_create(void)
 
                 //copy
                 if(!file.copy(sWriteFile))
-                    s2=QString("(errorcode: %1)").arg(file.error());
+                    s2=QString::fromUtf8("(errorcode: %1)").arg(file.error());
 
                 //exists create file?
                 if(!QFile(sWriteFile).exists())
                 {
-                    s=QString("Fehler beim Erstellen der Sicherung, evtl. fehlen Ihnen die Schreibrechte für diesen Ort!");
+                    s=QString::fromUtf8("Fehler beim Erstellen der Sicherung, evtl. fehlen Ihnen die Schreibrechte für diesen Ort!");
                     if(s2.length()>0)
                         s+=s2;
                     else{}
@@ -4558,9 +4806,13 @@ bool MainWindow::menu_db_backup_create(void)
                     //logbook
                     lg.set_type(LOGBOOK_TYPE_OTHER);
                     lg.set_date_time(QDateTime::currentDateTime());
-                    s=QString("Sicherung \"%1 \" erstellt").arg(sWriteFile);
+                    s=QString::fromUtf8("Sicherung \"%1 \" erstellt").arg(sWriteFile);
                     lg.set_text(QString(s));
                     logbook_insert(lg);
+
+                    //set last change in db -> another clients update table
+                    s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_LOGBOOK,-1);// create string
+                    m_LastDbChange.write_last_change(s);//write in db
                 }
             }
         }
@@ -4575,11 +4827,35 @@ bool MainWindow::menu_db_backup_load(void)
     if(!m_db.is_db_connect())
         return false;
 
+    bool b;
+    QString s;
+    QStringList ls;
+    QString sError,sReadFile;
+    QString sWriteTempFile;
+    QString sWriteFile=m_sDbPath;
+    QMessageBox msgQuest(QMessageBox::Question,"","");
+    msgQuest.setText(QString::fromUtf8("Achtung, beim Laden einer Sicherung gehen alle aktuellen Daten unwiderruflich verloren."
+                             " Ausserdem werden alle anderen Programminstanzen die auf diese Datenbank zugreifen aufgeforderten, sich zu beenden.\nMöchten Sie wirklich eine Sicherung laden?"));
+    QMessageBox msgCritical(QMessageBox::Critical,"","");
+    msgCritical.setWindowTitle(QString::fromUtf8("Fehler"));
+    msgQuest.setWindowTitle(QString::fromUtf8("?"));
+    QPushButton * yesButton=msgQuest.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msgQuest.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
+
+
+    //get db path folder
+    QString sDbPathFolder;
+    ls=m_sDbPath.split("/");
+    for(int i=0;i<ls.count()-1;i++)
+        sDbPathFolder+=ls[i]+QString::fromUtf8("/");
+    ls.clear();
+    sWriteTempFile=sDbPathFolder+QString::fromUtf8("lava_temp.sqlite");//set temp file path
+
     //load backup-path
     QDir dir;
     CSettings settings;
-    QString s,sPath=m_sDbPath;
-    if(settings.load(QString("BACKUP_PATH"),s))//load backup path
+    QString sPath=sDbPathFolder;
+    if(settings.load(QString::fromUtf8("BACKUP_PATH"),s))//load backup path
     {
         if(s.length()>0)
         {
@@ -4587,81 +4863,77 @@ bool MainWindow::menu_db_backup_load(void)
             if(dir.exists())
                 sPath=s;
         }
+    }   
+
+    //stop timer
+    if(m_iTimerId!=-1)
+    {
+        killTimer(m_iTimerId);//stop timer
+        m_iTimerId=-1;
     }
 
-    bool b;
-    QStringList ls;
-    QString sError,sReadFile;
-    QString sWriteTempFile=m_sDbPath+QString("lava_temp.sqlite");
-    QString sWriteFile=m_sDbPath+QString("lava.sqlite");
-    QMessageBox msgQuest(QMessageBox::Question,"","");
-    msgQuest.setText(QString("Achtung, beim Laden einer Sicherung gehen alle aktuellen Daten unwiderruflich verloren.\nMöchten Sie wirklich eine Sicherung laden?"));
-    QMessageBox msgCritical(QMessageBox::Critical,"","");
-    msgCritical.setWindowTitle(QString("Fehler"));
-    msgQuest.setWindowTitle(QString("?"));
-    QPushButton * yesButton=msgQuest.addButton(QString("Ja"),QMessageBox::YesRole);
-    msgQuest.addButton(QString("Nein"),QMessageBox::NoRole);
-
-
-    //stop db-connection & timer
-    killTimer(m_iTimerId);//stop timmer
-    m_db.close_db();//close current db connection
-
-
     //check permission db-path
-    QFileInfo file_info(m_sDbPath);
+    QFileInfo file_info(sDbPathFolder);
     if(!file_info.permission(QFile::WriteUser))
-        sError=QString("Sie haben keine Schreibrechte für den  Ordner \"%1\"!").arg(m_sDbPath);//error
+        sError=QString::fromUtf8("Sie haben keine Schreibrechte für den  Ordner \"%1\"!").arg(sDbPathFolder);//error
     else
     {
         msgQuest.exec();//quest really overwrite db-file?
         if(msgQuest.clickedButton()==yesButton)
         {
-            sReadFile=QFileDialog::getOpenFileName(this,QString("Sicherung laden"),sPath);
+            //send exit-order to another clients
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_ORDER_QUIT,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
+
+            //close current db connection
+            m_db.close_db();
+
+            //-
+            sReadFile=QFileDialog::getOpenFileName(this,QString::fromUtf8("Sicherung laden"),sPath);
             if(sReadFile.length()>0)
             {//load button pressed?
 
-                if(!QFile::exists(sReadFile))//check give it read file?
-                    sError=QString("Die angegebene Datei existiert nicht!");//error
+                if(sReadFile==m_sDbPath)
+                    sError=QString::fromUtf8("Sie benutzen zur Zeit die Datenbankdatei \"%1\"!").arg(m_sDbPath);//error
                 else
                 {
-                    if(sReadFile==sWriteFile)
-                        sError=QString("Sie können die aktuelle Datenbankdatei nicht als Sicherung laden!");
+                    if(!QFile::exists(sReadFile))//check give it read file?
+                        sError=QString::fromUtf8("Die angegebene Datei existiert nicht!");//error
                     else
                     {
                         if(!m_db.open_db(sReadFile))//open db(read file) ok?
-                            sError=QString("Die angegebene Datei konnte nicht geöffnet werden!");//error
+                            sError=QString::fromUtf8("Die angegebene Datei konnte nicht geöffnet werden!");//error
                         else
                         {
                             b=m_db.check_database_file(); // is the read file a lava2 sqlite db file?
                             m_db.close_db();//close read db
                             if(!b)
-                                sError=QString("Die angegebene Datei ist keine LaVa2-Datenbankdatei!");//error
+                                sError=QString::fromUtf8("Die angegebene Datei ist keine LaVa2-Datenbankdatei!");//error
                             else
                             {
                                 //save current db-file
                                 if(QFile(sWriteTempFile).exists())//exists temp-file ? ->remove it
                                     QFile::remove(sWriteTempFile);
                                 if(!QFile::rename(sWriteFile,sWriteTempFile))//rename current db to temp
-                                    sError=QString("Fehler beim umbenennen der Datenbank-Datei!");
+                                    sError=QString::fromUtf8("Fehler beim umbenennen der Datenbank-Datei!");
                                 else
                                 {
                                     //copy file
                                     b=QFile::copy(sReadFile,sWriteFile);//copy ok?
                                     if(!b || !QFile::exists(sWriteFile))
                                     {//copy error
-                                        sError=QString("Fehler beim kopieren der Datenbank-Datei!");
+                                        sError=QString::fromUtf8("Fehler beim kopieren der Datenbank-Datei!");
                                         QFile::rename(sWriteTempFile,sWriteFile);//rename back
                                     }
                                     else//copy ok
                                         QFile::remove(sWriteTempFile);//delete temp file(old db-file)
 
                                     //save backup path
-                                    s=QString("");
+                                    s=QString::fromUtf8("");
                                     ls=sReadFile.split("/");
                                     for(int i=0;i<ls.count()-1;i++)
-                                        s+=ls[i]+QString("/");
-                                    settings.write(QString("BACKUP_PATH"),s);
+                                        s+=ls[i]+QString::fromUtf8("/");
+                                    settings.write(QString::fromUtf8("BACKUP_PATH"),s);
                                 }
                             }
                         }
@@ -4676,22 +4948,29 @@ bool MainWindow::menu_db_backup_load(void)
     {
         msgCritical.setText(sError);
         msgCritical.exec();
-        sError=QString("");
+        sError=QString::fromUtf8("");
     }
 
 
     //start all
     if(!m_db.open_db(sWriteFile))
-        sError=QString("Fehler beim öffnen der Datenbank,");
+        sError=QString::fromUtf8("Fehler beim Öffnen der Datenbank,");
     else
     {
         //check + update db-file
         if(!m_db.check_and_update_db_version())
-            sError=QString("Fehler beim update der Datenbankdatei auf Version %1,").arg(CURRENT_DB_VERSION);
+            sError=QString::fromUtf8("Fehler beim update der Datenbankdatei auf Version %1,").arg(CURRENT_DB_VERSION);
         else
         {
             //update widgets
+            fill_date_lists();
             fill_all_table(true);
+            fill_logbook_count();
+
+            //set last change in db -> another clients update db
+            s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_ALL,-1);// create string
+            m_LastDbChange.write_last_change(s);//write in db
+            //-
             startTimer(3000);
         }
     }
@@ -4700,443 +4979,12 @@ bool MainWindow::menu_db_backup_load(void)
     //check error after start
     if(sError.length()>0)
     {
-        sError+=QString("\ndas Programm hat keine Datenbankverbindung mehr!!!");
+        sError+=QString::fromUtf8("\ndas Programm hat keine Datenbankverbindung mehr!!!");
         msgCritical.setText(sError);
         msgCritical.exec();
     }
     //-
     ls.clear();
-    return true;
-}
-
-bool MainWindow::menu_db_import_from_lava1(void)
-{
-    if(!m_db.is_db_connect())
-        return false;
-
-    bool b2;
-    int i,j,k,l,x,a;
-    char c=0;
-    QDate dt;
-    QDateTime dtTi;
-    CMaker mk;
-    CWaregroup wg;
-    CArticle ar;
-    CLogbook lg;
-    COrdering ord;
-    QList<QString> lsStrMaker;
-    QList<QString> lsStrWaregroup;
-    QList<CLogbook> lsLogbook;
-    QList<CArticle> lsArticle;
-    QList<COrdering> lsOrdering;
-    QString s,s2,s3,s4;
-    QStringList strLi;
-    QStringList strLi2;
-    QList<int> lsInt;
-    QString sHome=QDir::homePath();
-    QFile file;
-    QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("Fehler"));
-    QString sFile=QFileDialog::getOpenFileName(this,QString("Daten aus LaVa 1 impotieren"),sHome);
-    if(sFile.length()>0)//press button load?
-    {
-        file.setFileName(sFile);
-        if(file.open(QIODevice::ReadOnly))
-        {
-            //check file(is a lava 1 data file?)
-            s=QString(file.readLine());
-            for(i=0;i<4 && s.length()>=4;i++)
-                c+=s[i].toAscii();
-            if(c!=115)
-            {
-                //not a lava 1 data file?
-                s=QString("Die angegebene Datei ist keine LaVa 1 Datendatei.");
-                msg.setText(s);
-                msg.exec();
-            }
-            else
-            {
-                //load
-                s=QString(file.readLine());//only date data
-                if(s.length()>0)
-                {
-                    s=QString(file.readLine());//begin data
-                    if(s.length()>0)
-                    {
-                        //decode
-                        for(i=0;i<s.length();i++)
-                        {
-                            c=s[i].toAscii();
-                            c-=15;
-                            s[i]=c;
-                        }
-
-                        //maker
-                        for(i=0,s2=QString("");i<s.length();i++)
-                        {
-                            if(s[i]=='@')
-                                break;
-                            s2.push_back(s[i]);
-                        }
-                        if(i<s.length())
-                        {
-                            strLi=s2.split("\n");
-                            if(strLi.count()>0)
-                            {
-                                if(strLi[0]==QString("@"))
-                                    strLi.removeFirst();
-                            }
-                            for(j=0;j<strLi.count();j++)
-                            {
-                                if(strLi[j].length()>0)
-                                    lsStrMaker.push_back(strLi[j]);
-                            }
-
-                            //waregroup
-                            for(s2=QString("");i<s.length()-1;i++)
-                            {
-                                if(s[i]=='@' && s[i+1]=='@')
-                                    break;
-                                s2.push_back(s[i]);
-                            }
-                            if(i<s.length())
-                            {
-                                strLi.clear();
-                                strLi=s2.split("\n");
-                                if(strLi.count()>0)
-                                {
-                                    if(strLi[0]==QString("@"))
-                                        strLi.removeFirst();
-                                }
-                                for(j=0;j<strLi.count();j++)
-                                {
-                                    if(strLi[j].length()>0)
-                                        lsStrWaregroup.push_back(strLi[j]);
-                                }
-                            }
-
-                            //article
-                            for(s2=QString("");i<s.length()-2;i++)
-                            {
-                                if(s[i]=='@' && s[i+1]=='@' && s[i+2]=='@')
-                                    break;
-                                s2.push_back(s[i]);
-                            }
-                            if(i<s.length())
-                            {
-                                strLi.clear();
-                                strLi=s2.split("\n");
-                                if(strLi.count()>0)
-                                {
-                                    if(strLi[0]==QString("@@"))
-                                        strLi.removeFirst();
-                                }
-                                for(j=0,k=0,a=0;j<strLi.count();j++,k++)
-                                {
-                                    if(k==0)//article number
-                                        ar.set_articlenumber(strLi[j]);
-                                    if(k==1)//article name
-                                        ar.set_name(strLi[j]);
-                                    if(k==2)//maker
-                                    {
-                                        for(l=0;l<lsStrMaker.count();l++)//search maker & set id
-                                        {
-                                            if(lsStrMaker[l]==strLi[j])
-                                                break;
-                                        }
-                                        if(l>=lsStrMaker.count())//not found?
-                                            ar.set_maker_id(-1);
-                                        else
-                                            ar.set_maker_id(l);
-                                    }
-                                    if(k==3)//waregroup
-                                    {
-                                        for(l=0;l<lsStrWaregroup.count();l++)//search waregroup & set id
-                                        {
-                                            if(lsStrWaregroup[l]==strLi[j])
-                                                break;
-                                        }
-                                        if(l>=lsStrWaregroup.count())//not found?
-                                            ar.set_waregroup_id(-1);
-                                        else
-                                            ar.set_waregroup_id(l);
-                                    }
-                                    if(k==4)//comment
-                                        ar.set_comment(strLi[j]);
-                                    if(k==5)//inventory + max inv
-                                    {
-                                        strLi2.clear();
-                                        strLi2=strLi[j].split(":");
-                                        if(strLi2.count()==2)//two elements inv & max inv
-                                        {
-                                            x=strLi2[0].toInt(&b2,10);
-                                            if(b2)
-                                            {//cast to int ok
-                                                ar.set_inventory((unsigned int)x);//inv
-                                                x=strLi2[1].toInt(&b2,10);
-                                                if(b2)
-                                                {//cast to int ok
-                                                    ar.set_max_inventory((unsigned int)x);//max inv
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if(k==6)//ordering
-                                    {
-                                        while(strLi[j]!=QString("@@"))
-                                        {
-                                            strLi2.clear();
-                                            strLi2=strLi[j].split(":");
-                                            for(l=0;l<strLi2.count();l++)
-                                            {
-                                                x=strLi2[l].toInt(&b2,10);
-                                                if(b2)//cast to int ok?
-                                                {
-                                                    if(l==0)//count
-                                                    {
-                                                        s3=QString("%1").arg(x);
-                                                        s3+=QString("x%1|").arg(a);
-                                                        ord.set_wares(s3);
-                                                    }
-                                                    //1,2,3 = Time from ordring
-                                                    if(l>=4 && l<=6)//date
-                                                    {
-                                                        if(l==4)
-                                                            dt.setDate(0,0,x);
-                                                        if(l==5)
-                                                            dt.setDate(0,x,dt.day());
-                                                        if(l==6)
-                                                        {
-                                                            dt.setDate(x,dt.month(),dt.day());
-                                                            ord.set_date(dt);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            j++;
-                                            if(j<strLi.count())//comment
-                                                ord.set_comment(strLi[j]);
-                                            j++;
-                                            if(ord.get_date().isValid()==true && ord.get_wares().length()>0)
-                                                lsOrdering.push_back(ord);
-                                            ord.clear();
-                                            if(j>=strLi.count())
-                                                break;
-                                        }
-                                    }
-                                    //-
-                                    if(k>=6)
-                                    {
-                                        k=-1;
-                                        if(ar.get_name()!=QString(""))
-                                            lsArticle.push_back(ar);
-                                        ar.clear();
-                                        a++;
-                                    }
-                                }
-
-                                //logbook
-                                for(s2=QString("");i<s.length()-1;i++)
-                                    s2.push_back(s[i]);
-                                strLi.clear();
-                                strLi=s2.split("\n");
-                                for(l=0;l<strLi.count();l++)
-                                {
-                                    if(strLi[l]!=QString("@@@"))
-                                    {
-                                        //convert time & date
-                                        s4=QString("");
-                                        s3=strLi[l];
-                                        lsInt.clear();
-                                        for(a=0;a<s3.count() && lsInt.count()<6;a++)
-                                        {
-                                            if(s3[a].toAscii()>='0' && s3[a].toAscii()<='9')//number?
-                                            {
-                                                s4.push_back(s3[a]);
-                                                continue;
-                                            }
-                                            //-
-                                            if(s4.length()>0)
-                                            {
-                                                x=s4.toInt(&b2,10);
-                                                if(b2)
-                                                    lsInt.push_back(x);
-                                                s4=QString("");
-                                            }
-                                        }
-                                        //-
-                                        s3=s3.remove(0,a+2);
-                                        for(a=0;a<s3.count();a++)
-                                        {
-                                            if(s3[a].toAscii()=='\'')
-                                                s3.remove(a,1);
-                                        }
-                                        //-
-                                        if(lsInt.count()>5)
-                                        {
-                                            dtTi=QDateTime(QDate(lsInt[5],lsInt[4],lsInt[3]),QTime(lsInt[0],lsInt[1],lsInt[2]));
-                                            if(dtTi.isValid())//really date time?
-                                            {
-                                                lg.set_date_time(dtTi);
-                                                lg.set_text(s3);
-                                                lsLogbook.push_back(lg);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            file.close();
-        }
-
-    }
-
-    //data import
-    //maker
-    for(i=0;i<lsStrMaker.count();i++)
-    {
-        j=0;
-        s3=QString("_import_");
-        s2=lsStrMaker[i];
-        s=QString("name = '%1'").arg(s2);
-        while(m_db.maker_get_count(s)>0)//search free name
-        {
-            s4=QString("%1").arg(j);
-            s=QString("name = '%1%2%3'").arg(s2,s3,s4);
-            j++;
-        }
-        if(j>0)
-            s2+=s3+s4;
-
-        //insert in db
-        mk.set_name(s2);
-        m_db.maker_add(mk);
-
-        //mark
-        if(lsStrMaker[i]!=s2)
-            lsStrMaker[i]=s2;
-    }
-
-    //waregroup
-    for(i=0;i<lsStrWaregroup.count();i++)
-    {
-        j=0;
-        s3=QString("_import_");
-        s2=lsStrWaregroup[i];
-        s=QString("name = '%1' AND parent_id=-1").arg(s2);
-        while(m_db.waregroup_get_count(s)>0)//search free name in root dir
-        {
-            s4=QString("%1").arg(j);
-            s=QString("name = '%1%2%3' AND parent_id=-1").arg(s2,s3,s4);
-            j++;
-        }
-        if(j>0)
-            s2+=s3+s4;
-
-        //insert in db
-        wg.set_name(s2);
-        m_db.waregroup_add(wg);
-
-        //mark
-        if(lsStrWaregroup[i]!=s2)
-            lsStrWaregroup[i]=s2;
-    }
-
-    //article
-    for(i=0;i<lsArticle.count();i++)
-    {
-        j=0;
-        s3=QString("_import_");
-        s2=lsArticle[i].get_name();
-        s=QString("name = '%1'").arg(s2);
-        while(m_db.article_get_count(s)>0)//search free name
-        {
-            s4=QString("%1").arg(j);
-            s=QString("name = '%1%2%3'").arg(s2,s3,s4);
-            j++;
-        }
-        if(j>0)
-            s2+=s3+s4;
-
-        //set maker id
-        l=-1;
-        if(lsArticle[i].get_maker_id() >=0 && lsArticle[i].get_maker_id() < lsStrMaker.count())
-            l=m_db.maker_get_id(lsStrMaker[lsArticle[i].get_maker_id()]);
-        if(l<=0)//not found
-            lsArticle[i].set_maker_id(-1);
-        else
-            lsArticle[i].set_maker_id(l);
-
-        //set waregroup id
-        l=-1;
-        if(lsArticle[i].get_waregroup_id() >=0 && lsArticle[i].get_waregroup_id() < lsStrWaregroup.count())
-            l=m_db.waregroup_get_id(lsStrWaregroup[lsArticle[i].get_waregroup_id()],-1);
-        if(l<=0)//not found
-            lsArticle[i].set_waregroup_id(-1);
-        else
-            lsArticle[i].set_waregroup_id(l);
-
-        //insert in db
-        lsArticle[i].set_name(s2);
-        m_db.article_add(lsArticle[i]);
-    }
-
-    //ordering
-    for(i=0;i<lsOrdering.count();i++)
-    {
-        s=lsOrdering[i].get_wares();
-        if(s.length()>0)
-            s.remove(s.count()-1,1);
-        strLi=s.split("x");
-        if(strLi.count()==2)//two elements count & article id?
-        {
-            x=strLi[0].toInt(&b2,10);
-            if(b2)//cast ok?
-            {
-                l=strLi[1].toInt(&b2,10);
-                if(b2)//cast ok?
-                {
-                    s2=QString("name = '%1'").arg(lsArticle[l].get_name());
-                    if(m_db.article_get_count(s2)>0)//article found?
-                    {
-                        a=m_db.article_get_id(lsArticle[l].get_name());
-                        if(a>0)
-                        {
-                            s2=QString("%1").arg(x);
-                            s2+=QString("x%1|").arg(a);
-                            lsOrdering[i].set_wares(s2);//set really id
-
-                            //insert in db
-                            m_db.ordering_add(lsOrdering[i]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    //logbook
-    for(i=0;i<lsLogbook.count();i++)
-    {
-        lsLogbook[i].set_type(LOGBOOK_TYPE_IMPORT);
-        m_db.logbook_add(lsLogbook[i]);
-    }
-
-    //update table's
-    fill_all_table(true);
-
-    //clear
-    lsInt.clear();
-    lsLogbook.clear();
-    lsOrdering.clear();
-    lsArticle.clear();
-    strLi.clear();
-    strLi2.clear();
-    lsStrMaker.clear();
-    lsStrWaregroup.clear();
     return true;
 }
 
@@ -5146,31 +4994,23 @@ bool MainWindow::menu_db_clear(void)
         return false;
 
     QMessageBox msg(QMessageBox::Question,"","");
-    msg.setWindowTitle(QString("?"));
-    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-    msg.addButton(QString("Nein"),QMessageBox::NoRole);
-    QString s=QString("Möchten Sie wirklich alle Daten der Datenbank löschen?\n(die Daten sind unwiderruflich verloren)");
+    msg.setWindowTitle(QString::fromUtf8("?"));
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
+    QString s=QString::fromUtf8("Möchten Sie wirklich alle Daten der Datenbank löschen?\n(die Daten sind unwiderruflich verloren)");
     msg.setText(s);
     msg.exec();
     if(msg.clickedButton()==yesButton)
     {
-        s=QString("DELETE FROM waregroup");
-        m_db.exec_sql(s);
-        s=QString("DELETE FROM maker");
-        m_db.exec_sql(s);
-        s=QString("DELETE FROM dealer");
-        m_db.exec_sql(s);
-        s=QString("DELETE FROM article");
-        m_db.exec_sql(s);
-        s=QString("DELETE FROM logbook");
-        m_db.exec_sql(s);
-        s=QString("DELETE FROM customer");
-        m_db.exec_sql(s);
-        s=QString("DELETE FROM ordering");
-        m_db.exec_sql(s);
-        s=QString("DELETE FROM trade");
-        m_db.exec_sql(s);
+        m_db.clear();//clear db
+
+        fill_date_lists();
         fill_all_table();
+        fill_logbook_count();
+
+        //set last change in db -> another clients update db
+        s=m_LastDbChange.create_last_change_string(LC_ACTION_UPDATE_ALL,-1);// create string
+        m_LastDbChange.write_last_change(s);//write in db
     }
     return true;
 }
@@ -5185,16 +5025,16 @@ bool MainWindow::menu_help(void)
 {
     QString s;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("Fehler"));
-    if(!QFile::exists(QCoreApplication::applicationDirPath()+QString("/doc/help_de.pdf")))//help file not found
+    msg.setWindowTitle(QString::fromUtf8("Fehler"));
+    if(!QFile::exists(QCoreApplication::applicationDirPath()+QString::fromUtf8("/doc/help_de.pdf")))//help file not found
     {
-        s=QString("Die Datei \"%1\" ist nicht vorhanden!").arg(QCoreApplication::applicationDirPath()+QString("/doc/help_de.pdf"));
+        s=QString::fromUtf8("Die Datei \"%1\" ist nicht vorhanden!").arg(QCoreApplication::applicationDirPath()+QString::fromUtf8("/doc/help_de.pdf"));
         msg.setText(s);
         msg.exec();
     }
     else
     {
-        QUrl url=QUrl::fromLocalFile(QCoreApplication::applicationDirPath()+QString("/doc/help_de.pdf"));
+        QUrl url=QUrl::fromLocalFile(QCoreApplication::applicationDirPath()+QString::fromUtf8("/doc/help_de.pdf"));
         QDesktopServices::openUrl(url);
     }
     return true;
@@ -5202,15 +5042,16 @@ bool MainWindow::menu_help(void)
 
 bool MainWindow::menu_about(void)
 {
-    QString s=QString("L A ger V erwaltungs A ssistent 2"
+    QString s=QString::fromUtf8("L A ger V erwaltungs A ssistent 2"
                       "\n(inventory management assistant)"
                       "\n------------------------------------------------------------------------"
                       "\ngeschrieben von/written by Robert Ewert - germany(Berlin)"
                       "\nrobert.ewert@gmail.com - www.robert.ewert.de.vu"
                       "\n------------------------------------------------------------------------"
                       "\nLizenz/licence: GNU GPL version 3"
+                      "\nwritten in QT 4.8 & QtCreator (C++)"
                       "\n------------------------------------------------------------------------");
-    s+=QString("\n\n%1").arg(VERSION);
+    s+=QString::fromUtf8("\n\n%1").arg(VERSION);
     QMessageBox msg(QMessageBox::Information,"","");
     msg.setWindowTitle("information:");
     msg.setText(s);
@@ -5221,7 +5062,7 @@ bool MainWindow::menu_about(void)
 bool MainWindow::menu_balance_list(void)
 {
     CDlgBalanceList dlg;
-    dlg.setWindowTitle(QString("Artikelsaldenliste"));
+    dlg.setWindowTitle(QString::fromUtf8("Artikelsaldenliste"));
     dlg.set_thread(&m_thread);
     dlg.exec();
     return true;
@@ -5230,16 +5071,16 @@ bool MainWindow::menu_balance_list(void)
 bool MainWindow::menu_article_under_warnlimit(void)
 {
     QList<QString> ls;
-    ls.push_back(QString("Artikelbezeichnung"));
-    ls.push_back(QString("1.Artikelnummer"));
-    ls.push_back(QString("2.Artikelnummer"));
-    ls.push_back(QString("Hersteller"));
-    ls.push_back(QString("Warengruppe"));
-    ls.push_back(QString("Bestand"));
-    ls.push_back(QString("Warnlimit"));
+    ls.push_back(QString::fromUtf8("Artikelbezeichnung"));
+    ls.push_back(QString::fromUtf8("1.Artikelnummer"));
+    ls.push_back(QString::fromUtf8("2.Artikelnummer"));
+    ls.push_back(QString::fromUtf8("Hersteller"));
+    ls.push_back(QString::fromUtf8("Warengruppe"));
+    ls.push_back(QString::fromUtf8("Bestand"));
+    ls.push_back(QString::fromUtf8("Warnlimit"));
 
     CDlgUniList dlg;
-    dlg.setWindowTitle(QString("Artikel unter Warnlimit"));
+    dlg.setWindowTitle(QString::fromUtf8("Artikel unter Warnlimit"));
     dlg.set_thread(&m_thread);
     dlg.set_type(TYPE_WARN_LIST);
     dlg.create_table_columns(ls);
@@ -5252,17 +5093,62 @@ bool MainWindow::menu_article_under_warnlimit(void)
 bool MainWindow::menu_inventorys_on_date(void)
 {
     QList<QString> ls;
-    ls.push_back(QString("Bestand"));
-    ls.push_back(QString("Artikelbezeichnung"));
-    ls.push_back(QString("1.Artikelnummer"));
-    ls.push_back(QString("2.Artikelnummer"));
-    ls.push_back(QString("Hersteller"));
-    ls.push_back(QString("Warengruppe"));
+    ls.push_back(QString::fromUtf8("Bestand"));
+    ls.push_back(QString::fromUtf8("Artikelbezeichnung"));
+    ls.push_back(QString::fromUtf8("1.Artikelnummer"));
+    ls.push_back(QString::fromUtf8("2.Artikelnummer"));
+    ls.push_back(QString::fromUtf8("Hersteller"));
+    ls.push_back(QString::fromUtf8("Warengruppe"));
 
     CDlgUniList dlg;
-    dlg.setWindowTitle(QString("Artikelbestände am folgenden Datum (Tagesabschluss)"));
+    dlg.setWindowTitle(QString::fromUtf8("Artikelbestände am folgenden Datum (Tagesabschluss)"));
     dlg.set_thread(&m_thread);
     dlg.set_type(TYPE_INVENTORYS_ON_DATE);
+    dlg.create_table_columns(ls);
+    dlg.update_table();
+    dlg.exec();
+    ls.clear();
+    return true;
+}
+
+bool MainWindow::menu_inventorys_list(void)
+{
+    QList<QString> ls;
+    ls.push_back(QString::fromUtf8("Bst./max.Kap."));
+    ls.push_back(QString::fromUtf8("Artikelbez."));
+    ls.push_back(QString::fromUtf8("1/2.Artikelnr."));
+    ls.push_back(QString::fromUtf8("Hersteller"));
+    ls.push_back(QString::fromUtf8("Warengruppe"));
+    ls.push_back(QString::fromUtf8("Standort/Kommentar"));
+    ls.push_back(QString::fromUtf8("akt.Bestand"));
+
+    CDlgUniList dlg;
+    dlg.setWindowTitle(QString::fromUtf8("Inventurliste"));
+    dlg.set_thread(&m_thread);
+    dlg.set_type(TYPE_INVENTORY_LIST);
+    dlg.create_table_columns(ls);
+    dlg.update_table();
+    dlg.exec();
+    ls.clear();
+    return true;
+}
+
+bool MainWindow::menu_list_value_of_goods(void)
+{
+    QList<QString> ls;
+    ls.push_back(QString::fromUtf8("Artikelbez."));
+    ls.push_back(QString::fromUtf8("Hersteller"));
+    ls.push_back(QString::fromUtf8("Warengruppe"));
+    ls.push_back(QString::fromUtf8("akt.Bestand"));
+    ls.push_back(QString::fromUtf8("EK / VK"));
+    ls.push_back(QString::fromUtf8("Wert (EK)"));
+    ls.push_back(QString::fromUtf8("Wert (VK)"));
+    ls.push_back(QString::fromUtf8("Marge"));
+
+    CDlgUniList dlg;
+    dlg.setWindowTitle(QString::fromUtf8("Warenwerte auf Lager"));
+    dlg.set_thread(&m_thread);
+    dlg.set_type(TYPE_LIST_VALUE_OF_GOODS);
     dlg.create_table_columns(ls);
     dlg.update_table();
     dlg.exec();
@@ -5273,11 +5159,11 @@ bool MainWindow::menu_inventorys_on_date(void)
 bool MainWindow::menu_print_logbook(void)
 {
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("!"));
-    msg.setText(QString("Es gibt an dem ausgewähltem Datum keine Logbucheinträge!"));
+    msg.setWindowTitle(QString::fromUtf8("!"));
+    msg.setText(QString::fromUtf8("Es gibt an dem ausgewähltem Datum keine Logbucheinträge!"));
     //-
     QList<QListWidgetItem*> ls=ui->listWidgetLogbookMaskDate->selectedItems();
-    QString s2,s=QString("Logbucheinträge vom ");
+    QString s2,s=QString::fromUtf8("Logbucheinträge vom ");
     QStringList lS;
     //-
     if(ls.count()>0)
@@ -5294,6 +5180,7 @@ bool MainWindow::menu_print_logbook(void)
     else
     {
         m_print_job.m_memory.clear();
+        m_print_job.set_type(PRINT_JOB_LIST);
         m_print_job.m_memory.set_listwidget(ui->listWidgetLogbook);
         print_open_preview(s);
     }
@@ -5302,48 +5189,48 @@ bool MainWindow::menu_print_logbook(void)
 
 bool MainWindow::menu_print_maker_selection(void)
 {
-    QString s("Herstellerinformation:");
-    QString sErr("Es wurde kein Hersteller ausgewählt!");
+    QString s=QString::fromUtf8("Herstellerinformation:");
+    QString sErr=QString::fromUtf8("Es wurde kein Hersteller ausgewählt!");
     print_list(s,sErr,ui->listWidgetMakerData,ui->tableWidgetMaker);
     return true;
 }
 
 bool MainWindow::menu_print_maker_overview(void)
 {
-    QString s("Herstellerübersicht:");
-    QString sErr("Die Tabelle mit den Herstellern ist leer!");
+    QString s=QString::fromUtf8("Herstellerübersicht:");
+    QString sErr=QString::fromUtf8("Die Tabelle mit den Herstellern ist leer!");
     print_table(s,sErr,ui->tableWidgetMaker);
     return true;
 }
 
 bool MainWindow::menu_print_dealer_selection(void)
 {
-    QString s("Händlerinformation:");
-    QString sErr("Es wurde kein Händler ausgewählt!");
+    QString s=QString::fromUtf8("Händlerinformation:");
+    QString sErr=QString::fromUtf8("Es wurde kein Händler ausgewählt!");
     print_list(s,sErr,ui->listWidgetDealerData,ui->tableWidgetDealer);
     return true;
 }
 
 bool MainWindow::menu_print_dealer_overview(void)
 {
-    QString s("Händlerübersicht:");
-    QString sErr("Die Tabelle mit den Händlern ist leer!");
+    QString s=QString::fromUtf8("Händlerübersicht:");
+    QString sErr=QString::fromUtf8("Die Tabelle mit den Händlern ist leer!");
     print_table(s,sErr,ui->tableWidgetDealer);
     return true;
 }
 
 bool MainWindow::menu_print_customer_selection(void)
 {
-    QString s("Kundeninformation:");
-    QString sErr("Es wurde kein Kunde ausgewählt!");
+    QString s=QString::fromUtf8("Kundeninformation:");
+    QString sErr=QString::fromUtf8("Es wurde kein Kunde ausgewählt!");
     print_list(s,sErr,ui->listWidgetCustomerData,ui->tableWidgetCustomer);
     return true;
 }
 
 bool MainWindow::menu_print_customer_overview(void)
 {
-    QString s("Kundenübersicht:");
-    QString sErr("Die Tabelle mit den Kunden ist leer!");
+    QString s=QString::fromUtf8("Kundenübersicht:");
+    QString sErr=QString::fromUtf8("Die Tabelle mit den Kunden ist leer!");
     print_table(s,sErr,ui->tableWidgetCustomer);
     return true;
 }
@@ -5351,8 +5238,8 @@ bool MainWindow::menu_print_customer_overview(void)
 bool MainWindow::menu_print_article_overview(void)
 {
     bool bAllColumns=true;
-    QString s("Artikelübersicht:");
-    QString sErr("Die Tabelle mit den Artrikeln ist leer!");
+    QString s=QString::fromUtf8("Artikelübersicht:");
+    QString sErr=QString::fromUtf8("Die Tabelle mit den Artrikeln ist leer!");
     print_table(s,sErr,ui->tableWidgetArticle,&bAllColumns);
     return true;
 }
@@ -5360,24 +5247,24 @@ bool MainWindow::menu_print_article_overview(void)
 bool MainWindow::menu_print_inventory_overview(void)
 {
     bool bAllColumns=true;
-    QString s("Lagerbestandsübersicht:");
-    QString sErr("Die Tabelle mit dem Lagerbestand ist leer!");
+    QString s=QString::fromUtf8("Lagerbestandsübersicht:");
+    QString sErr=QString::fromUtf8("Die Tabelle mit dem Lagerbestand ist leer!");
     print_table(s,sErr,ui->tableWidgetInventory,&bAllColumns);
     return true;
 }
 
 bool MainWindow::menu_print_ordering_overview(void)
 {
-    QString s("Bestellungen(Übersicht):");
-    QString sErr("Die Tabelle mit den Bestellungen ist leer!");
+    QString s=QString::fromUtf8("Bestellungen(Übersicht):");
+    QString sErr=QString::fromUtf8("Die Tabelle mit den Bestellungen ist leer!");
     print_table(s,sErr,ui->tableWidgetOrdering);
     return true;
 }
 
 bool MainWindow::menu_print_ordering_selection(void)
 {
-    QString s("Bestellung(Information):");
-    QString sErr("Es wurde keine Bestellung ausgewählt!");
+    QString s=QString::fromUtf8("Bestellung(Information):");
+    QString sErr=QString::fromUtf8("Es wurde keine Bestellung ausgewählt!");
     print_table_and_list(s,sErr,ui->tableWidgetOrderingWareslist,ui->tableWidgetOrdering);
     return true;
 }
@@ -5391,8 +5278,8 @@ bool MainWindow::menu_print_trade_overview(void)
         sDates=ls[0]->text();
 
     bool bAllColumns=true;
-    QString s=QString("Warenein-/ausgänge (%1):").arg(sDates);
-    QString sErr("Die Tabelle mit den Warenein-/ausgängen ist leer!");
+    QString s=QString::fromUtf8("Warenein-/ausgänge (%1):").arg(sDates);
+    QString sErr=QString::fromUtf8("Die Tabelle mit den Warenein-/ausgängen ist leer!");
     print_table(s,sErr,ui->tableWidgetTrade,&bAllColumns);
     return true;
 }
@@ -5403,17 +5290,27 @@ bool MainWindow::menu_print_trade_selection(void)
     QListWidget * pList=NULL;
     if(!trade_info_hide_status())
         pList=ui->listWidgetTradeInfo;
-    QString s("Warenein-/ausgang(Information):");
-    QString sErr("Es wurde kein Warenein-/ausgang ausgewählt!");
+    QString s=QString::fromUtf8("Warenein-/ausgang(Information):");
+    QString sErr=QString::fromUtf8("Es wurde kein Warenein-/ausgang ausgewählt!");
     print_table_and_list(s,sErr,ui->tableWidgetTradeWareslist,ui->tableWidgetTrade,pList,&bAllColumns);
     return true;
 }
 
 bool MainWindow::menu_print_waregroup(void)
 {
-    QString s("Warengruppen(Übersicht):");
-    QString sErr("Die Warengruppenübersicht ist leer!");
+    QString s=QString::fromUtf8("Warengruppen(Übersicht):");
+    QString sErr=QString::fromUtf8("Die Warengruppenübersicht ist leer!");
     print_tree(s,sErr,ui->treeWidgetWaregroup);
+    return true;
+}
+
+bool MainWindow::menu_barcode_overview(void)
+{
+    QString s=QString::fromUtf8("Artikelübersicht(Barcode):");
+
+    m_print_job.m_memory.clear();
+    m_print_job.set_type(PRINT_JOB_BARCODE_OVERVIEW);
+    print_open_preview(s);
     return true;
 }
 
@@ -5425,7 +5322,7 @@ bool MainWindow::menu_table_setting_inventory(void)
     CTableColumnsData tcdNew=tcd;
     QList<QString> lsHeaderNames;
     CInputDialogTableSetting dlg;
-    dlg.setWindowTitle(QString("Tabelleneinstellung - Lagerbestand - Übersicht"));
+    dlg.setWindowTitle(QString::fromUtf8("Tabelleneinstellung - Lagerbestand - Übersicht"));
     dlg.set_data(tcd);
 
     //dlg
@@ -5453,7 +5350,7 @@ bool MainWindow::menu_table_setting_article(void)
     CTableColumnsData tcdNew=tcd;
     QList<QString> lsHeaderNames;
     CInputDialogTableSetting dlg;
-    dlg.setWindowTitle(QString("Tabelleneinstellung - Artikel - Übersicht"));
+    dlg.setWindowTitle(QString::fromUtf8("Tabelleneinstellung - Artikel - Übersicht"));
     dlg.set_data(tcd);
 
     //dlg
@@ -5477,70 +5374,62 @@ bool MainWindow::menu_table_setting_article(void)
 bool MainWindow::menu_export_inventory(void)
 {
     CExportCSV exportCSV;
-    QString sTitle=QString("Lagerbestandsübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_inventory(this,ui->tableWidgetInventory,m_db,m_widgets,QString("Lagerbestände"),sTitle);
+    return exportCSV.write_data_inventory(this,ui->tableWidgetInventory,m_db,m_widgets,QString::fromUtf8("Lagerbestände"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_trade(void)
 {
-    QString si=QString("");
+    QString si=QString::fromUtf8("");
 
     //dates
     if(ui->listWidgetTradeMaskDate->currentRow()>=0 && ui->listWidgetTradeMaskDate->currentRow()<ui->listWidgetTradeMaskDate->count())//date selected
         si=ui->listWidgetTradeMaskDate->item(ui->listWidgetTradeMaskDate->currentRow())->text();
 
     CExportCSV exportCSV;
-    QString sTitle=QString("Warenein-/ausgangsübersicht %1 (erstellt %2)").arg(si,QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_trade(this,ui->tableWidgetTrade,m_db,m_widgets,QString("Warengänge"),sTitle);
+    return exportCSV.write_data_trade(this,ui->tableWidgetTrade,m_db,m_widgets,QString::fromUtf8("Warengänge"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_ordering(void)
 {
     CExportCSV exportCSV;
-    QString sTitle=QString("Bestellungenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_ordering(this,ui->tableWidgetOrdering,m_db,m_widgets,QString("Bestellungen"),sTitle);
+    return exportCSV.write_data_ordering(this,ui->tableWidgetOrdering,m_db,m_widgets,QString::fromUtf8("Bestellungen"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_article(void)
 {
     CExportCSV exportCSV;
-    QString sTitle=QString("Artikelübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_article(this,ui->tableWidgetArticle,m_db,QString("Artikel"),sTitle);
+    return exportCSV.write_data_article(this,ui->tableWidgetArticle,m_db,QString::fromUtf8("Artikel"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_waregroup(void)
 {
     CExportCSV exportCSV;
-    QString sTitle=QString("Warengruppenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_tree(this,ui->treeWidgetWaregroup,QString("Warengruppen"),sTitle);
+    return exportCSV.write_data_tree(this,ui->treeWidgetWaregroup,QString::fromUtf8("Warengruppen"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_maker(void)
 {
     CExportCSV exportCSV;
-    QString sTitle=QString("Herstellerübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_maker(this,ui->tableWidgetMaker,m_db,QString("Hersteller"),sTitle);
+    return exportCSV.write_data_maker(this,ui->tableWidgetMaker,m_db,QString::fromUtf8("Hersteller"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_dealer(void)
 {
     CExportCSV exportCSV;
-    QString sTitle=QString("Händlerübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_dealer(this,ui->tableWidgetDealer,m_db,QString("Händler"),sTitle);
+    return exportCSV.write_data_dealer(this,ui->tableWidgetDealer,m_db,QString::fromUtf8("Händler"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_customer(void)
 {
     CExportCSV exportCSV;
-    QString sTitle=QString("Kundenübersicht (erstellt %1)").arg(QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-    return exportCSV.write_data_customer(this,ui->tableWidgetCustomer,m_db,QString("Kunden"),sTitle);
+    return exportCSV.write_data_customer(this,ui->tableWidgetCustomer,m_db,QString::fromUtf8("Kunden"),QString::fromUtf8(""));
 }
 
 bool MainWindow::menu_export_logbook(void)
 {
     bool b=false;
     CExportCSV exportCSV;
-    QString s,sFile,sTitle;
+    QString s,sFile;
 
     //get mask datetext
     QList<QListWidgetItem *> ls=ui->listWidgetLogbookMaskDate->selectedItems();
@@ -5548,9 +5437,8 @@ bool MainWindow::menu_export_logbook(void)
     {
         s=ls[0]->text();
         s.resize(10);//copy only 10 char (dd.mm.yyyy)
-        sTitle=QString("Logbuchübersicht vom %1, %2 (erstellt %3)").arg(s,ui->comboBoxMaskLogbook->currentText(),QDateTime::currentDateTime().toString(QString("hh:mm:ss , dd.MM.yyyy")));
-        sFile=QString("logbuch-%1").arg(s);
-        exportCSV.write_data_list(this,ui->listWidgetLogbook,sFile,sTitle);
+        sFile=QString::fromUtf8("logbuch-%1").arg(s);
+        exportCSV.write_data_list(this,ui->listWidgetLogbook,sFile,QString::fromUtf8(""));
         b=true;
     }
     //-
@@ -5558,16 +5446,106 @@ bool MainWindow::menu_export_logbook(void)
     return b;
 }
 
+bool MainWindow::menu_import_from_csv(void)
+{
+    int type=0;
+    QString s;
+    CLogbook lg;
+    CInputDialogImport dlg;
+    dlg.set_thread(&m_thread);
+    if(dlg.exec())
+    {
+        //update table
+        switch(dlg.get_data_type())
+        {
+            case 0://article
+                article_mask_set();
+                maker_mask_set();
+                waregroup_update_tree();
+                inventory_mask_set();
+                type=LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG;
+                break;
+            case 1://dealer
+                dealer_mask_set();
+                type=LC_ACTION_UPDATE_DEALER;
+                break;
+            case 2://maker
+                maker_mask_set();
+                type=LC_ACTION_UPDATE_MAKER;
+                break;
+            case 3://customer
+                customer_mask_set();
+                type=LC_ACTION_UPDATE_CUSTOMER;
+                break;
+            case 4://waregroup
+                waregroup_update_tree();
+                type=LC_ACTION_UPDATE_WAREGROUP;
+                break;
+            default:
+                break;
+        }
+
+        //logbook
+        lg.set_type(LOGBOOK_TYPE_OTHER);
+        lg.set_date_time(QDateTime::currentDateTime());
+        s=QString::fromUtf8("Daten aus der Datei \"%1\" in die Datenbank importiert").arg(dlg.get_source_file());
+        lg.set_text(s);
+        logbook_insert(lg);
+
+        //set last change in db -> another clients update table
+        s=m_LastDbChange.create_last_change_string(type,-1);// create string
+        m_LastDbChange.write_last_change(s);//write in db
+    }
+    return true;
+}
+
 
 //print ---------------------------------------------------------------------------------------------------------------------------------
 bool MainWindow::print_open_preview(QString sFirstRow)
 {
-    m_print_job.m_sFirstRow=sFirstRow;
+    bool b2,b=true;
+    QStringList ls;
+    QList<int> lsInt;
+    qreal margin_left=15,margin_right=10,margin_top=10,margin_bottom=10;
+    CSettings settings;
     QPrinter printer(QPrinter::PrinterResolution);
-    bool b=true;
+    QString sDocName,sOrientation,sMargins,sOriUpdate,sMarUpdate,sPrinter,sPriUpdate;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("Fehler"));
-    msg.setText(QString("Dem Betriebssystem ist kein Drucker bekannt."));
+    msg.setWindowTitle(QString::fromUtf8("Fehler"));
+    msg.setText(QString::fromUtf8("Dem Betriebssystem ist kein Drucker bekannt."));
+
+
+    m_print_job.m_sFirstRow=sFirstRow;
+
+    //doc-name
+    ls=sFirstRow.split(QString(" "));
+    if(ls.count()>0)
+        sDocName=QString("LaVa 2 - %1").arg(ls[0]);
+    else
+        sDocName=QString("LaVa 2");
+    sDocName.replace(QString(":"),QString(""));
+    ls.clear();
+
+    //load settings
+    b2=settings.load("PRINT_DIALOG_MARGINS",sMargins);
+    if(b2)
+    {
+        b2=settings.cast_string_to_int_list(sMargins,lsInt);
+        if(lsInt.count()>=4)
+        {
+            margin_left=lsInt[0];
+            margin_top=lsInt[1];
+            margin_right=lsInt[2];
+            margin_bottom=lsInt[3];
+        }
+    }
+
+    if(!settings.load("PRINT_DIALOG_ORIENTATION",sOrientation))
+        sOrientation=QString::fromUtf8("0");//error set default
+
+    settings.load("PRINT_DIALOG_PRINTER",sPrinter);
+
+    //---
     if(!printer.isValid())
     {
         b=false;
@@ -5575,17 +5553,65 @@ bool MainWindow::print_open_preview(QString sFirstRow)
     }
     else
     {
-        printer.setDocName(QString("LaVa 2"));
-        printer.setFullPage( true );
+        printer.setDocName(sDocName);
         QPrintPreviewDialog previewDlg(&printer, this);
-        previewDlg.setWindowTitle(QString("Druckvorschau"));
+        previewDlg.setWindowTitle(QString::fromUtf8("Druckvorschau"));
         previewDlg.setWindowFlags ( Qt::Window );
         connect(&previewDlg, SIGNAL(paintRequested(QPrinter* )), SLOT(print(QPrinter* )));
         previewDlg.setMinimumSize(800,500);
-        printer.setPageMargins((qreal)5,(qreal)5,(qreal)5,(qreal)5,QPrinter::Millimeter);
-        previewDlg.showMaximized();
-        previewDlg.exec();
+
+        //printer
+        if(sPrinter.length()>0)
+        {
+            printer.setPrinterName(sPrinter);
+            if(!printer.isValid())
+            {//error, last selected printer is not online
+                msg.setText(QString("Der zuletzt benutzte Drucker ist nicht erreichbar, es wird der Standarddrucker gesetzt."));
+                msg.exec();
+                printer.setPrinterName(QString(""));//set default printer
+            }
+        }
+
+        if(b)
+        {
+            //orientation
+            if(sOrientation==QString::fromUtf8("0"))
+                printer.setOrientation(QPrinter::Portrait);
+            else
+                printer.setOrientation(QPrinter::Landscape);
+
+            //margins
+            printer.setPageMargins(margin_left ,margin_top ,margin_right ,margin_bottom ,QPrinter::Millimeter);
+
+            //show
+            previewDlg.showMaximized();
+            previewDlg.exec();
+
+            //get settings
+            printer.getPageMargins(&margin_left ,&margin_top ,&margin_right ,&margin_bottom ,QPrinter::Millimeter); //margins
+            sMarUpdate=QString("%1,").arg(margin_left);
+            sMarUpdate+=QString("%1,").arg(margin_top);
+            sMarUpdate+=QString("%1,").arg(margin_right);
+            sMarUpdate+=QString("%1").arg(margin_bottom);
+
+            if(printer.orientation()==0)//orientation
+                sOriUpdate=QString("0");
+            else
+                sOriUpdate=QString("1");
+
+            sPriUpdate=printer.printerName();
+
+            //update settings
+            if(sOrientation!=sOriUpdate && sOriUpdate.length()>0)
+                settings.write(QString("PRINT_DIALOG_ORIENTATION"),sOriUpdate);
+            if(sMargins!=sMarUpdate && sMarUpdate.length()>0)
+                settings.write(QString("PRINT_DIALOG_MARGINS"),sMarUpdate);
+            if(sPrinter!=sPriUpdate && sPriUpdate.length()>0)
+                settings.write(QString("PRINT_DIALOG_PRINTER"),sPriUpdate);
+        }
     }
+    //-
+    lsInt.clear();
     return b;
 }
 
@@ -5607,6 +5633,8 @@ bool MainWindow::print(QPrinter * pPrinter)
             b=m_print_job.print_tree();
         if(type==PRINT_JOB_TABLE_AND_LIST)//print table + list
             b=m_print_job.print_table_and_list();
+        if(type==PRINT_JOB_BARCODE_OVERVIEW)//barcode overview
+            b=m_print_job.print_barcode_overview();
     }
     return b;
 }
@@ -5615,19 +5643,28 @@ bool MainWindow::print_table(QString sPageTitle, QString sError, QTableWidget * 
 {
     if(pTable==NULL)
         return false;
-
+    //-
+    bool ok;
+    QString s;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("!"));
+    msg.setWindowTitle(QString::fromUtf8("!"));
     msg.setText(sError);
     //-
     if(pTable->rowCount()<=0)
         msg.exec();// error nothing in table
     else
     {
-        m_print_job.m_memory.clear();
-        m_print_job.m_memory.set_tablewidget(pTable);
-        m_print_job.m_memory.set_bool(pAllColumns);
-        print_open_preview(sPageTitle);
+        //document title change
+        s=QInputDialog::getText(this,QString::fromUtf8("Überschrift ändern"),QString::fromUtf8("Überschrift:\t\t"),QLineEdit::Normal,sPageTitle,&ok);
+        if(ok)
+        {
+            sPageTitle=s;
+            m_print_job.m_memory.clear();
+            m_print_job.set_type(PRINT_JOB_TABLE);
+            m_print_job.m_memory.set_tablewidget(pTable);
+            m_print_job.m_memory.set_bool(pAllColumns);
+            print_open_preview(sPageTitle);
+        }
     }
     return true;
 }
@@ -5636,9 +5673,11 @@ bool MainWindow::print_list(QString sPageTitle, QString sError, QListWidget * pL
 {
     if(pList==NULL || pTable==NULL)
         return false;
-
+    //-
+    bool ok;
+    QString s;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("!"));
+    msg.setWindowTitle(QString::fromUtf8("!"));
     msg.setText(sError);
     //-
     QList<QTableWidgetItem*> ls=pTable->selectedItems();
@@ -5646,11 +5685,18 @@ bool MainWindow::print_list(QString sPageTitle, QString sError, QListWidget * pL
         msg.exec();// error nothing selected
     else
     {
-        ls.clear();
-        m_print_job.m_memory.clear();
-        m_print_job.m_memory.set_listwidget(pList);
-        print_open_preview(sPageTitle);
+        //document title change
+        s=QInputDialog::getText(this,QString::fromUtf8("Überschrift ändern"),QString::fromUtf8("Überschrift:\t\t"),QLineEdit::Normal,sPageTitle,&ok);
+        if(ok)
+        {
+            sPageTitle=s;
+            m_print_job.m_memory.clear();
+            m_print_job.set_type(PRINT_JOB_LIST);
+            m_print_job.m_memory.set_listwidget(pList);
+            print_open_preview(sPageTitle);
+        }
     }
+        ls.clear();
     return true;
 }
 
@@ -5658,18 +5704,27 @@ bool MainWindow::print_tree(QString sPageTitle, QString sError, QTreeWidget * pT
 {
     if(pTree==NULL)
         return false;
-
+    //-
+    bool ok;
+    QString s;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("!"));
+    msg.setWindowTitle(QString::fromUtf8("!"));
     msg.setText(sError);
     //-
     if(pTree->topLevelItemCount()<=0)
         msg.exec();// error nothing items at tree
     else
     {
-        m_print_job.m_memory.clear();
-        m_print_job.m_memory.set_treewidget(pTree);
-        print_open_preview(sPageTitle);
+        //document title change
+        s=QInputDialog::getText(this,QString::fromUtf8("Überschrift ändern"),QString::fromUtf8("Überschrift:\t\t"),QLineEdit::Normal,sPageTitle,&ok);
+        if(ok)
+        {
+            sPageTitle=s;
+            m_print_job.m_memory.clear();
+            m_print_job.set_type(PRINT_JOB_TREE);
+            m_print_job.m_memory.set_treewidget(pTree);
+            print_open_preview(sPageTitle);
+        }
     }
     return true;
 }
@@ -5678,21 +5733,30 @@ bool MainWindow::print_table_and_list(QString sPageTitle, QString sError, QTable
 {
     if(pTableData==NULL || pTableInfo==NULL)
         return false;
-
+    //-
+    bool ok;
+    QString s;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("!"));
+    msg.setWindowTitle(QString::fromUtf8("!"));
     msg.setText(sError);
     //-
     if(pTableData->rowCount()<=0)
         msg.exec();// error nothing in table
     else
     {
-        m_print_job.m_memory.clear();
-        m_print_job.m_memory.set_tablewidget(pTableData);
-        m_print_job.m_memory.set_tablewidget2(pTableInfo);
-        m_print_job.m_memory.set_bool(pAllColumns);
-        m_print_job.m_memory.set_listwidget(pList);
-        print_open_preview(sPageTitle);
+        //document title change
+        s=QInputDialog::getText(this,QString::fromUtf8("Überschrift ändern"),QString::fromUtf8("Überschrift:\t\t"),QLineEdit::Normal,sPageTitle,&ok);
+        if(ok)
+        {
+            sPageTitle=s;
+            m_print_job.m_memory.clear();
+            m_print_job.set_type(PRINT_JOB_TABLE_AND_LIST);
+            m_print_job.m_memory.set_tablewidget(pTableData);
+            m_print_job.m_memory.set_tablewidget2(pTableInfo);
+            m_print_job.m_memory.set_bool(pAllColumns);
+            m_print_job.m_memory.set_listwidget(pList);
+            print_open_preview(sPageTitle);
+        }
     }
     return true;
 }

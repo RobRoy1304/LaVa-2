@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ CInputdialogBrowseWaregroup::CInputdialogBrowseWaregroup(QWidget *parent) :
     m_ui->treeWidget->hideColumn(2);//id column
     m_ui->treeWidget->hideColumn(3);//parent_id column
     m_ui->treeWidget->setSortingEnabled(false);
+    m_ui->treeWidget->setColumnWidth(0,300);
+    m_ui->treeWidget->setColumnWidth(1,300);
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -57,7 +59,7 @@ bool CInputdialogBrowseWaregroup::settings(bool bUpdate)
     bool b;
     CSettings settings;
     QList<QString> lsSType,lsSValue,lsSUpdateType,lsSUpdateValue;
-    lsSType.push_back(QString("DLG_WAREGROUP_TREE_BROWSE"));
+    lsSType.push_back(QString::fromUtf8("DLG_WAREGROUP_TREE_BROWSE"));
     //-
     b=settings.load(lsSType,lsSValue);//load all settings
     if(b)
@@ -107,7 +109,7 @@ bool CInputdialogBrowseWaregroup::get_selected_waregroup(QString & s, int & id)
         return false;
 
     bool b=false;
-    s=QString("");
+    s=QString::fromUtf8("");
     QList <QTreeWidgetItem*> ls=m_ui->treeWidget->selectedItems();
     if(ls.count()==0)
         id=-1;

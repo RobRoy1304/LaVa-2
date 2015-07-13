@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,9 +28,16 @@ CInputDlgOrderingIncoming::CInputDlgOrderingIncoming(QWidget *parent) :
     m_dtMark=QDate::currentDate();
     //-
     ui->pushButtonEdit->setEnabled(false);
-    ui->buttonBox->setEnabled(false);
+    ui->pushButtonOk->setEnabled(false);
     settings(false);//load & set settings
     ui->dateEdit->setDate(QDate().currentDate());
+
+    //disable auto default buttons
+    ui->pushButtonCancel->setAutoDefault(false);
+    ui->pushButtonEdit->setAutoDefault(false);
+    ui->pushButtonMaskSet->setAutoDefault(false);
+    ui->pushButtonNomination->setAutoDefault(false);
+    ui->pushButtonOk->setAutoDefault(false);
 
     //date
     QDate dt=QDate().currentDate();
@@ -42,7 +49,7 @@ CInputDlgOrderingIncoming::CInputDlgOrderingIncoming(QWidget *parent) :
     ui->tableWidgetWares->setContextMenuPolicy(Qt::CustomContextMenu);
     m_pContextMenu=new QMenu(QString("context_default"),this);
     if(m_pContextMenu!=NULL)
-        m_pContextMenu->addAction(QString("Anzahl eingegangener Artikel ändern"));
+        m_pContextMenu->addAction(QString::fromUtf8("Anzahl eingegangener Artikel ändern"));
 
     //connects context menus
     connect(m_pContextMenu,SIGNAL(triggered(QAction*)),this,SLOT(receiv_context_menu(QAction*)));
@@ -60,6 +67,8 @@ CInputDlgOrderingIncoming::CInputDlgOrderingIncoming(QWidget *parent) :
     connect(ui->lineEditMask,SIGNAL(textChanged(QString)),this,SLOT(mask_edit()));
     connect(ui->comboBoxMask,SIGNAL(currentIndexChanged(QString)),this,SLOT(mask_edit()));
     connect(ui->pushButtonMaskSet,SIGNAL(clicked()),this,SLOT(mask_changed()));
+    connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
+    connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -67,6 +76,7 @@ CInputDlgOrderingIncoming::CInputDlgOrderingIncoming(QWidget *parent) :
 
 CInputDlgOrderingIncoming::~CInputDlgOrderingIncoming()
 {
+    killTimer(m_iTimerId);
     settings(true);//save settings if update
 
     //context menu's
@@ -76,24 +86,72 @@ CInputDlgOrderingIncoming::~CInputDlgOrderingIncoming()
     delete ui;
 }
 
-void CInputDlgOrderingIncoming::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-
 void CInputDlgOrderingIncoming::keyPressEvent(QKeyEvent * event)
 {
     if(event->key()==Qt::Key_Enter || event->key()==Qt::Key_Return)
     {
         if(ui->lineEditMask->hasFocus())
             mask_changed();
+    }
+}
+
+void CInputDlgOrderingIncoming::timerEvent(QTimerEvent *event)
+{
+    bool b=false;
+    QString s;
+    int id,type;
+    //-
+    if(event!=NULL && m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL && m_pThread->m_pWidgets!=NULL && m_LastDbChange.check_update_last_change())
+        {//db change from another client?
+            s=m_LastDbChange.get_last_change();//get fom db
+            if(m_LastDbChange.get_data_from_last_change_string(type,id,s))//split string
+            {
+                //orderings update?
+                if(type==LC_ACTION_UPDATE_ORDERING || type==LC_ACTION_UPDATE_ORDERING_DEALER || type==LC_ACTION_UPDATE_ALL )
+                {
+                    fill_ordering_table();
+                    b=true;
+                }
+
+                //article's update?
+                if(type==LC_ACTION_UPDATE_MAKER || type==LC_ACTION_UPDATE_WAREGROUP || type==LC_ACTION_UPDATE_ARTICLE_INV
+                        || type==LC_ACTION_UPDATE_ALL || type==LC_ACTION_UPDATE_INV_ORD_TRADE_ARTICLE_MK_WG || type==LC_ACTION_UPDATE_INVENTORY_TRADE)
+                {//update all rows
+                    fill_wares_table();
+                    b=true;
+                }
+            }
+        }
+    }
+
+    //message in window title, if another client edit db
+    static QString mark_title=QString("");
+    static int counter=0;
+    static bool mark_message_on=false;
+    //-
+    if(b)
+    {
+        if(!mark_message_on)//message not on screen
+        {
+            counter=3;
+            mark_message_on=true;
+            mark_title=windowTitle();
+            s=mark_title+QString::fromUtf8(" - Datenbank wurde von einer anderen Programminstanz verändert");
+            setWindowTitle(s);
+        }
+    }
+
+    //counter run?
+    if(mark_message_on)
+    {
+        counter-=1;
+        if(counter<0)
+        {
+            setWindowTitle(mark_title);
+            mark_message_on=false;
+        }
     }
 }
 
@@ -313,6 +371,12 @@ bool CInputDlgOrderingIncoming::init(void)
 bool CInputDlgOrderingIncoming::set_thread(CWorkThread * pThread)
 {
     m_pThread=pThread;
+    //set db in class CLastDBChange
+    if(pThread!=NULL)
+    {
+        m_LastDbChange.set_db(pThread->m_pDbInterface);
+        m_iTimerId=startTimer(1000);//start timer
+    }
     return true;
 }
 
@@ -344,16 +408,16 @@ bool CInputDlgOrderingIncoming::check_user_input(void)
         ls=ui->tableWidgetOrdering->selectedItems();
         if(ls.count()<=0)
         {
-            sError=QString("Fehler: keine Bestellung ausgewählt");
+            sError=QString::fromUtf8("Fehler: keine Bestellung ausgewählt");
             b=false;//error
         }
     }
     //-
     ui->textBrowser->setText(sError);
-    ui->buttonBox->setEnabled(b);
+    ui->pushButtonOk->setEnabled(b);
     memory.clear();
     ls.clear();
-    return true;
+    return b;
 }
 
 bool CInputDlgOrderingIncoming::fill_ordering_table(void)
@@ -506,7 +570,7 @@ bool CInputDlgOrderingIncoming::ware_count_edit(void)
                 if(ar.get_unit().length()>0)//unit?
                     s+=QString("(%1)").arg(ar.get_unit());
                 s+=QString(":");
-                iNewCount=QInputDialog::getInt(this,QString("Anzahl ändern"),s,iCount,0,99999,1,&b);
+                iNewCount=QInputDialog::getInt(this,QString::fromUtf8("Anzahl ändern"),s,iCount,0,9999999,1,&b);
                 if(b)
                 {//pressed ok
 
@@ -529,11 +593,11 @@ bool CInputDlgOrderingIncoming::ware_count_edit(void)
                                 inv=ar.get_inventory();
                                 if(inv+iNewCount > max_inv)
                                 {
-                                    sError=QString("Warnung: Die maximale Kapazität des Artikels \"%1\" ").arg(ar.get_name());
-                                    sError+=QString("wird um \"%1").arg((max_inv-(inv+iNewCount))*-1);
+                                    sError=QString::fromUtf8("Warnung: Die maximale Kapazität des Artikels \"%1\" ").arg(ar.get_name());
+                                    sError+=QString::fromUtf8("wird um \"%1").arg((max_inv-(inv+iNewCount))*-1);
                                     if(ar.get_unit().length()>0)
-                                        sError+=QString(" %1").arg(ar.get_unit());
-                                    sError+=QString("\" überschritten.");
+                                        sError+=QString::fromUtf8(" %1").arg(ar.get_unit());
+                                    sError+=QString::fromUtf8("\" überschritten.");
                                 }
                             }
                         }
@@ -557,7 +621,7 @@ bool CInputDlgOrderingIncoming::ware_count_edit(void)
     }
     //-
     ui->textBrowser->insertPlainText(sError);
-    ui->buttonBox->setEnabled(bButton);
+    ui->pushButtonOk->setEnabled(bButton);
     ls.clear();
 
     //unblock signals (sort)
@@ -578,7 +642,6 @@ bool CInputDlgOrderingIncoming::get_data(CTrade & trade, int & iOrderingId, bool
     QDate dt;
     int c1,c2;
     QString s,sDealerName,sCount1,sCount2,sId,s2;
-    QList <QTableWidgetItem*> ls;
     QTableWidgetItem * pItem=NULL;
     CPointerMemory memory;
     memory.set_string(&s);
@@ -667,10 +730,47 @@ bool CInputDlgOrderingIncoming::get_data(CTrade & trade, int & iOrderingId, bool
     trade.set_type(TYPE_ORDERING_INCOMING);
     trade.set_canceled(false);
     //-booking number-
-    s=QString("");
-    m_pThread->set_work(WORK_TRADE_GET_NEXT_FREE_BOOKING_NUMBER,&memory);
-    if(s.length()>0)//found?
-        trade.set_booking_number(s);
+    s=ui->lineEditBookingnumber->text();
+    trade.set_booking_number(s);
     //-
     return true;
+}
+
+
+void CInputDlgOrderingIncoming::press_ok(void)
+{
+    bool b,bOk=true;
+    CTrade tr;
+    int o_id;
+    QString s;
+    QMessageBox msg(QMessageBox::Information,"","");
+    msg.setWindowTitle("!");
+    msg.setText(QString::fromUtf8("Artikel aus der Warenliste wurde(n) von einer anderen Programminstanz gelöscht!"));
+
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL)
+        {
+            if(check_user_input())
+            {
+                //check article in list -> another client delete?
+                get_data(tr,o_id,b);
+                if(!m_pThread->m_pDbInterface->check_article_at_wares(tr.get_wares(),s))
+                {//error article was delete
+                    msg.exec();
+                    bOk=false;
+                }
+                //-
+                if(bOk)
+                    done(1);
+                else
+                    close();
+            }
+        }
+    }
+}
+
+void CInputDlgOrderingIncoming::press_cancel(void)
+{
+    close();
 }

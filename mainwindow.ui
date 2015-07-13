@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>600</height>
+    <height>570</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>1000</width>
-    <height>600</height>
+    <height>570</height>
    </size>
   </property>
   <property name="font">
@@ -25,7 +25,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>LaVa 2</string>
+   <string>lava2</string>
   </property>
   <property name="windowIcon">
    <iconset resource="lava2res.qrc">
@@ -2621,7 +2621,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuInfo">
@@ -2661,6 +2661,7 @@
       <string>Artikel</string>
      </property>
      <addaction name="menuPrinterArticleOView"/>
+     <addaction name="menuBarcodeOverview"/>
     </widget>
     <widget class="QMenu" name="menuPrinterMaker">
      <property name="title">
@@ -2719,14 +2720,33 @@
     <addaction name="menuListBalanceList"/>
     <addaction name="menuListUnderWarnLimit"/>
     <addaction name="menuListInventoryDate"/>
+    <addaction name="menuListInv"/>
+    <addaction name="menuListValueOfGoods"/>
    </widget>
    <widget class="QMenu" name="menuDatabase">
     <property name="title">
      <string>Datenbank</string>
     </property>
+    <widget class="QMenu" name="menuExport">
+     <property name="title">
+      <string>Daten als CSV-Datei exportieren</string>
+     </property>
+     <addaction name="menuExportInventory"/>
+     <addaction name="menuExportTrade"/>
+     <addaction name="menuExportOrdering"/>
+     <addaction name="menuExportArticle"/>
+     <addaction name="menuExportWaregroup"/>
+     <addaction name="menuExportMaker"/>
+     <addaction name="menuExportDealer"/>
+     <addaction name="menuExportCustomer"/>
+     <addaction name="menuExportLogbook"/>
+    </widget>
     <addaction name="menuDbBackupCreate"/>
     <addaction name="menuDbBackupLoad"/>
-    <addaction name="menuDbImportFromLava1"/>
+    <addaction name="separator"/>
+    <addaction name="menuExport"/>
+    <addaction name="menuImportFromCSV"/>
+    <addaction name="separator"/>
     <addaction name="menuDbClear"/>
    </widget>
    <widget class="QMenu" name="menuSetting">
@@ -2736,26 +2756,11 @@
     <addaction name="menuSettingInventory"/>
     <addaction name="menuSettingArticle"/>
    </widget>
-   <widget class="QMenu" name="menuExport">
-    <property name="title">
-     <string>Export</string>
-    </property>
-    <addaction name="menuExportInventory"/>
-    <addaction name="menuExportTrade"/>
-    <addaction name="menuExportOrdering"/>
-    <addaction name="menuExportArticle"/>
-    <addaction name="menuExportWaregroup"/>
-    <addaction name="menuExportMaker"/>
-    <addaction name="menuExportDealer"/>
-    <addaction name="menuExportCustomer"/>
-    <addaction name="menuExportLogbook"/>
-   </widget>
    <addaction name="menuInfo"/>
    <addaction name="menuPrinter"/>
    <addaction name="menuList"/>
    <addaction name="menuDatabase"/>
    <addaction name="menuSetting"/>
-   <addaction name="menuExport"/>
    <addaction name="menuOver"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -2874,11 +2879,6 @@
     <string>Sicherung laden</string>
    </property>
   </action>
-  <action name="menuDbImportFromLava1">
-   <property name="text">
-    <string>Daten aus LaVa1 importieren</string>
-   </property>
-  </action>
   <action name="menuDbClear">
    <property name="text">
     <string>Datenbank leeren</string>
@@ -2942,6 +2942,31 @@
   <action name="menuExportTrade">
    <property name="text">
     <string>Warenein-/ausgang</string>
+   </property>
+  </action>
+  <action name="menuImportFromCSV">
+   <property name="text">
+    <string>Daten aus CSV-Datei importieren</string>
+   </property>
+  </action>
+  <action name="menuDbImportFromLavaOne">
+   <property name="text">
+    <string>Daten aus LaVa 1 importieren</string>
+   </property>
+  </action>
+  <action name="menuListInv">
+   <property name="text">
+    <string>Inventurliste</string>
+   </property>
+  </action>
+  <action name="menuBarcodeOverview">
+   <property name="text">
+    <string>Barcode Übersicht</string>
+   </property>
+  </action>
+  <action name="menuListValueOfGoods">
+   <property name="text">
+    <string>Warenwerte auf Lager</string>
    </property>
   </action>
  </widget>

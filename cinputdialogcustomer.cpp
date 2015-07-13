@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,14 +24,21 @@ CInputDialogCustomer::CInputDialogCustomer(QWidget *parent) :
     m_ui(new Ui::CInputDialogCustomer)
 {
     m_ui->setupUi(this);
-
     m_ui->lineEditCustomerNumber->setFocus();
+    m_ui->pushButtonOk->setEnabled(false);
     m_pThread=NULL;
+    m_iMarkId=-1;
     m_sCustomerNumber=QString("");
-    m_ui->buttonBox->setEnabled(false);
+
+    //disable auto default buttons
+    m_ui->pushButtonCancel->setAutoDefault(false);
+    m_ui->pushButtonNomination->setAutoDefault(false);
+    m_ui->pushButtonOk->setAutoDefault(false);
     //-
     connect(m_ui->pushButtonNomination,SIGNAL(clicked()),this,SLOT(customer_number_nomination()));
     connect(m_ui->lineEditCustomerNumber,SIGNAL(textChanged(QString)),this,SLOT(customer_number_changed(QString)));
+    connect(m_ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
+    connect(m_ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -40,18 +47,6 @@ CInputDialogCustomer::CInputDialogCustomer(QWidget *parent) :
 CInputDialogCustomer::~CInputDialogCustomer()
 {
     delete m_ui;
-}
-
-void CInputDialogCustomer::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
 }
 
 bool CInputDialogCustomer::get_data(CCustomer & cu)
@@ -66,11 +61,18 @@ bool CInputDialogCustomer::get_data(CCustomer & cu)
     cu.set_callnumber(m_ui->lineEditCallnumber->text());
     cu.set_faxnumber(m_ui->lineEditFaxnumber->text());
     cu.set_email(m_ui->lineEditEmail->text());
+    cu.set_id(m_iMarkId);
     return true;
 }
 
 bool CInputDialogCustomer::set_data(CCustomer & cu)
 {
+    //for edit
+    m_iMarkId=cu.get_id();
+    m_sMarkName=cu.get_name();
+
+    m_ui->pushButtonOk->setText(QString::fromUtf8("Änderung(en) anwenden"));
+    m_ui->pushButtonOk->setEnabled(true);
     m_ui->lineEditCity->setText(cu.get_city());
     m_ui->lineEditComment->setText(cu.get_comment());
     m_ui->lineEditCustomerNumber->setText(cu.get_customernumber());
@@ -105,9 +107,9 @@ void CInputDialogCustomer::customer_number_nomination(void)
     }
 }
 
-void CInputDialogCustomer::customer_number_changed(QString s)
+bool CInputDialogCustomer::customer_number_changed(QString s)
 {
-    QString s2;
+    QString text,s2;
     int count=-1;
     CPointerMemory memory;
     memory.set_string(&s2);
@@ -116,7 +118,7 @@ void CInputDialogCustomer::customer_number_changed(QString s)
     //-
     if(s.length()<=0)//no customer number?
     {
-        m_ui->labelError->setText("Fehler: Kundennummer fehlt");
+        text=QString("Fehler: Kundennummer fehlt");
         b=false;
     }
     else if(s==m_sCustomerNumber)//edit mode and = mark customer number?
@@ -127,15 +129,70 @@ void CInputDialogCustomer::customer_number_changed(QString s)
         m_pThread->set_work(WORK_CUSTOMER_GET_COUNT,&memory);
         if(count>0)//dopple?
         {
-            m_ui->labelError->setText("Fehler: Kundennummer gibt es schon");
+            text=QString("Fehler: Kundennummer gibt es schon");
             b=false;
         }
-        else
-            m_ui->labelError->setText("");
     }
     //-
-    if(b)
-        m_ui->buttonBox->setEnabled(true);
-    else
-        m_ui->buttonBox->setEnabled(false);
+    m_ui->pushButtonOk->setEnabled(b);
+    m_ui->labelError->setText(text);//set comment
+    //-
+    return b;
+}
+
+void CInputDialogCustomer::press_ok(void)
+{
+    int i,iReturn=1;
+    QString s;
+    CCustomer cu;
+    QMessageBox msg(QMessageBox::Question,"","");
+    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    msg.setWindowTitle("?");
+    msg.setText(s);
+    msg.setInformativeText(QString::fromUtf8("Der Datensatz wurde von einer anderen Programminstanz gelöscht!\nSoll dieser Kunde neu angelegt werden?"));
+    //-
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL)
+        {
+            //another client create a record with this number?
+            if(!customer_number_changed(m_ui->lineEditCustomerNumber->text()))
+                iReturn=-1;//error
+            else
+            {
+                //check by edit-mode, another client delete record?
+                if(m_iMarkId>0)//edit-mode?
+                {
+                    s=QString("id = %1").arg(m_iMarkId);
+                    s+=QString(" AND name = '%1'").arg(m_sMarkName);
+                    i=m_pThread->m_pDbInterface->customer_get_count(s);
+                    if(i<=0)//record delete?
+                    {
+                        msg.exec();
+                        if(msg.clickedButton()!=yesButton)
+                            iReturn=0;
+                        else
+                        {
+                            get_data(cu);
+                            m_sCustomerNumber=m_pThread->m_pDbInterface->customer_get_customer_number_nomination();
+                            m_ui->lineEditCustomerNumber->setText(m_sCustomerNumber);
+                            cu.set_customernumber(m_sCustomerNumber);
+                            m_pThread->m_pDbInterface->customer_add(cu);
+                            m_iMarkId=cu.get_id();//mark new id
+                            iReturn=1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //-
+    if(iReturn>=0)
+        done(iReturn);
+}
+
+void CInputDialogCustomer::press_cancel(void)
+{
+    close();
 }

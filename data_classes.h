@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 #include <QtGui>
 
 //version
-#define VERSION "version 0.30 (BETA)"
-#define CURRENT_DB_VERSION "1,02"
+#define VERSION "Version 0.32"
+#define CURRENT_DB_VERSION "1,03"
 
 //trade
 #define TYPE_INCOMING 1
@@ -59,11 +59,49 @@
 #define LOGBOOK_TYPE_CUSTOMER_REMOVE 62
 #define LOGBOOK_TYPE_OTHER 70
 
-
 //table item data
 #define TABLE_ALIGNMENT_LEFT 0
 #define TABLE_ALIGNMENT_RIGHT 1
 #define TABLE_ALIGNMENT_CENTER 2
+
+//EAN
+#define TYPE_EAN_UNKNOW 0
+#define TYPE_EAN_8 1
+#define TYPE_EAN_13 2
+
+//---------------------------------------
+class CEan
+{
+private:
+    //const
+    QString m_saCodeA[10];
+    QString m_saCodeB[10];
+    QString m_saCodeC[10];
+    QString m_saParity[10];
+    QString m_sLeadTail;
+    QString m_sSeperator;
+    //-
+    QString m_sBarcode;
+    int m_iType;
+
+public:
+    CEan();
+    CEan(QString sBarcode);
+    ~CEan();
+
+    void set_const(void);
+    bool set_barcode(QString sBarcode);
+    int get_type(void);
+    bool is_ean_barcode(void);
+    int get_checksum(void);
+    int get_barcode_number(int index);
+    QString get_barcode_number_string(int index, int length=1);
+    bool get_digital_struct(QString & sDigitalStruct);
+};
+
+
+//---------------------------------------
+
 class CTableItemData
 {
 private:
@@ -85,6 +123,8 @@ public:
     void set(QString sText, int iAlignment, QIcon * pIcon=NULL);
     void clear(void);
 };
+
+//--------------------------------------------------
 
 //table column data
 class CTableColumnsData
@@ -122,6 +162,8 @@ public:
     bool update_order(QList<int> & lsNewColumnsOrder);
     bool swap_columns(int iRow1, int iRow2);
 };
+
+//------------------------------------------------
 
 //memory
 class CPointerMemory
@@ -188,6 +230,7 @@ public:
     void set_date_time(QDateTime * dt_tiDateTime);
 };
 
+//----------------------------------------------------------
 
 //basic
 class CBasicData
@@ -200,6 +243,7 @@ class CBasicData
     public:
     CBasicData();
     ~CBasicData(){}
+    void clear(void);
     int get_id(void);
     QString get_name(void);
     QString get_comment(void);
@@ -207,6 +251,8 @@ class CBasicData
     void set_name(QString sName);
     void set_comment(QString sComment);
 };
+
+//-------------------------------------------------------
 
 //waregroup
 class CWaregroup : public CBasicData
@@ -217,11 +263,14 @@ class CWaregroup : public CBasicData
     public:
     CWaregroup();
     ~CWaregroup(){}
+    void clear(void);
     int get_parent_id(void);
     void set_parent_id(int iParentId);
-    void set(int iParent=-1,QString sName=QString(""),QString sComment=QString(""), int iId=-1);
+    void set(int iParent=-1,QString sName=QString::fromUtf8(""),QString sComment=QString::fromUtf8(""), int iId=-1);
     int operator != (CWaregroup & wg);
 };
+
+//----------------------------------------------------------
 
 //maker
 class CMaker : public CBasicData
@@ -237,6 +286,7 @@ class CMaker : public CBasicData
     public:
     CMaker();
     ~CMaker(){}
+    void clear(void);
     QString get_adress(void);
     QString get_callnumber(void);
     QString get_faxnumber(void);
@@ -252,6 +302,8 @@ class CMaker : public CBasicData
     void set(CMaker & mk);
 };
 
+//-----------------------------------------------
+
 //dealer
 class CDealer : public CMaker
 {
@@ -261,10 +313,13 @@ class CDealer : public CMaker
     public:
     CDealer();
     ~CDealer(){}
+    void clear(void);
     QString get_customernumber(void);
     void set_customernumber(QString s);
     void set(CDealer & de);
 };
+
+//-----------------------------------------------
 
 //customer
 class CCustomer : public CBasicData
@@ -282,6 +337,7 @@ class CCustomer : public CBasicData
     public:
     CCustomer();
     ~CCustomer(){}
+    void clear(void);
     QString get_customernumber(void);
     QString get_first_name(void);
     QString get_street(void);
@@ -300,6 +356,8 @@ class CCustomer : public CBasicData
     void set_faxnumber(QString s);
     void set_email(QString s);
 };
+
+//--------------------------------------------
 
 //article
 class CArticle : public CBasicData
@@ -352,6 +410,8 @@ class CArticle : public CBasicData
     void set(CArticle & ar);
 };
 
+//--------------------------------------------
+
 //ordering
 class COrdering
 {
@@ -385,6 +445,8 @@ class COrdering
     void set(COrdering & ord);
 };
 
+//-------------------------------------------------
+
 //trade
 class CTrade
 {
@@ -404,6 +466,7 @@ class CTrade
     public:
     CTrade();
     ~CTrade(){}
+    bool clear(void);
     bool get_canceled(void);
     int get_type(void);
     QString get_comment(void);
@@ -435,6 +498,8 @@ class CTrade
     void set(CTrade & trade);
 };
 
+//-----------------------------------------------------------
+
 class CLogbook
 {
 private:
@@ -445,6 +510,7 @@ private:
 public:
     CLogbook();
     ~CLogbook();
+    bool clear(void);
     QString get_text(void);
     int get_type(void);
     QDateTime get_date_time(void);

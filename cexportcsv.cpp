@@ -1,7 +1,26 @@
+/*  LaVa 2, a inventory managment tool
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "cexportcsv.h"
 
 CExportCSV::CExportCSV()
 {
+    m_iCodec=0;//UTF-8 is default
 }
 
 bool CExportCSV::write(QString sFile, QList<QString> & ls)
@@ -11,15 +30,29 @@ bool CExportCSV::write(QString sFile, QList<QString> & ls)
 
     bool b=false;
     QFile file(sFile);
+    QByteArray ba;
     //-
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
         file.close();
     else
     {
-        check_format(ls);
+        //codec
+        QTextStream stream(&file);
+        if(m_iCodec==0)//utf-8 selected
+            stream.setCodec("UTF-8");
+        else if(m_iCodec==1)//windows 1252 selected
+            stream.setCodec("Windows-1252");
+
+        //write
         while(ls.count()>0)
         {
-            file.write(ls[0].toAscii()); //write
+            if(m_iCodec==0)//UTF-8
+                ba=ls[0].toUtf8();
+            else if(m_iCodec==1)//Local(Windows 1252)
+                ba=ls[0].toLocal8Bit();
+            //-
+            stream<<ba;
+            //-
             ls.removeFirst();
         }
         file.close();
@@ -41,7 +74,7 @@ bool CExportCSV::check_format(QList<QString> & ls)
 
     for(i=0;i<ls.count();i++)
     {
-        if(ls[i]==QString("\n"))
+        if(ls[i]==QString::fromUtf8("\n"))
             continue;
         s=ls[i];
         if(s.length()>0)
@@ -51,17 +84,17 @@ bool CExportCSV::check_format(QList<QString> & ls)
         }
         s.remove(QChar(';'));
         //-
-        sls=s.split(QString("\"\""));
-        s=QString("");
+        sls=s.split(QString::fromUtf8("\"\""));
+        s=QString::fromUtf8("");
         for(j=0;j<sls.count();j++)
         {
             s2=sls[j];
             s2.remove(QChar('\"'));
-            s+=QString("\"%1\"").arg(s2);
+            s+=QString::fromUtf8("\"%1\"").arg(s2);
             if(j+1>=sls.count())//last
-                s+=QString("\n");
+                s+=QString::fromUtf8("\n");
             else
-                s+=QString(";");
+                s+=QString::fromUtf8(";");
         }
         //-
         if(s!=ls[i])
@@ -77,7 +110,7 @@ bool CExportCSV::check_format(QList<QString> & ls)
 
 QString CExportCSV::check_format(QString s)
 {
-    QString sReturn=QString("");
+    QString sReturn=QString::fromUtf8("");
     if(s.length()>0)
     {
         s.remove(QChar('\n'));
@@ -104,10 +137,10 @@ bool CExportCSV::open_filedialog(QString & sPath, QWidget * pParent, QString sFi
     QDateTime dtTi=QDateTime::currentDateTime();
     QFileInfo file_info;
     QMessageBox msg(QMessageBox::Critical,"","");
-    msg.setWindowTitle(QString("Fehler"));
+    msg.setWindowTitle(QString::fromUtf8("Fehler"));
 
     //load last path from settings
-    if(settings.load(QString("EXPORT_PATH"),s))//load mark path
+    if(settings.load(QString::fromUtf8("EXPORT_PATH"),s))//load mark path
     {
         if(s.length()>0)
         {
@@ -119,29 +152,29 @@ bool CExportCSV::open_filedialog(QString & sPath, QWidget * pParent, QString sFi
 
     //set path
     if(sExportPath.length()>0)//backup path load?
-        sFile=sExportPath+QString("/%1_%2.csv").arg(sFilename,dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+        sFile=sExportPath+QString::fromUtf8("/%1_%2.csv").arg(sFilename,dtTi.toString(QString::fromUtf8("hh-mm-ss_dd-MM-yyyy")));
     else//default path
-        sFile=QDir::homePath()+QString("/%1_%2.csv").arg(sFilename,dtTi.toString(QString("hh-mm-ss_dd-MM-yyyy")));
+        sFile=QDir::homePath()+QString::fromUtf8("/%1_%2.csv").arg(sFilename,dtTi.toString(QString::fromUtf8("hh-mm-ss_dd-MM-yyyy")));
 
     //open file dialog
-    sFile=QFileDialog::getSaveFileName(pParent,QString("Export"),sFile);
+    sFile=QFileDialog::getSaveFileName(pParent,QString::fromUtf8("Export"),sFile);
     if(sFile.length()>0)//file dialog finish with 'save'?
     {
         //file info (permission)
-        s=QString("");
+        s=QString::fromUtf8("");
         ls=sFile.split("/");
         for(i=0;i<ls.count()-1;i++)
-            s+=ls[i]+QString("/");
+            s+=ls[i]+QString::fromUtf8("/");
         file_info.setFile(s);
         if(!file_info.permission(QFile::WriteUser))
         {
-            msg.setText(QString("Sie haben keine Schreibrechte an diesem Ort!"));
+            msg.setText(QString::fromUtf8("Sie haben keine Schreibrechte an diesem Ort!"));
             msg.exec();
         }
         else
         {
             //save backup path
-            settings.write(QString("EXPORT_PATH"),file_info.filePath());
+            settings.write(QString::fromUtf8("EXPORT_PATH"),file_info.filePath());
 
             //check give it file?
             if(QFile(sFile).exists())
@@ -154,6 +187,35 @@ bool CExportCSV::open_filedialog(QString & sPath, QWidget * pParent, QString sFi
     //-
     ls.clear();
     return b;
+}
+
+bool CExportCSV::convert_to_export_setting(QList<QString> & ls)
+{//convert data to user settings for csv-export
+
+    bool bReturn=true;
+    int i;
+    QString sSplitText,sSplitChar;
+    CInputDialogExport dlg;
+
+    //get user settings
+    bReturn=dlg.exec();
+    {
+        dlg.get_data(sSplitChar,sSplitText,m_iCodec);
+
+        //convert
+        if(sSplitChar==QString::fromUtf8(";") && sSplitText==QString::fromUtf8("\""))
+        {}//nothing do - is default
+        else
+        {
+            for(i=0;i<ls.count();i++)
+            {
+                ls[i].replace(QString::fromUtf8("\""),sSplitText);
+                ls[i].replace(QString::fromUtf8(";"),sSplitChar);
+            }
+        }
+    }
+    //-
+    return bReturn;
 }
 
 bool CExportCSV::create_data_table(QTableWidget * pTable, QList<QString> & ls, QString sTitle, bool bLastColumn)
@@ -172,18 +234,18 @@ bool CExportCSV::create_data_table(QTableWidget * pTable, QList<QString> & ls, Q
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //get table text
     for(y=-1;y<pTable->rowCount();y++)
     {
-        sLine=QString("");
+        sLine=QString::fromUtf8("");
         for(x=0;x<pTable->columnCount()-lc;x++)
         {
-            s=QString("");
+            s=QString::fromUtf8("");
 
             //get text
             if(y==-1)//header?
@@ -201,7 +263,7 @@ bool CExportCSV::create_data_table(QTableWidget * pTable, QList<QString> & ls, Q
             }
 
             //text->line
-            s=QString("\"%1\"").arg(s);
+            s=QString::fromUtf8("\"%1\"").arg(s);
             sLine+=s;
             if(x+1!=pTable->columnCount())
                 sLine+=";";
@@ -233,18 +295,18 @@ bool CExportCSV::create_data_table(QTableWidget * pTable, QList<QString> & ls, i
         //title
         if(sTitle.length()>0)//title set?
         {
-            s=QString("\"%1\"\n").arg(sTitle);
+            s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
             ls.push_back(s);
-            ls.push_back(QString("\n"));//empty row
+            ls.push_back(QString::fromUtf8("\n"));//empty row
         }
 
         //get table text
         for(y=-1;y<pTable->rowCount();y++)
         {
-            sLine=QString("");
+            sLine=QString::fromUtf8("");
             for(x=iFromColumn;x<=iToColumn;x++)
             {
-                s=QString("");
+                s=QString::fromUtf8("");
 
                 //get text
                 if(y==-1)//header?
@@ -262,7 +324,7 @@ bool CExportCSV::create_data_table(QTableWidget * pTable, QList<QString> & ls, i
                 }
 
                 //text->line
-                s=QString("\"%1\"").arg(s);
+                s=QString::fromUtf8("\"%1\"").arg(s);
                 sLine+=s;
                 if(x+1!=pTable->columnCount())
                     sLine+=";";
@@ -286,9 +348,9 @@ bool CExportCSV::create_data_list(QListWidget * pList, QList<QString> & ls, QStr
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     for(int i=0; i<pList->count();i++)
@@ -296,7 +358,7 @@ bool CExportCSV::create_data_list(QListWidget * pList, QList<QString> & ls, QStr
         pItem=pList->item(i);
         if(pItem!=NULL)
         {
-            sLine=QString("\"%1\"\n").arg(pItem->text());
+            sLine=QString::fromUtf8("\"%1\"\n").arg(pItem->text());
             ls.push_back(sLine);
         }
     }
@@ -312,14 +374,14 @@ bool CExportCSV::create_data_list_table(QListWidget * pList, QTableWidget * pTab
     QString s;
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     create_data_list(pList,ls);
-    ls.push_back(QString("\n"));//empty row
-    create_data_table(pTable,ls,QString(""),bLastColumn);
+    ls.push_back(QString::fromUtf8("\n"));//empty row
+    create_data_table(pTable,ls,QString::fromUtf8(""),bLastColumn);
     return true;
 }
 
@@ -335,9 +397,80 @@ bool CExportCSV::create_data_tree(QTreeWidget * pTree, QList<QString> & ls, QStr
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
+    }
+
+    //table title
+    s=QString::fromUtf8("\"Warengruppe(mit Pfad)\";\"Kommentar\"\n");
+    ls.push_back(s);
+
+    //toplevel waregroups
+    for(i=0;i<pTree->topLevelItemCount();i++)
+    {
+        pItemTop=pTree->topLevelItem(i);
+        if(pItemTop!=NULL)
+        {
+            s=QString::fromUtf8("\"%1\";\"%2\"\n").arg(check_format(pItemTop->text(0)),check_format(pItemTop->text(1)));
+            ls.push_back(s);
+
+            //cildren
+            if(pItemTop->childCount()>0)
+                create_data_tree_children(pItemTop,ls);
+        }
+    }
+    return true;
+}
+bool CExportCSV::create_data_tree_children(QTreeWidgetItem * pItemParent, QList<QString> & ls)
+{
+    if(pItemParent==NULL)
+        return false;
+
+    int j;
+    QString s,sLine;
+    QStringList sls;
+
+    //path before
+    if(ls.count()>0)
+    {
+        sLine=ls[ls.count()-1];
+        sLine.remove("\"");
+        sLine.remove("\n");
+        sls=sLine.split(";");
+        if(sls.count()>0)
+            sLine=sls[0];
+        sls.clear();
+    }
+
+    for(j=0;j<pItemParent->childCount();j++)
+    {
+        //create row
+        s=sLine+QString::fromUtf8("\"/%1\";\"%2\"\n").arg(check_format(pItemParent->child(j)->text(0)),check_format(pItemParent->child(j)->text(1)));
+        ls.push_back(s);
+
+        //cildren from children
+        if(pItemParent->child(j)->childCount()>0)
+            create_data_tree_children(pItemParent->child(j),ls);
+    }
+    return true;
+}
+
+bool CExportCSV::create_data_tree_arrow(QTreeWidget * pTree, QList<QString> & ls, QString sTitle)
+{
+    if(pTree==NULL)
+        return false;
+
+    int i;
+    QString s;
+    QTreeWidgetItem * pItemTop=NULL;
+
+    //title
+    if(sTitle.length()>0)//title set?
+    {
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
+        ls.push_back(s);
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //toplevel waregroups
@@ -346,18 +479,18 @@ bool CExportCSV::create_data_tree(QTreeWidget * pTree, QList<QString> & ls, QStr
         pItemTop=pTree->topLevelItem(i);
         if(pItemTop!=NULL)
         {
-            s=QString("\"%1\"\n").arg(check_format(pItemTop->text(0)));
+            s=QString::fromUtf8("\"%1\"\n").arg(check_format(pItemTop->text(0)));
             ls.push_back(s);
 
             //cildren
             if(pItemTop->childCount()>0)
-                create_data_tree_children(pItemTop,ls,1);
+                create_data_tree_children_arrow(pItemTop,ls,1);
         }
     }
     return true;
 }
 
-bool CExportCSV::create_data_tree_children(QTreeWidgetItem * pItemParent, QList<QString> & ls, int iSubLevel)
+bool CExportCSV::create_data_tree_children_arrow(QTreeWidgetItem * pItemParent, QList<QString> & ls, int iSubLevel)
 {
     if(pItemParent==NULL || iSubLevel<0 || iSubLevel>20)
         return false;
@@ -369,7 +502,7 @@ bool CExportCSV::create_data_tree_children(QTreeWidgetItem * pItemParent, QList<
     //set
     for(j=0;j<pItemParent->childCount();j++)
     {
-        sLine=QString("");
+        sLine=QString::fromUtf8("");
         sls.clear();
 
         //mark & split row before
@@ -378,31 +511,31 @@ bool CExportCSV::create_data_tree_children(QTreeWidgetItem * pItemParent, QList<
 
         for(i=0;i<iSubLevel;i++)
         {
-            s=QString("\"\";");
+            s=QString::fromUtf8("\"\";");
             if(i+1==iSubLevel)
             {
                 if(j+1==pItemParent->childCount())//last
-                    s=QString("\"*→\";");
+                    s=QString::fromUtf8("\"*→\";");
                 else
-                    s=QString("\"↓→\";");
+                    s=QString::fromUtf8("\"↓→\";");
             }
             else
             {
                 if(i<sls.count())
                 {
-                    if(sls[i]==QString("\"↓\"") || sls[i]==QString("\"↓→\""))
-                        s=QString("\"↓\";");
+                    if(sls[i]==QString::fromUtf8("\"↓\"") || sls[i]==QString::fromUtf8("\"↓→\""))
+                        s=QString::fromUtf8("\"↓\";");
                 }
             }
             //-
             sLine+=s;
         }
-        sLine+=QString("\"%1\"\n").arg(check_format(pItemParent->child(j)->text(0)));
+        sLine+=QString::fromUtf8("\"%1\"\n").arg(check_format(pItemParent->child(j)->text(0)));
         ls.push_back(sLine);
 
         //cildren from children
         if(pItemParent->child(j)->childCount()>0)
-            create_data_tree_children(pItemParent->child(j),ls,iSubLevel+1);
+            create_data_tree_children_arrow(pItemParent->child(j),ls,iSubLevel+1);
     }
     //-
     sls.clear();
@@ -416,10 +549,16 @@ bool CExportCSV::write_data_table(QWidget * pParent, QTableWidget * pTable, QStr
 
     QString sFile;
     QList<QString> ls;
-    if(open_filedialog(sFile,pParent,sFileDescription))
+
+    if(create_data_table(pTable,ls,sTitle,bLastColumn))
     {
-       if(create_data_table(pTable,ls,sTitle,bLastColumn))
-           write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+            {
+                write(sFile,ls);
+            }
+        }
     }
     ls.clear();
     //-
@@ -433,10 +572,16 @@ bool CExportCSV::write_data_list(QWidget * pParent, QListWidget * pList, QString
 
     QString sFile;
     QList<QString> ls;
-    if(open_filedialog(sFile,pParent,sFileDescription))
+
+    if(create_data_list(pList,ls,sTitle))
     {
-       if(create_data_list(pList,ls,sTitle))
-           write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+            {
+                write(sFile,ls);
+            }
+        }
     }
     ls.clear();
     //-
@@ -450,10 +595,17 @@ bool CExportCSV::write_data_list_table(QWidget * pParent, QListWidget * pList, Q
 
     QString sFile;
     QList<QString> ls;
-    if(open_filedialog(sFile,pParent,sFileDescription))
+
+    if(create_data_list_table(pList,pTable,ls,sTitle,bLastColumn))
     {
-       if(create_data_list_table(pList,pTable,ls,sTitle,bLastColumn))
-           write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+            {
+                write(sFile,ls);
+            }
+        }
+
     }
     ls.clear();
     //-
@@ -468,10 +620,15 @@ bool CExportCSV::write_data_tree(QWidget * pParent,QTreeWidget * pTree, QString 
     QString sFile;
     QList<QString> ls;
 
-    if(open_filedialog(sFile,pParent,sFileDescription))
+    if(create_data_tree(pTree,ls,sTitle))
     {
-        if(create_data_tree(pTree,ls,sTitle))
-            write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+            {
+                write(sFile,ls);
+            }
+        }
     }
     ls.clear();
     //-
@@ -493,13 +650,13 @@ bool CExportCSV::write_data_maker(QWidget * pParent, QTableWidget * pTable, CDbC
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //header
-    ls.push_back(QString("\"Name\";\"Adresse\";\"Telefonnummer\";\"Faxnummer\";\"Emailadresse\";\"homepage\";\"Kontaktperson\";\"Kommentar\"\n"));
+    ls.push_back(QString::fromUtf8("\"Name\";\"Adresse\";\"Telefonnummer\";\"Faxnummer\";\"Emailadresse\";\"homepage\";\"Kontaktperson\";\"Kommentar\"\n"));
 
     //get maker info
     id_column=pTable->columnCount()-1;
@@ -518,7 +675,7 @@ bool CExportCSV::write_data_maker(QWidget * pParent, QTableWidget * pTable, CDbC
                     {
                         if(db.maker_get(id,mk)) // get maker by id
                         {
-                            sLine=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\"\n")
+                            sLine=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\"\n")
                                         .arg(mk.get_name(),mk.get_adress(),mk.get_callnumber(),mk.get_faxnumber(),mk.get_email(),mk.get_homepage(),mk.get_contectperson(),mk.get_comment());
                             ls.push_back(sLine);
                         }
@@ -531,8 +688,11 @@ bool CExportCSV::write_data_maker(QWidget * pParent, QTableWidget * pTable, CDbC
     //write
     if(ls.count()>0)
     {
-        if(open_filedialog(sFile,pParent,sFileDescription))
-            write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+                write(sFile,ls);
+        }
     }
     //-
     ls.clear();
@@ -554,13 +714,13 @@ bool CExportCSV::write_data_dealer(QWidget * pParent, QTableWidget * pTable, CDb
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //header
-    ls.push_back(QString("\"Name\";\"Adresse\";\"Telefonnummer\";\"Faxnummer\";\"Emailadresse\";\"homepage\";\"Kontaktperson\";\"Kundennummer\";\"Kommentar\"\n"));
+    ls.push_back(QString::fromUtf8("\"Name\";\"Adresse\";\"Telefonnummer\";\"Faxnummer\";\"Emailadresse\";\"homepage\";\"Kontaktperson\";\"Kundennummer\";\"Kommentar\"\n"));
 
     //get maker info
     id_column=pTable->columnCount()-1;
@@ -579,7 +739,7 @@ bool CExportCSV::write_data_dealer(QWidget * pParent, QTableWidget * pTable, CDb
                     {
                         if(db.dealer_get(id,de)) // get maker by id
                         {
-                            sLine=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\";\"%9\"\n")
+                            sLine=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\";\"%9\"\n")
                                         .arg(de.get_name(),de.get_adress(),de.get_callnumber(),
                                              de.get_faxnumber(),de.get_email(),de.get_homepage(),de.get_contectperson(),de.get_customernumber(),de.get_comment());
                             ls.push_back(sLine);
@@ -593,8 +753,11 @@ bool CExportCSV::write_data_dealer(QWidget * pParent, QTableWidget * pTable, CDb
     //write
     if(ls.count()>0)
     {
-        if(open_filedialog(sFile,pParent,sFileDescription))
-            write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+                write(sFile,ls);
+        }
     }
     //-
     ls.clear();
@@ -616,13 +779,13 @@ bool CExportCSV::write_data_customer(QWidget * pParent, QTableWidget * pTable, C
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //header
-    ls.push_back(QString("\"Name\";\"Vorname\";\"Strasse\";\"Postleitzahl\";\"Ort\";\"Kundennummer\";\"Telefonnummer\";\"Faxnummer\";\"Emailadresse\";\"Kommentar\"\n"));
+    ls.push_back(QString::fromUtf8("\"Name\";\"Vorname\";\"Strasse\";\"Postleitzahl\";\"Ort\";\"Kundennummer\";\"Telefonnummer\";\"Faxnummer\";\"Emailadresse\";\"Kommentar\"\n"));
 
     //get maker info
     id_column=pTable->columnCount()-1;
@@ -641,10 +804,10 @@ bool CExportCSV::write_data_customer(QWidget * pParent, QTableWidget * pTable, C
                     {
                         if(db.customer_get(id,cu)) // get maker by id
                         {
-                            sLine=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\";\"%9\";")
+                            sLine=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\";\"%9\";")
                                         .arg(cu.get_name(),cu.get_first_name(),cu.get_street(),cu.get_postcode(),cu.get_city(),cu.get_customernumber(),
                                              cu.get_callnumber(),cu.get_faxnumber(),cu.get_email());
-                            sLine+=QString("\"%1\"\n").arg(cu.get_comment());
+                            sLine+=QString::fromUtf8("\"%1\"\n").arg(cu.get_comment());
                             ls.push_back(sLine);
                         }
                     }
@@ -656,8 +819,11 @@ bool CExportCSV::write_data_customer(QWidget * pParent, QTableWidget * pTable, C
     //write
     if(ls.count()>0)
     {
-        if(open_filedialog(sFile,pParent,sFileDescription))
-            write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+                write(sFile,ls);
+        }
     }
     //-
     ls.clear();
@@ -681,13 +847,13 @@ bool CExportCSV::write_data_inventory(QWidget * pParent, QTableWidget * pTable, 
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //header
-    ls.push_back(QString("\"Auslastung(%)\";\"Warnung\";\"Bestand\";\"bestellte Menge\";\"Anzahl Bestellungen\";\"Lagerkapazität\";\"Einheit\";\"Artikelbezeichnung\";"
+    ls.push_back(QString::fromUtf8("\"Auslastung(%)\";\"Warnung\";\"Bestand\";\"bestellte Menge\";\"Anzahl Bestellungen\";\"Lagerkapazität\";\"Einheit\";\"Artikelbezeichnung\";"
                          "\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Standort\";\"Kommentar\"\n"));
 
     //get maker info
@@ -707,31 +873,31 @@ bool CExportCSV::write_data_inventory(QWidget * pParent, QTableWidget * pTable, 
                     {
                         if(db.article_get(id,ar)) // get maker by id
                         {
-                            sLine=QString("");
+                            sLine=QString::fromUtf8("");
 
                             //%
                             widget.inventory_get_icon_and_precent(ar,ti);
                             s=ti.get_text();
-                            lss=s.split(QString(" "));
+                            lss=s.split(QString::fromUtf8(" "));
                             if(lss.count()>1)
-                                sLine+=QString("\"%1\";").arg(lss[0]);
+                                sLine+=QString::fromUtf8("\"%1\";").arg(lss[0]);
                             else
-                                sLine+=QString("\"0\";");
+                                sLine+=QString::fromUtf8("\"0\";");
                             lss.clear();
 
                             //warning
                             widget.inventory_get_icon_and_warning_limit(ar,ti);
-                            sLine+=QString("\"%1\";").arg(ti.get_text());
+                            sLine+=QString::fromUtf8("\"%1\";").arg(ti.get_text());
                             //-
-                            sLine+=QString("\"%1\";").arg(ar.get_inventory());//inv
-                            sLine+=QString("\"%1\";").arg(db.ordering_get_count_by_article(ar.get_id()));//ordering(article count)
+                            sLine+=QString::fromUtf8("\"%1\";").arg(ar.get_inventory());//inv
+                            sLine+=QString::fromUtf8("\"%1\";").arg(db.ordering_get_count_by_article(ar.get_id()));//ordering(article count)
                             j=db.ordering_get_ordering_count_by_article(ar.get_id());
                             if(j>0)
-                                sLine+=QString("\"%1\";").arg(j);//ordering(article count)
+                                sLine+=QString::fromUtf8("\"%1\";").arg(j);//ordering(article count)
                             else
-                                sLine+=QString("\"\";");
-                            sLine+=QString("\"%1\";").arg(ar.get_max_inventory());//max inv
-                            sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
+                                sLine+=QString::fromUtf8("\"\";");
+                            sLine+=QString::fromUtf8("\"%1\";").arg(ar.get_max_inventory());//max inv
+                            sLine+=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\";\"%8\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
                                                                                                      db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()),
                                                                                                      ar.get_location(),ar.get_comment());
                             ls.push_back(sLine);
@@ -745,8 +911,11 @@ bool CExportCSV::write_data_inventory(QWidget * pParent, QTableWidget * pTable, 
     //write
     if(ls.count()>0)
     {
-        if(open_filedialog(sFile,pParent,sFileDescription))
-            write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+                write(sFile,ls);
+        }
     }
     //-
     ls.clear();
@@ -768,14 +937,14 @@ bool CExportCSV::write_data_article(QWidget * pParent, QTableWidget * pTable, CD
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //header
-    ls.push_back(QString("\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Warnung\";"
-                         "\"EK\";\"VK\";\"Marge\";\"Währung\";\"Standort\";\"Kommentar\"\n"));
+    ls.push_back(QString::fromUtf8("\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Warnung\";"
+                         "\"Bestand\";\"max.Lagerkapazität\";\"Einheit\";\"EK\";\"VK\";\"Marge\";\"Währung\";\"Standort\";\"Kommentar\"\n"));
 
     //get maker info
     id_column=pTable->columnCount()-1;
@@ -794,33 +963,69 @@ bool CExportCSV::write_data_article(QWidget * pParent, QTableWidget * pTable, CD
                     {
                         if(db.article_get(id,ar)) // get article by id
                         {
-                            sLine=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";").arg(ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
+                            sLine=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";").arg(ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
                                                                                      db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()));
                             //warning
                             if(ar.get_warning_limit()>0 && ((int)ar.get_inventory())<ar.get_warning_limit())
-                                sLine+=QString("\"bst.<%1\";").arg(ar.get_warning_limit());
+                                sLine+=QString::fromUtf8("\"bst.<%1\";").arg(ar.get_warning_limit());
                             else
-                                sLine+=QString("\"\";");
+                                sLine+=QString::fromUtf8("\"\";");
+
+                            //inv
+                            sLine+=QString::fromUtf8("\"%1\";").arg(ar.get_inventory());
+
+                            //max.inv
+                            s=ar.get_max_inventory();
+                            if(s.length()>0)
+                                sLine+=QString::fromUtf8("\"%1\";").arg(ar.get_max_inventory());
+                            else
+                                sLine+=QString::fromUtf8("\"\";");
+
+                            //unit
+                            s=ar.get_unit();
+                            if(s.length()>0)
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s);
+                            else
+                                sLine+=QString::fromUtf8("\"\";");
 
                             //baseprice
                             if(ar.get_base_price()>0.0)
-                                sLine+=QString("\"%1\";").arg(ar.get_base_price());
+                            {
+                                //german format 0,00 not 0.00
+                                s=QString::fromUtf8("%1").arg(ar.get_base_price());
+                                s.replace(QString::fromUtf8("."),QString::fromUtf8(","));
+
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s);
+                            }
                             else
-                                sLine+=QString("\"\";");
+                                sLine+=QString::fromUtf8("\"\";");
 
                             //saleprice
                             if(ar.get_sales_price()>0.0)
-                                sLine+=QString("\"%1\";").arg(ar.get_sales_price());
+                            {
+                                //german format 0,00 not 0.00
+                                s=QString::fromUtf8("%1").arg(ar.get_sales_price());
+                                s.replace(QString::fromUtf8("."),QString::fromUtf8(","));
+
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s);
+                            }
                             else
-                                sLine+=QString("\"\";");
+                                sLine+=QString::fromUtf8("\"\";");
+
 
                             //diff
                             if(ar.get_base_price()>0.0 && ar.get_sales_price()>0.0)
-                                sLine+=QString("\"%1\";").arg(ar.get_sales_price()-ar.get_base_price());
+                            {
+                                //german format 0,00 not 0.00
+                                s=QString::fromUtf8("%1").arg(ar.get_sales_price()-ar.get_base_price());
+                                s.replace(QString::fromUtf8("."),QString::fromUtf8(","));
+
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s);
+                            }
                             else
-                                sLine+=QString("\"\";");
+                                sLine+=QString::fromUtf8("\"\";");
                             //-
-                            sLine+=QString("\"%1\";\"%2\";\"%3\"\n").arg(ar.get_valuta(),ar.get_location(),ar.get_comment());
+                            sLine+=QString::fromUtf8("\"%1\";\"%2\";\"%3\"\n").arg(ar.get_valuta(),ar.get_location(),ar.get_comment());
                             ls.push_back(sLine);
                         }
                     }
@@ -832,8 +1037,11 @@ bool CExportCSV::write_data_article(QWidget * pParent, QTableWidget * pTable, CD
     //write
     if(ls.count()>0)
     {
-        if(open_filedialog(sFile,pParent,sFileDescription))
-            write(sFile,ls);
+        if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+        {
+            if(open_filedialog(sFile,pParent,sFileDescription))
+                write(sFile,ls);
+        }
     }
     //-
     ls.clear();
@@ -856,13 +1064,13 @@ bool CExportCSV::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //header
-    ls.push_back(QString("\"Bestelldatum\";\"Bestellnummer\";\"Händler\";\"Kommentar\";\"Anzahl\";\"Einheit\";\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";"
+    ls.push_back(QString::fromUtf8("\"Bestelldatum\";\"Bestellnummer\";\"Händler\";\"Kommentar\";\"Anzahl\";\"Einheit\";\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";"
                          "\"Hersteller\";\"Warengruppe\";\"Standort\"\n"));
 
     //create
@@ -883,7 +1091,7 @@ bool CExportCSV::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
                         if(db.ordering_get(id,ord)) // get ordering by id
                         {
                             //data
-                            sLine=QString("\"%1\";\"%2\";\"%3\";\"%4\";").arg(ord.get_date().toString("dd.MM.yyyy"),ord.get_ordernumber(),db.dealer_get_name(ord.get_dealer_id()),
+                            sLine=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";").arg(ord.get_date().toString("dd.MM.yyyy"),ord.get_ordernumber(),db.dealer_get_name(ord.get_dealer_id()),
                                                                               ord.get_comment());
                             bFirst=true;
 
@@ -899,12 +1107,12 @@ bool CExportCSV::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
                                     {
                                         if(bFirst)
                                         {
-                                            sLine+=QString("\"%1\";").arg(iCount);
+                                            sLine+=QString::fromUtf8("\"%1\";").arg(iCount);
                                             bFirst=false;
                                         }
                                         else
-                                            sLine=QString("\"\";\"\";\"\";\"\";\"%1\";").arg(iCount);
-                                        sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
+                                            sLine=QString::fromUtf8("\"\";\"\";\"\";\"\";\"%1\";").arg(iCount);
+                                        sLine+=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
                                                                                                          db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()),
                                                                                                          ar.get_location());
                                         ls.push_back(sLine);
@@ -912,7 +1120,7 @@ bool CExportCSV::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
                                 }
                                 lsWares.removeFirst();
                             }
-                            ls.push_back(QString("\n"));//empty row
+                            ls.push_back(QString::fromUtf8("\n"));//empty row
                             lsWares.clear();
                         }
                     }
@@ -923,8 +1131,11 @@ bool CExportCSV::write_data_ordering(QWidget * pParent, QTableWidget * pTable, C
         //write
         if(ls.count()>0)
         {
-            if(open_filedialog(sFile,pParent,sFileDescription))
-                write(sFile,ls);
+            if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+            {
+                if(open_filedialog(sFile,pParent,sFileDescription))
+                    write(sFile,ls);
+            }
         }
     }
     //-
@@ -949,13 +1160,13 @@ bool CExportCSV::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbC
     //title
     if(sTitle.length()>0)//title set?
     {
-        s=QString("\"%1\"\n").arg(sTitle);
+        s=QString::fromUtf8("\"%1\"\n").arg(sTitle);
         ls.push_back(s);
-        ls.push_back(QString("\n"));//empty row
+        ls.push_back(QString::fromUtf8("\n"));//empty row
     }
 
     //header
-    ls.push_back(QString("\"Art\";\"storniert\";\"Buchungsnummer\";\"Ein-/Ausgangsdatum\";\"Info1\";\"Info2\";\"Info3\";\"Info4\";\"Info5\";\"Kommentar\";\"Anzahl\";"
+    ls.push_back(QString::fromUtf8("\"Art\";\"storniert\";\"Buchungsnummer\";\"Ein-/Ausgangsdatum\";\"Info1\";\"Info2\";\"Info3\";\"Info4\";\"Info5\";\"Kommentar\";\"Anzahl\";"
                          "\"Einheit\";\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Standort\"\n"));
 
     //create
@@ -974,69 +1185,69 @@ bool CExportCSV::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbC
                     {
                         //data
                         if(tr.get_type()==TYPE_INCOMING)
-                            sLine=QString("\"Wareneingang\";");
+                            sLine=QString::fromUtf8("\"Wareneingang\";");
                         else if(tr.get_type()==TYPE_OUTGOING)
-                            sLine=QString("\"Warenausgang\";");
+                            sLine=QString::fromUtf8("\"Warenausgang\";");
                         else if(tr.get_type()==TYPE_ORDERING_INCOMING)
-                            sLine=QString("\"Wareneingang(Bestellung)\";");
+                            sLine=QString::fromUtf8("\"Wareneingang(Bestellung)\";");
                         else
-                            sLine=QString("\"Warenausgang(Kunde)\";");
+                            sLine=QString::fromUtf8("\"Warenausgang(Kunde)\";");
 
                         if(tr.get_canceled())
-                            sLine+=QString("\"ja\";");
+                            sLine+=QString::fromUtf8("\"ja\";");
                         else
-                            sLine+=QString("\"nein\";");
+                            sLine+=QString::fromUtf8("\"nein\";");
 
-                        sLine+=QString("\"%1\";\"%2\";").arg(tr.get_booking_number(),tr.get_date().toString("dd.MM.yyyy"));
+                        sLine+=QString::fromUtf8("\"%1\";\"%2\";").arg(tr.get_booking_number(),tr.get_date().toString("dd.MM.yyyy"));
 
                         //info ordering incoming & customer ountgoing
                         if(tr.get_type()==TYPE_INCOMING || tr.get_type()==TYPE_OUTGOING)
-                            sLine+=QString("\"\";\"\";\"\";\"\";\"\";");
+                            sLine+=QString::fromUtf8("\"\";\"\";\"\";\"\";\"\";");
                         else
                         {
                             if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-                                s=QString("Kundennummer:");
+                                s=QString::fromUtf8("Kundennummer:");
                             else
-                                s=QString("Bestellnummer:");
+                                s=QString::fromUtf8("Bestellnummer:");
                             s2=tr.get_info_1();
                             if(s2.length()>0)
-                                sLine+=QString("\"%1\";").arg(s+s2);
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s+s2);
                             else
-                                sLine+=QString("\"\";");
+                                sLine+=QString::fromUtf8("\"\";");
                             //-
                             if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-                                s=QString("Name, Vorname:");
+                                s=QString::fromUtf8("Name, Vorname:");
                             else
-                                s=QString("Händler:");
+                                s=QString::fromUtf8("Händler:");
                             s2=tr.get_info_2();
                             if(s2.length()>0)
-                                sLine+=QString("\"%1\";").arg(s+s2);
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s+s2);
                             else
-                                sLine+=QString("\"\";");
+                                sLine+=QString::fromUtf8("\"\";");
                             //-
                             if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-                                s=QString("Strasse:");
+                                s=QString::fromUtf8("Strasse:");
                             else
-                                s=QString("Bestelldatum:");
+                                s=QString::fromUtf8("Bestelldatum:");
                             s2=tr.get_info_3();
                             if(s2.length()>0)
-                                sLine+=QString("\"%1\";").arg(s+s2);
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s+s2);
                             else
-                                sLine+=QString("\"\";");
+                                sLine+=QString::fromUtf8("\"\";");
                             //-
                             if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-                                s=QString("Postleitzahl, Ort:");
+                                s=QString::fromUtf8("Postleitzahl, Ort:");
                             else
-                                s=QString("sonstiges:");
+                                s=QString::fromUtf8("sonstiges:");
                             s2=tr.get_info_4();
                             if(s2.length()>0)
-                                sLine+=QString("\"%1\";").arg(s+s2);
+                                sLine+=QString::fromUtf8("\"%1\";").arg(s+s2);
                             else
-                                sLine+=QString("\"\";");
-                            sLine+=QString("\"\";");//info 5 current not use
+                                sLine+=QString::fromUtf8("\"\";");
+                            sLine+=QString::fromUtf8("\"\";");//info 5 current not use
                         }
 
-                        sLine+=QString("\"%1\";").arg(tr.get_comment());
+                        sLine+=QString::fromUtf8("\"%1\";").arg(tr.get_comment());
                         bFirst=true;
 
                         //wares
@@ -1051,12 +1262,12 @@ bool CExportCSV::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbC
                                 {
                                     if(bFirst)
                                     {
-                                        sLine+=QString("\"%1\";").arg(iCount);
+                                        sLine+=QString::fromUtf8("\"%1\";").arg(iCount);
                                         bFirst=false;
                                     }
                                     else
-                                        sLine=QString("\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"%1\";").arg(iCount);
-                                    sLine+=QString("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
+                                        sLine=QString::fromUtf8("\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"\";\"%1\";").arg(iCount);
+                                    sLine+=QString::fromUtf8("\"%1\";\"%2\";\"%3\";\"%4\";\"%5\";\"%6\";\"%7\"\n").arg(ar.get_unit(),ar.get_name(),ar.get_articlenumber(),ar.get_articlenumber2(),
                                                                                                          db.maker_get_name(ar.get_maker_id()),db.waregroup_get_path(ar.get_waregroup_id()),
                                                                                                          ar.get_location());
                                     ls.push_back(sLine);
@@ -1064,7 +1275,7 @@ bool CExportCSV::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbC
                             }
                             lsWares.removeFirst();
                         }
-                        ls.push_back(QString("\n"));//empty row
+                        ls.push_back(QString::fromUtf8("\n"));//empty row
                         lsWares.clear();
                     }
                 }
@@ -1074,8 +1285,11 @@ bool CExportCSV::write_data_trade(QWidget * pParent, QTableWidget * pTable, CDbC
         //write
         if(ls.count()>0)
         {
-            if(open_filedialog(sFile,pParent,sFileDescription))
-                write(sFile,ls);
+            if(convert_to_export_setting(ls))//convert data to user settings(CInputDialogExport)
+            {
+                if(open_filedialog(sFile,pParent,sFileDescription))
+                    write(sFile,ls);
+            }
         }
     }
     //-

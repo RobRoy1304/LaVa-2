@@ -17,25 +17,6 @@
    <iconset resource="lava2res.qrc">
     <normaloff>:/images/res/icon.ico</normaloff>:/images/res/icon.ico</iconset>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>540</y>
-     <width>751</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-   <property name="centerButtons">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="lineEditMask">
    <property name="geometry">
     <rect>
@@ -258,7 +239,7 @@
   <widget class="QPushButton" name="pushButtonDelete">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>450</x>
      <y>320</y>
      <width>121</width>
      <height>28</height>
@@ -284,7 +265,7 @@
   <widget class="QPushButton" name="pushButtonEdit">
    <property name="geometry">
     <rect>
-     <x>140</x>
+     <x>310</x>
      <y>320</y>
      <width>131</width>
      <height>28</height>
@@ -492,6 +473,45 @@
     <number>200</number>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButtonOk">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>550</y>
+     <width>141</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ok</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonCancel">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>550</y>
+     <width>131</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>abbrechen</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonAddBarcode">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>320</y>
+     <width>161</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>hinzufügen (Barcode)</string>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>dateEdit</tabstop>
@@ -504,46 +524,15 @@
   <tabstop>checkBoxAuto</tabstop>
   <tabstop>tableWidgetCustomer</tabstop>
   <tabstop>pushButtonNew</tabstop>
+  <tabstop>pushButtonAddBarcode</tabstop>
   <tabstop>pushButtonEdit</tabstop>
   <tabstop>pushButtonDelete</tabstop>
   <tabstop>tableWidgetWares</tabstop>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>pushButtonOk</tabstop>
  </tabstops>
  <resources>
   <include location="lava2res.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>CInputDlgOutgoingCustomer</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>CInputDlgOutgoingCustomer</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

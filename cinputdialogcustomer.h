@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,26 +28,28 @@ namespace Ui {
 
 class CInputDialogCustomer : public QDialog {
     Q_OBJECT
+
+private:
+    Ui::CInputDialogCustomer *m_ui;
+    CWorkThread * m_pThread;
+
+    //only for edit
+    QString m_sCustomerNumber;
+    int m_iMarkId;
+    QString m_sMarkName;
+
 public:
     CInputDialogCustomer(QWidget *parent = 0);
     ~CInputDialogCustomer();
-
-    CWorkThread * m_pThread;
-    QString m_sCustomerNumber;
-
     bool get_data(CCustomer & cu);
     bool set_data(CCustomer & cu);
     void set_db(CWorkThread * pThread){m_pThread=pThread;}
 
-protected:
-    void changeEvent(QEvent *e);
-
-private:
-    Ui::CInputDialogCustomer *m_ui;
-
 public slots:
     void customer_number_nomination(void);
-    void customer_number_changed(QString s);
+    bool customer_number_changed(QString s);
+    void press_ok(void);
+    void press_cancel(void);
 };
 
 #endif // CINPUTDIALOGCUSTOMER_H

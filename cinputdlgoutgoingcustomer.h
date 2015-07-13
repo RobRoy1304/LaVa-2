@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include "cworkthread.h"
 #include "cinputdialogarticleallowance.h"
 #include "csettings.h"
+#include "clastdbchange.h"
+#include "cinputdlgbarcode.h"
 
 namespace Ui {
     class CInputDlgOutgoingCustomer;
@@ -31,28 +33,27 @@ namespace Ui {
 class CInputDlgOutgoingCustomer : public QDialog {
     Q_OBJECT
 
-public:
-    CInputDlgOutgoingCustomer(QWidget *parent = 0);
-    ~CInputDlgOutgoingCustomer();
-    virtual void keyPressEvent(QKeyEvent * event);
-
-protected:
-    void changeEvent(QEvent *e);
-
 private:
     Ui::CInputDlgOutgoingCustomer *ui;
     QMenu * m_pContextMenu; //table context menu
+    int m_iTimerId;
+    CLastDbChange m_LastDbChange;//class to check-> db change from another client
     QDate m_dtMark;//to check is booking number handmake or not
+    CWorkThread * m_pThread;
 
 public:
-    CWorkThread * m_pThread;
-    //-  
+
+    CInputDlgOutgoingCustomer(QWidget *parent = 0);
+    ~CInputDlgOutgoingCustomer();
+    virtual void keyPressEvent(QKeyEvent * event);
+    void timerEvent(QTimerEvent *event);
     bool set_thread(CWorkThread * pThread);
     bool insert_ware_at_table(QString sData,bool bEdit,bool bSelect);
     bool get_data(CTrade & tr);
     bool init(void);
     bool check_article_counts_on_date(void);
     bool settings(bool bUpdate=false);
+    bool update_wares_table(void);
 
 public slots:
     //context menu
@@ -63,11 +64,14 @@ public slots:
     void checkbox_auto_clicked(void);
     void mask_edit(void);
     bool add_ware(void);
+    bool add_ware_barcode(void);
     bool delete_ware(void);
     bool edit_ware(void);
     bool check_user_input(void);
     bool set_booking_number_nomination(void);
     bool date_changed(QDate dtNew);
+    void press_ok(void);
+    void press_cancel(void);
 };
 
 #endif // CINPUTDLGOUTGOINGCUSTOMER_H

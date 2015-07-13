@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,19 +26,23 @@ CInputDialogArticle::CInputDialogArticle(QWidget *parent) :
 {
     ui->setupUi(this);
     m_pThread=NULL;
-    m_iNewWaregroupId=m_iNewMakerId=-1;
-    ui->lineEditName->setFocus();
-    ui->buttonBox->setEnabled(false);
-    m_sMarkArticleName=QString("");
-    m_sMarkArticleNumber1=QString("");
-    m_sMarkArticleNumber2=QString("");
+    m_iNewWaregroupId=m_iNewMakerId=m_iMarkId=-1;
+    m_sMarkArticleName=QString::fromUtf8("");
+    m_sMarkArticleNumber1=QString::fromUtf8("");
+    m_sMarkArticleNumber2=QString::fromUtf8("");
 
+    //disable auto default buttons
+    ui->pushButtonWaregroup->setAutoDefault(false);
+    ui->pushButtonCancel->setAutoDefault(false);
+    ui->pushButtonOk->setAutoDefault(false);
+    //-
+    ui->lineEditName->setFocus();
+    ui->pushButtonOk->setEnabled(false);
     ui->lineEditInventory->setMaxLength(9);
     ui->lineEditMaxInventory->setMaxLength(9);
 
     //conects
     connect(ui->pushButtonWaregroup,SIGNAL(clicked()),this,SLOT(browse_waregroups()));
-    connect(ui->buttonBox,SIGNAL(accepted()),this,SLOT(pressed_ok()));
     connect(ui->comboBox,SIGNAL(editTextChanged(QString)),this,SLOT(edit_maker_combobox(QString)));
     connect(ui->lineEditWaregroup,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     connect(ui->checkBoxWarning,SIGNAL(clicked()),this,SLOT(checkbox_warning()));
@@ -50,6 +54,8 @@ CInputDialogArticle::CInputDialogArticle(QWidget *parent) :
     connect(ui->lineEditName,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     connect(ui->lineEditArticlenumber,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     connect(ui->lineEditArticlenumber_2,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
+    connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
+    connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
     //-
     setMinimumSize(width(),height());
     setMaximumSize(width(),height());
@@ -58,18 +64,6 @@ CInputDialogArticle::CInputDialogArticle(QWidget *parent) :
 CInputDialogArticle::~CInputDialogArticle()
 {
     delete ui;
-}
-
-void CInputDialogArticle::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
 }
 
 bool CInputDialogArticle::init(int iSelectedWaregroupId)
@@ -116,7 +110,7 @@ bool CInputDialogArticle::edit_maker_combobox(QString s)
         return false;
 
     int i;
-    QString sCondition=QString("name='%1'").arg(s);
+    QString sCondition=QString::fromUtf8("name='%1'").arg(s);
     CPointerMemory memory;
     memory.set_string(&sCondition);
     memory.set_int(&i);
@@ -134,82 +128,6 @@ bool CInputDialogArticle::edit_maker_combobox(QString s)
     }
     check_user_input();
     return true;
-}
-
-bool CInputDialogArticle::pressed_ok(void)
-{
-    if(m_pThread==NULL)
-        return false;
-    if(m_pThread->m_pDbInterface==NULL)
-        return false;
-
-    bool b=true;
-    QString s;
-    QString name;
-    //-check maker-
-    name=ui->comboBox->itemText(ui->comboBox->currentIndex());
-    int maker_id=-1;
-    CMaker mk;
-    if(name.length()>0)
-    {
-        maker_id=m_pThread->m_pDbInterface->maker_get_id(name);//search
-        if(maker_id==-1)
-        {//maker not found?
-            s=QString("Der Hersteller '%1' existiert nicht.").arg(name);
-            QMessageBox msg(QMessageBox::Question,"","");
-            QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
-            msg.addButton(QString("Nein"),QMessageBox::NoRole);
-            msg.setWindowTitle("?");
-            msg.setText(s);
-            msg.setInformativeText("Soll dieser Hersteller angelegt werden?");
-            msg.exec();
-            if(msg.clickedButton()==yesButton)
-            {
-                //insert new maker in db
-                mk.set_name(name);
-                b=m_pThread->m_pDbInterface->maker_add(mk);
-                if(!b)//error
-                {}
-                else
-                    m_iNewMakerId=mk.get_id();
-            }
-        }
-    }
-    if(b)
-    {
-        //check waregroup
-        name=ui->lineEditWaregroup->text();
-        int waregroup_id=-1;
-        CWaregroup wg;
-        m_dlgWaregroup.get_selected_waregroup(s,waregroup_id);
-        if(name!=s && name.length()>0)
-        {
-            waregroup_id=m_pThread->m_pDbInterface->waregroup_get_id(name,-1);
-            if(waregroup_id==-1)
-            {//waregroup not exist.
-                s=QString("Die Warengruppe '%1' existiert nicht im Hauptverzeichnis.").arg(name);
-                QMessageBox msg2(QMessageBox::Question,"","");
-                QPushButton * yesButton2=msg2.addButton(QString("Ja"),QMessageBox::YesRole);
-                msg2.addButton(QString("Nein"),QMessageBox::NoRole);
-                msg2.setWindowTitle("?");
-                msg2.setText(s);
-                msg2.setInformativeText("Soll diese Warengruppe angelegt werden?");
-                msg2.exec();
-                if(msg2.clickedButton()==yesButton2)
-                {
-                    //insert new waregroup in db
-                    wg.set_name(name);
-                    wg.set_parent_id(-1);//insert intro root dir
-                    b=m_pThread->m_pDbInterface->waregroup_add(wg);
-                    if(!b)//error
-                    {}
-                    else
-                        m_iNewWaregroupId=wg.get_id();
-                }
-            }
-        }
-    }
-    return b;
 }
 
 bool CInputDialogArticle::get_data(CArticle & ar)
@@ -260,12 +178,16 @@ bool CInputDialogArticle::get_data(CArticle & ar)
         ar.set_waregroup_id(waregroup_id);
     }
     //baseprice
-    fBaseprice=ui->lineEditBaseprice->text().toFloat(&b);
+    s=ui->lineEditBaseprice->text();
+    s.replace(QString::fromUtf8(","),QString::fromUtf8("."));//format german style
+    fBaseprice=s.toFloat(&b);
     if(!b)
         fBaseprice=0.0;
     ar.set_base_price(fBaseprice);
     //salesprice
-    fSalesprice=ui->lineEditSalesprice->text().toFloat(&b);
+    s=ui->lineEditSalesprice->text();
+    s.replace(QString::fromUtf8(","),QString::fromUtf8("."));//format german style
+    fSalesprice=s.toFloat(&b);
     if(!b)
         fSalesprice=0.0;
     ar.set_sales_price(fSalesprice);
@@ -282,6 +204,8 @@ bool CInputDialogArticle::get_data(CArticle & ar)
             ar.set_warning_limit(i);
     }
     //-
+    ar.set_id(m_iMarkId);
+    //-
     return true;
 }
 
@@ -291,6 +215,12 @@ bool CInputDialogArticle::set_data(CArticle & ar)
         return false;
     if(m_pThread->m_pDbInterface==NULL)
         return false;
+
+    //for edit
+    m_iMarkId=ar.get_id();
+    m_sMarkArticleName=ar.get_name();
+    m_sMarkArticleNumber1=ar.get_articlenumber();
+    m_sMarkArticleNumber2=ar.get_articlenumber2();
 
     //give it trades from article?
     CPointerMemory memory;
@@ -313,25 +243,27 @@ bool CInputDialogArticle::set_data(CArticle & ar)
     ui->lineEditUnit->setText(ar.get_unit());
 
     //inv.
-    s=QString("%1").arg(ar.get_inventory());
+    s=QString::fromUtf8("%1").arg(ar.get_inventory());
     ui->lineEditInventory->setText(s);
     ui->lineEditInventory->setEnabled(bInvEnable);
     //max.inv.
     if(ar.get_max_inventory()>0)
     {
-        s=QString("%1").arg(ar.get_max_inventory());
+        s=QString::fromUtf8("%1").arg(ar.get_max_inventory());
         ui->lineEditMaxInventory->setText(s);
     }
     //baseprice
     if(ar.get_base_price()>0.0)
     {
-        s=QString("%1").arg(ar.get_base_price());
+        s=QString::fromUtf8("%1").arg(ar.get_base_price());
+        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
         ui->lineEditBaseprice->setText(s);
     }
     //salesprice
     if(ar.get_sales_price()>0.0)
     {
-        s=QString("%1").arg(ar.get_sales_price());
+        s=QString::fromUtf8("%1").arg(ar.get_sales_price());
+        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
         ui->lineEditSalesprice->setText(s);
     }
     //maker
@@ -350,7 +282,7 @@ bool CInputDialogArticle::set_data(CArticle & ar)
     //warning limit
     if(ar.get_warning_limit()>=0)
     {//set?
-        s=QString("%1").arg(ar.get_warning_limit());
+        s=QString::fromUtf8("%1").arg(ar.get_warning_limit());
         ui->lineEditWarningLimit->setText(s);
         ui->lineEditWarningLimit->setEnabled(true);
         ui->checkBoxWarning->setChecked(true);
@@ -361,7 +293,8 @@ bool CInputDialogArticle::set_data(CArticle & ar)
         ui->checkBoxWarning->setChecked(false);
     }
     //-
-    ui->buttonBox->setEnabled(true);
+    ui->pushButtonOk->setText(QString::fromUtf8("Änderung(en) anwenden"));
+    ui->pushButtonOk->setEnabled(true);
     return true;
 }
 
@@ -379,7 +312,7 @@ bool CInputDialogArticle::check_user_input(void)
 {
     int i,count=-1,id;
     unsigned int uiInput=0,uiMaxInventory=0;
-    bool bWarning=false,b=true;
+    bool bWarning=false,b=true,bReturn=true;
     QString s3,s2,s,sError;
     QPalette paRed=ui->labelError->palette();
     QPalette paYellow=paRed;
@@ -396,17 +329,7 @@ bool CInputDialogArticle::check_user_input(void)
         if(s2.length()<=0)
         {
             b=false;
-            sError=QString("Fehler: Artikelbezeichnung fehlt");
-        }
-        else
-        {
-            s=QString("name='%1'").arg(s2);
-            m_pThread->set_work(WORK_ARTICLE_GET_COUNT,&memory);
-            if(count>0 && s2!=m_sMarkArticleName)
-            {
-                b=false;
-                sError=QString("Fehler: Artikel mit dieser Bezeichnung existiert schon");
-            }
+            sError=QString::fromUtf8("Fehler: Artikelbezeichnung fehlt");
         }
     }
 
@@ -417,27 +340,41 @@ bool CInputDialogArticle::check_user_input(void)
         if(s.length()>0)
             s.toInt(&b);
         if(!b)
-            sError=QString("Fehler: Warnlimit muss eine Zahl sein");
+            sError=QString::fromUtf8("Fehler: Warnlimit muss eine Zahl sein");
     }
 
     //saleprice
     if(b)
     {
         s=ui->lineEditSalesprice->text();
+        s.replace(QString::fromUtf8(","),QString::fromUtf8("."));//format german style
         if(s.length()>0)
             s.toFloat(&b);
         if(!b)
-            sError=QString("Fehler: Verkaufspreis muss eine Zahl sein");
+            sError=QString::fromUtf8("Fehler: Verkaufspreis muss eine Zahl sein");
     }
 
     //baseprice
     if(b)
     {
         s=ui->lineEditBaseprice->text();
+        s.replace(QString::fromUtf8(","),QString::fromUtf8("."));//format german style
         if(s.length()>0)
             s.toFloat(&b);
         if(!b)
-            sError=QString("Fehler: Einkaufspreis muss eine Zahl sein");
+            sError=QString::fromUtf8("Fehler: Einkaufspreis muss eine Zahl sein");
+    }
+
+    //inv
+    if(b)
+    {
+        s=ui->lineEditInventory->text();
+        if(s.length()>0)//input?
+        {
+            uiInput=s.toUInt(&b,10);
+            if(!b)
+                sError=QString::fromUtf8("Fehler: Bestand muss eine Zahl sein");
+        }
     }
 
     //max inv.
@@ -447,65 +384,22 @@ bool CInputDialogArticle::check_user_input(void)
         if(s.length()>0)
             uiMaxInventory=s.toUInt(&b);
         if(!b)
-            sError=QString("Fehler: max.Lagerkapazität muss eine Zahl sein");
+            sError=QString::fromUtf8("Fehler: max.Lagerkapazität muss eine Zahl sein");
     }
 
-    //inventory
-    if(b)
-    {
-        s=ui->lineEditInventory->text();
-        if(s.length()>0)//input?
-        {
-            uiInput=s.toUInt(&b,10);
-            if(!b)
-                sError=QString("Fehler: Bestand muss eine Zahl sein");
-            else
-            {
-                s=ui->lineEditMaxInventory->text();
-                if(s.length()>0)
-                    uiMaxInventory=s.toUInt(&b);
-                if(b)
-                {
-                    if(uiInput>uiMaxInventory)
-                    {
-                        sError=QString("Fehler: Bestand muss kleiner sein als die Lagerkapazität");
-                        b=false;
-                    }
-                }
-            }
-        }
-    }
-
-    //warnings
+    //warnings----------------------------------------------------
     if(b && m_pThread!=NULL)
     {
-        //maker
-        s2=ui->comboBox->itemText(ui->comboBox->currentIndex());
-        s=QString("name='%1'").arg(s2);
-        m_pThread->set_work(WORK_MAKER_GET_COUNT,&memory);
-        if(!s2.isEmpty())
-        {
-            if(count<=0)//not found
-            {
-                sError=QString("Warnung: Hersteller existiert nicht");
-                bWarning=true;
-            }
-        }
-
-        //waregroup
+        //article name
         if(!bWarning)
         {
-            s2=ui->lineEditWaregroup->text();
-            m_dlgWaregroup.get_selected_waregroup(s3,id);
-            if(s2!=s3 && s2.length()>0)
+            s2=ui->lineEditName->text();
+            s=QString::fromUtf8("name='%1'").arg(s2);
+            m_pThread->set_work(WORK_ARTICLE_GET_COUNT,&memory);
+            if(count>0 && s2!=m_sMarkArticleName)
             {
-                s=QString("name='%1' AND parent_id=-1").arg(s2);
-                m_pThread->set_work(WORK_WAREGROUP_GET_COUNT,&memory);
-                if(count<=0)
-                {
-                    sError=QString("Warnung: Warengruppe existiert nicht im Hauptverzeichnis");
-                    bWarning=true;
-                }
+                sError=QString::fromUtf8("Warnung: Artikel mit dieser Bezeichnung existiert schon");
+                bWarning=true;
             }
         }
 
@@ -519,15 +413,16 @@ bool CInputDialogArticle::check_user_input(void)
                     i=0;
                 else
                     i=1;
-                s=QString("articlenumber='%1'").arg(s2);
+                s=QString::fromUtf8("articlenumber='%1'").arg(s2);
                 m_pThread->set_work(WORK_ARTICLE_GET_COUNT,&memory);
                 if(count>i)//articlenumber found? (edit ? >1)
                 {
-                    sError=QString("Warnung: 1.Artikelnummer ist bereits vergeben");
+                    sError=QString::fromUtf8("Warnung: 1.Artikelnummer ist bereits vergeben");
                     bWarning=true;
                 }
             }
         }
+
         if(!bWarning)
         {
             s2=ui->lineEditArticlenumber_2->text();
@@ -537,12 +432,66 @@ bool CInputDialogArticle::check_user_input(void)
                     i=0;
                 else
                     i=1;
-                s=QString("articlenumber2='%1'").arg(s2);
+                s=QString::fromUtf8("articlenumber2='%1'").arg(s2);
                 m_pThread->set_work(WORK_ARTICLE_GET_COUNT,&memory);
                 if(count>i)//articlenumber2 found? (edit ? >1)
                 {
-                    sError=QString("Warnung: 2.Artikelnummer ist bereits vergeben");
+                    sError=QString::fromUtf8("Warnung: 2.Artikelnummer ist bereits vergeben");
                     bWarning=true;
+                }
+            }
+        }
+
+        //maker
+        s2=ui->comboBox->itemText(ui->comboBox->currentIndex());
+        s=QString::fromUtf8("name='%1'").arg(s2);
+        m_pThread->set_work(WORK_MAKER_GET_COUNT,&memory);
+        if(!s2.isEmpty())
+        {
+            if(count<=0)//not found
+            {
+                sError=QString::fromUtf8("Warnung: Hersteller existiert nicht");
+                bWarning=true;
+            }
+        }
+
+        //waregroup
+        if(!bWarning)
+        {
+            s2=ui->lineEditWaregroup->text();
+            m_dlgWaregroup.get_selected_waregroup(s3,id);
+            if(s2!=s3 && s2.length()>0)
+            {
+                s=QString::fromUtf8("name='%1' AND parent_id=-1").arg(s2);
+                m_pThread->set_work(WORK_WAREGROUP_GET_COUNT,&memory);
+                if(count<=0)
+                {
+                    sError=QString::fromUtf8("Warnung: Warengruppe existiert nicht im Hauptverzeichnis");
+                    bWarning=true;
+                }
+            }
+        }
+
+        //inventory
+        if(!bWarning)
+        {
+            s=ui->lineEditInventory->text();
+            if(s.length()>0)//input?
+            {
+                uiInput=s.toUInt(&b,10);
+                if(b)
+                {
+                    s=ui->lineEditMaxInventory->text();
+                    if(s.length()>0)
+                        uiMaxInventory=s.toUInt(&b);
+                    if(b)
+                    {
+                        if(uiInput>uiMaxInventory)
+                        {
+                            sError=QString::fromUtf8("Warnung: Bestand ist grösser als die Lagerkapazität");
+                            bWarning=true;
+                        }
+                    }
                 }
             }
         }
@@ -557,6 +506,7 @@ bool CInputDialogArticle::check_user_input(void)
         {//error
             ui->labelError->setPalette(paRed);//text color red
             ui->labelError->setText(sError);
+            bReturn=false;
         }
         else
         {//warning
@@ -564,6 +514,131 @@ bool CInputDialogArticle::check_user_input(void)
             ui->labelError->setText(sError);
         }
     }
-    ui->buttonBox->setEnabled(b);
-    return true;
+    ui->pushButtonOk->setEnabled(b);
+    return bReturn;
+}
+
+void CInputDialogArticle::press_ok(void)
+{
+    CMaker mk;
+    CArticle ar;
+    CWaregroup wg;
+    QString s,name;
+    bool b,bAdd=false,bBreak=false;
+    int i,iReturn=1,maker_id=-1,waregroup_id=-1;
+
+    QMessageBox msg(QMessageBox::Question,"","");
+    QPushButton * yesButton=msg.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
+    msg.setWindowTitle("?");
+    msg.setText(s);
+    msg.setInformativeText(QString::fromUtf8("Der Datensatz wurde von einer anderen Programminstanz gelöscht!\nSoll dieser Artikel neu angelegt werden?"));
+
+    QMessageBox msg2(QMessageBox::Question,"","");
+    QPushButton * yesButton2=msg2.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg2.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
+    msg2.setWindowTitle("?");
+    msg2.setText(s);
+    msg2.setInformativeText("Soll dieser Hersteller angelegt werden?");
+
+    QMessageBox msg3(QMessageBox::Question,"","");
+    QPushButton * yesButton3=msg3.addButton(QString::fromUtf8("Ja"),QMessageBox::YesRole);
+    msg3.addButton(QString::fromUtf8("Nein"),QMessageBox::NoRole);
+    msg3.setWindowTitle("?");
+    msg3.setText(s);
+    msg3.setInformativeText("Soll diese Warengruppe angelegt werden?");
+
+
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL)
+        {
+            if(!check_user_input())
+                iReturn=-1;//error
+            else
+            {
+                //check by edit-mode, another client delete record?
+                if(m_iMarkId>0)//edit-mode?
+                {
+                    s=QString::fromUtf8("id = %1").arg(m_iMarkId);
+                    s+=QString::fromUtf8(" AND name = '%1'").arg(m_sMarkArticleName);
+                    i=m_pThread->m_pDbInterface->article_get_count(s);
+                    if(i<=0)//record delete?
+                    {
+                        msg.exec();
+                        if(msg.clickedButton()!=yesButton)
+                        {
+                            iReturn=0;
+                            bBreak=true;
+                        }
+                        else
+                            bAdd=true;
+                    }
+                }
+            }
+
+            if(!bBreak)
+            {
+                //-check maker-
+                name=ui->comboBox->itemText(ui->comboBox->currentIndex());
+                if(name.length()>0)
+                {
+                    maker_id=m_pThread->m_pDbInterface->maker_get_id(name);//search
+                    if(maker_id==-1)
+                    {//maker not found?
+                        s=QString::fromUtf8("Der Hersteller '%1' existiert nicht.").arg(name);
+                        msg2.exec();
+                        if(msg2.clickedButton()==yesButton2)
+                        {
+                            //insert new maker in db
+                            mk.set_name(name);
+                            b=m_pThread->m_pDbInterface->maker_add(mk);
+                            if(b)
+                                m_iNewMakerId=mk.get_id();
+                        }
+                    }
+                }
+                if(b)
+                {
+                    //check waregroup
+                    name=ui->lineEditWaregroup->text();
+                    m_dlgWaregroup.get_selected_waregroup(s,waregroup_id);
+                    if(name!=s && name.length()>0)
+                    {
+                        waregroup_id=m_pThread->m_pDbInterface->waregroup_get_id(name,-1);
+                        if(waregroup_id==-1)
+                        {//waregroup not exist.
+                            s=QString::fromUtf8("Die Warengruppe '%1' existiert nicht im Hauptverzeichnis.").arg(name);
+                            msg3.exec();
+                            if(msg3.clickedButton()==yesButton3)
+                            {
+                                //insert new waregroup in db
+                                wg.set_name(name);
+                                wg.set_parent_id(-1);//insert intro root dir
+                                b=m_pThread->m_pDbInterface->waregroup_add(wg);
+                                if(b)
+                                    m_iNewWaregroupId=wg.get_id();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //-
+    if(bAdd)
+    {
+        get_data(ar);
+        m_pThread->m_pDbInterface->article_add(ar);
+        m_iMarkId=ar.get_id();//mark new id
+        iReturn=1;
+    }
+    //-
+    if(iReturn>=0)
+        done(iReturn);
+}
+
+void CInputDialogArticle::press_cancel(void)
+{
+    close();
 }

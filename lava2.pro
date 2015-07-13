@@ -2,6 +2,8 @@
 # Project created by QtCreator 2009-07-13T09:34:28
 # -------------------------------------------------
 QT += sql
+QT += widgets
+QT += printsupport
 TARGET = lava2
 TEMPLATE = app
 RC_FILE = lava2app.rc
@@ -28,8 +30,12 @@ SOURCES += main.cpp \
     cinputdialogordering.cpp \
     cinputdialogwaregroup.cpp \
     cprintjob.cpp \
+    cexportcsv.cpp \
+    cinputdialogimport.cpp \
     cinputdialogtablesetting.cpp \
-    cexportcsv.cpp
+    clastdbchange.cpp \
+    cinputdlgbarcode.cpp \
+    cinputdialogexport.cpp
 HEADERS += mainwindow.h \
     data_classes.h \
     cinputdialogbrowsewaregroup.h \
@@ -54,11 +60,14 @@ HEADERS += mainwindow.h \
     cinputdialogwaregroup.h \
     cprintjob.h \
     cinputdialogtablesetting.h \
-    cexportcsv.h
+    cexportcsv.h \
+    cinputdialogimport.h \
+    clastdbchange.h \
+    cinputdlgbarcode.h \
+    cinputdialogexport.h
 FORMS += mainwindow.ui \
     cinputdialogbrowsewaregroup.ui \
     cinputdialogcustomer.ui \
-    cinputdlgtrade.ui \
     cinputdlgorderingincoming.ui \
     cinputdlgoutgoingcustomer.ui \
     cinputdialogarticleallowance.ui \
@@ -71,7 +80,11 @@ FORMS += mainwindow.ui \
     cinputdialogmaker.ui \
     cinputdialogordering.ui \
     cinputdialogwaregroup.ui \
-    cinputdialogtablesetting.ui
+    cinputdialogimport.ui \
+    cinputdialogtablesetting.ui \
+    cinputdlgbarcode.ui \
+    cinputdlgtrade.ui \
+    cinputdialogexport.ui
 
 RESOURCES += \
     lava2res.qrc

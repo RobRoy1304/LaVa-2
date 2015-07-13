@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,6 +45,9 @@ class CMyTableWidgetItem: public QTableWidgetItem
          bool b1,b2,bReturn=false;
          QString s1=this->text();
          QString s2=other.text();
+         //-
+         s1.replace(QString::fromUtf8(","),QString::fromUtf8("."));//german text style , not .
+         s2.replace(QString::fromUtf8(","),QString::fromUtf8("."));
          //-
          ls=s1.split(" ");
          if(ls.count()>0)
@@ -118,7 +121,7 @@ public:
     bool get_selected_table_item_value(QTableWidget *pTable,int & iValue, int iColumn=-1);//iColumn=-1 -> last column
     bool get_selected_table_item_value(QTableWidget *pTable,QString & sValue, int iColumn=-1);//iColumn=-1 -> last column
     bool mod_row(QTableWidget * pTable, QList<CTableItemData> & lsData, int iPosition=ITEM_POSITION_BOTTOM, bool bBlock=false, bool bUpdate=false, int iSelectId=-1,int iIdColumn=-1);//bUpdate=false->insert,true->update | iSelectId=-1 -> no select  |  iIdColumn=-1 -> last column
-    bool mod_row(QTableWidget * pTable, QList<CTableItemData> & lsData, int iPosition=ITEM_POSITION_BOTTOM, bool bBlock=false, bool bUpdate=false, QString sSelectValue=QString(""),int iIdColumn=-1);//bUpdate=false->insert,true->update | iSelectValue="" -> no select  |  iIdColumn=-1 -> last column
+    bool mod_row(QTableWidget * pTable, QList<CTableItemData> & lsData, int iPosition=ITEM_POSITION_BOTTOM, bool bBlock=false, bool bUpdate=false, QString sSelectValue=QString::fromUtf8(""),int iIdColumn=-1);//bUpdate=false->insert,true->update | iSelectValue="" -> no select  |  iIdColumn=-1 -> last column
     bool fill_row(QTableWidget * pTable,int iRow,QList<CTableItemData> & lsData);
     bool update_table_by_tablecolumnsdata(CTableColumnsData & tcdOld,CTableColumnsData & tcdNew, QList<QString> & lsHeaderNames);
 
@@ -131,7 +134,7 @@ public:
     //maker -tables-
     bool maker_update_tablewidget(QTableWidget * pTable, QList<int> & lsIDs, int iSelectedID=-1);
     bool maker_insert_row(QTableWidget * pTable, CMaker & mk, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
-    bool maker_update_row(QTableWidget * pTable, CMaker & mk, bool bSelect=false);
+    bool maker_update_row(QTableWidget * pTable, CMaker & mk, bool bSelect=false, bool bAddIfNotExis=true);
     bool maker_format(CMaker &mk, QList<CTableItemData> & lsData);
     //maker -list-
     bool maker_update_list(QListWidget * pList, int iID);//if iId==-1 ->empty list
@@ -142,7 +145,7 @@ public:
     //dealer -tables-
     bool dealer_update_tablewidget(QTableWidget * pTable, QList<int> & lsIDs, int iSelectedID=-1);
     bool dealer_insert_row(QTableWidget * pTable, CDealer & de, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
-    bool dealer_update_row(QTableWidget * pTable, CDealer & de, bool bSelect=false);
+    bool dealer_update_row(QTableWidget * pTable, CDealer & de, bool bSelect=false, bool bAddIfNotExis=true);
     bool dealer_format(CDealer &de, QList<CTableItemData> & lsData);
     //dealer -list-
     bool dealer_update_list(QListWidget * pList, int iID=-1);//if iId==-1 ->empty list
@@ -153,7 +156,7 @@ public:
     //customer -tables-
     bool customer_update_tablewidget(QTableWidget * pTable, QList<int> & lsIDs, int iSelectedID=-1);
     bool customer_insert_row(QTableWidget * pTable, CCustomer & cu, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
-    bool customer_update_row(QTableWidget * pTable, CCustomer & cu, bool bSelect=false);
+    bool customer_update_row(QTableWidget * pTable, CCustomer & cu, bool bSelect=false, bool bAddIfNotExis=true);
     bool customer_format(CCustomer & cu, QList<CTableItemData> & lsData);
     //customer -list-
     bool customer_update_list(QListWidget * pList, int iID=-1);//if iId==-1 ->empty list
@@ -163,7 +166,7 @@ public:
     bool article_update_tablewidget(QTableWidget * pTable, QList<int> & lsIDs, int iFormatType, int iSelectedID=-1);
     bool article_update_tablewidget_wares_list(QTableWidget * pTable,QList<QString> & lsWares,int iFormatType);
     bool article_insert_row(QTableWidget * pTable, CArticle & ar, int iFormatType, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
-    bool article_update_row(QTableWidget * pTable, CArticle & ar, int iFormatType, bool bSelect=false);
+    bool article_update_row(QTableWidget * pTable, CArticle & ar, int iFormatType, bool bSelect=false, bool bAddIfNotExis=true);
     bool article_format(CArticle & ar, QList<CTableItemData> & lsData, int iFormatType);
     bool article_update_row_wareslist(QTableWidget * pTable,QString sData,bool bEdit, bool bSelect);
 
@@ -172,15 +175,15 @@ public:
     bool ordering_update_tablewidget(QTableWidget * pTable, QList<int> & lsIDs, int iFormatType, int iSelectedID=-1);
     bool ordering_update_tablewidget_wares_list(QTableWidget * pTable, int iOrderingID, int iFormatType);
     bool ordering_insert_row(QTableWidget * pTable, COrdering & ord, int iFormatType, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
-    bool ordering_update_row(QTableWidget * pTable, COrdering & ord, int iFormatType, bool bSelect=false);
+    bool ordering_update_row(QTableWidget * pTable, COrdering & ord, int iFormatType, bool bSelect=false, bool bAddIfNotExis=true);
     bool ordering_format(COrdering & ord, QList<CTableItemData> & lsData, int iFormatType);
 
 
     //trade -tables-
-    bool trade_update_tablewidget(QTableWidget * pTable, QList<QString> & lsBookingNumber, QString sSelect=QString(""));
+    bool trade_update_tablewidget(QTableWidget * pTable, QList<QString> & lsBookingNumber, QString sSelect=QString::fromUtf8(""));
     bool trade_update_tablewidget_wares_list(QTableWidget * pTable, QString sBookingNumber);
     bool trade_insert_row(QTableWidget * pTable, CTrade & trade, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
-    bool trade_update_row(QTableWidget * pTable, CTrade & trade, bool bSelect=false);
+    bool trade_update_row(QTableWidget * pTable, CTrade & trade, bool bSelect=false, bool bAddIfNotExis=true);
     bool trade_format(CTrade & trade, QList<CTableItemData> & lsData);
     void trade_get_icon(CTrade & trade, CTableItemData & ti, int iAlignment=TABLE_ALIGNMENT_LEFT);
     //trade -list-
@@ -194,7 +197,7 @@ public:
     //inventory -tables-
     bool inventory_update_tablewidget(QTableWidget * pTable, QList<int> & lsIDs, int iSelectedID=-1);
     bool inventory_insert_row(QTableWidget * pTable, CArticle & ar, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
-    bool inventory_update_row(QTableWidget * pTable, CArticle & ar, bool bSelect=false);
+    bool inventory_update_row(QTableWidget * pTable, CArticle & ar, bool bSelect=false, bool bAddIfNotExis=true);
     bool inventory_format(CArticle & ar, QList<CTableItemData> & lsData);
     void inventory_get_icon_and_warning_limit(CArticle & ar, CTableItemData & ti, int iAlignment=TABLE_ALIGNMENT_LEFT);
     void inventory_get_icon_and_precent(CArticle & ar, CTableItemData & ti, int iAlignment=TABLE_ALIGNMENT_LEFT);
@@ -213,6 +216,8 @@ public:
     bool balancelist_update_tablewidget(QTableWidget * pTable, QDate dtFrom, QDate dtTo, int iArticleId);
     bool warnlist_update_tablewidget(QTableWidget * pTable);
     bool inventorys_on_date_update_tablewidget(QTableWidget * pTable, QDate dt);
+    bool inventorylist_update_tablewidget(QTableWidget * pTable);
+    bool list_value_of_goods(QTableWidget * pTable, QDate dt);
 };
 
 #endif // CWIDGETINTERFACE_H

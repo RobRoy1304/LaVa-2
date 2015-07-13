@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>900</width>
-    <height>534</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,25 +17,6 @@
    <iconset resource="lava2res.qrc">
     <normaloff>:/images/res/icon.ico</normaloff>:/images/res/icon.ico</iconset>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>490</y>
-     <width>751</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-   <property name="centerButtons">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QComboBox" name="comboBoxMask">
    <property name="geometry">
     <rect>
@@ -204,7 +185,7 @@
     <number>0</number>
    </property>
    <property name="maximum">
-    <number>99999</number>
+    <number>9999999</number>
    </property>
    <property name="value">
     <number>1</number>
@@ -299,7 +280,33 @@
     </rect>
    </property>
    <property name="text">
-    <string>dieses Fenster permanent geöffnet halten</string>
+    <string>dieses Fenster zum schnelleren hinzufügen geöffnet halten</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonOk">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>500</y>
+     <width>171</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>hinzufügen</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonCancel">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>500</y>
+     <width>131</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Fenster schliessen</string>
    </property>
   </widget>
  </widget>
@@ -309,45 +316,14 @@
   <tabstop>lineEditMask</tabstop>
   <tabstop>pushButtonMaskSet</tabstop>
   <tabstop>checkBoxAuto</tabstop>
+  <tabstop>checkBoxNotCloseTheDialog</tabstop>
   <tabstop>tableWidgetArticle</tabstop>
   <tabstop>textBrowser</tabstop>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>pushButtonCancel</tabstop>
+  <tabstop>pushButtonOk</tabstop>
  </tabstops>
  <resources>
   <include location="lava2res.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>CInputDialogArticleAllowance</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>CInputDialogArticleAllowance</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

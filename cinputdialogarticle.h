@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,14 +32,21 @@ class CInputDialogArticle : public QDialog
     Q_OBJECT
 
 public:
-    CWorkThread * m_pThread;
-    CInputdialogBrowseWaregroup m_dlgWaregroup;
     int m_iNewMakerId;
     int m_iNewWaregroupId;
-    QString m_sMarkArticleName;//for edit
-    QString m_sMarkArticleNumber1;//for edit
-    QString m_sMarkArticleNumber2;//for edit
 
+private:
+    Ui::CInputDialogArticle *ui;
+    CWorkThread * m_pThread;
+    CInputdialogBrowseWaregroup m_dlgWaregroup;
+
+    //for edit
+    int m_iMarkId;
+    QString m_sMarkArticleName;
+    QString m_sMarkArticleNumber1;
+    QString m_sMarkArticleNumber2;
+
+public:
     explicit CInputDialogArticle(QWidget *parent = 0);
     ~CInputDialogArticle();
     bool init(int iSelectedWaregroupId=-1);
@@ -47,18 +54,13 @@ public:
     bool get_data(CArticle & ar);
     bool set_data(CArticle & ar);
 
-private:
-    Ui::CInputDialogArticle *ui;
-
-protected:
-    void changeEvent(QEvent *e);
-
 public slots:
     bool browse_waregroups(void);
-    bool pressed_ok(void);
     bool edit_maker_combobox(QString s);
     bool checkbox_warning(void);
     bool check_user_input(void);
+    void press_ok(void);
+    void press_cancel(void);
 };
 
 #endif // CINPUTDIALOGARTICLE_H

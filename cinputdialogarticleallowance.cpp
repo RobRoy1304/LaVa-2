@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #include "cinputdialogarticleallowance.h"
 #include "ui_cinputdialogarticleallowance.h"
+#include "cinputdlgtrade.h"
 
 CInputDialogArticleAllowance::CInputDialogArticleAllowance(QWidget *parent) :
     QDialog(parent),
@@ -30,11 +31,18 @@ CInputDialogArticleAllowance::CInputDialogArticleAllowance(QWidget *parent) :
     m_pThread=NULL;
     m_dtDate=QDate(0,0,0);
     //-
+
+    //disable auto default buttons
+    ui->pushButtonCancel->setAutoDefault(false);
+    ui->pushButtonMaskSet->setAutoDefault(false);
+    ui->pushButtonOk->setAutoDefault(false);
+
     settings(false);//load & set settings
-    ui->buttonBox->setEnabled(false);
+    ui->pushButtonOk->setEnabled(false);   
 
     //focus
     ui->spinBox->setFocus();
+    ui->spinBox->setMinimum(1);
 
     //connects
     connect(ui->pushButtonMaskSet,SIGNAL(clicked()),this,SLOT(mask_changed()));
@@ -43,6 +51,8 @@ CInputDialogArticleAllowance::CInputDialogArticleAllowance(QWidget *parent) :
     connect(ui->lineEditMask,SIGNAL(textChanged(QString)),this,SLOT(mask_edit()));
     connect(ui->comboBoxMask,SIGNAL(currentIndexChanged(QString)),this,SLOT(mask_edit()));
     connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(count_changed()));
+    connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
+    connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -52,18 +62,6 @@ CInputDialogArticleAllowance::~CInputDialogArticleAllowance()
 {
     settings(true);//save settings if update
     delete ui;
-}
-
-void CInputDialogArticleAllowance::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
 }
 
 void CInputDialogArticleAllowance::keyPressEvent(QKeyEvent * event)
@@ -183,6 +181,20 @@ bool CInputDialogArticleAllowance::set(CWorkThread * pThread, QTableWidget * pPa
     m_iType=iType;
     m_dtDate=dtDate;
 
+    //set db in class CLastDBChange
+    if(pThread!=NULL)
+    {
+        m_LastDbChange.set_db(pThread->m_pDbInterface);
+    }
+
+    //ok-button
+    if(m_iArticleId>0)
+    {//edit-mode
+        ui->pushButtonOk->setText(QString::fromUtf8("Änderung(en) anwenden"));
+        ui->pushButtonCancel->setText(QString::fromUtf8("abbrechen"));
+        ui->pushButtonOk->setEnabled(true);
+    }
+
     //update article table with article
     update_table();
 
@@ -221,16 +233,7 @@ void CInputDialogArticleAllowance::mask_changed(void)
 
 void CInputDialogArticleAllowance::count_changed(void)
 {
-    if(ui->spinBox->value()<=0)
-    {
-        ui->buttonBox->setEnabled(false);
-        ui->textBrowser->clear();
-    }
-    else
-    {
-        ui->buttonBox->setEnabled(true);
-        check_count();
-    }
+    check_count();
 }
 
 bool CInputDialogArticleAllowance::update_table(void)
@@ -287,7 +290,7 @@ bool CInputDialogArticleAllowance::update_table(void)
     {
     }
     //-
-    ui->buttonBox->setEnabled(false);
+    ui->pushButtonOk->setEnabled(false);
     //-
     return b;
 }
@@ -372,6 +375,7 @@ bool CInputDialogArticleAllowance::check_count(void)
     //-
     max_count_on_date=get_count_on_date(article_id);
     //-
+    ui->textBrowser->setTextColor(QColor(Qt::darkRed));
     ui->textBrowser->clear(); //clear error text field
     //-
     inventory=ar.get_inventory();
@@ -398,10 +402,10 @@ bool CInputDialogArticleAllowance::check_count(void)
                     //-
                     if(i<0)//to many
                     {
-                        s=QString("Warnung: Die maximale Kapazität dieses Artikels wird beim Eingang der Bestellung um \"%1").arg(i*-1);
+                        s=QString::fromUtf8("Warnung: Die maximale Kapazität dieses Artikels wird beim Eingang der Bestellung um \"%1").arg(i*-1);
                         if(ar.get_unit().length()>0)
                             s+=QString(" %1").arg(ar.get_unit());
-                        s+=QString("\" überschritten.");
+                        s+=QString::fromUtf8("\" überschritten.");
                         ui->textBrowser->insertPlainText(s);
                     }
                     b=true;
@@ -416,10 +420,10 @@ bool CInputDialogArticleAllowance::check_count(void)
                     //-
                     if(i<0)//to many
                     {
-                        s=QString("Warnung: Die maximale Kapazität dieses Artikels wird um \"%1").arg(i*-1);
+                        s=QString::fromUtf8("Warnung: Die maximale Kapazität dieses Artikels wird um \"%1").arg(i*-1);
                         if(ar.get_unit().length()>0)
-                            s+=QString(" %1").arg(ar.get_unit());
-                        s+=QString("\" überschritten.");
+                            s+=QString::fromUtf8(" %1").arg(ar.get_unit());
+                        s+=QString::fromUtf8("\" überschritten.");
                         ui->textBrowser->insertPlainText(s);
                     }
                     b=true;
@@ -443,7 +447,7 @@ bool CInputDialogArticleAllowance::check_count(void)
                     //-
                     if(!b)//error
                     {
-                        s=QString("Fehler: Am '%1' ist der Bestand dieses Artikels bei ").arg(m_dtDate.toString("dd.MM.yyyy"));
+                        s=QString("Fehler: Am '%1' liegt der Bestand dieses Artikels bei").arg(m_dtDate.toString("dd.MM.yyyy"));
                         s+=QString("\"%1").arg(i);
                         if(ar.get_unit().length()>0)
                             s+=QString(" %1").arg(ar.get_unit());
@@ -455,7 +459,7 @@ bool CInputDialogArticleAllowance::check_count(void)
         }
     }
     //-
-    ui->buttonBox->setEnabled(b);
+    ui->pushButtonOk->setEnabled(b);
     //-
     return b;
 }
@@ -477,4 +481,72 @@ bool CInputDialogArticleAllowance::set_count(int iCount)
 {
     ui->spinBox->setValue(iCount);//set count
     return true;
+}
+
+int CInputDialogArticleAllowance::get_count(void)
+{
+    return ui->spinBox->value();//get count
+}
+
+bool CInputDialogArticleAllowance::set_mask(QString sMask)
+{
+    ui->lineEditMask->setText(sMask);
+    return true;
+}
+
+QString CInputDialogArticleAllowance::get_mask(void)
+{
+    return ui->lineEditMask->text();
+}
+
+void CInputDialogArticleAllowance::press_ok(void)
+{
+    QString sData;
+
+    //check interim time another client change db
+    if(check_count())
+    {//value ok?
+
+        //add row in table
+        if(m_iArticleId<=0)
+        {//add-mode
+            get_data(sData);
+            insert_ware_at_parent_table(sData);
+        }
+        //-
+        if(!ui->checkBoxNotCloseTheDialog->isChecked() || m_iArticleId>0)//not checked or edit-mode
+            done(1);
+        else
+        {
+            ui->textBrowser->setTextColor(QColor(Qt::darkGreen));
+            ui->textBrowser->setText(QString::fromUtf8("Artikel zur Warenliste hinzugefügt."));
+            ui->tableWidgetArticle->clearSelection();
+            //-
+            ui->spinBox->setFocus();
+            ui->spinBox->findChild<QLineEdit*>()->setSelection(0,9999999);//select text value
+        }
+    }
+}
+
+void CInputDialogArticleAllowance::press_cancel(void)
+{
+    close();
+}
+
+bool CInputDialogArticleAllowance::insert_ware_at_parent_table(QString sData)
+{
+    bool b=false,bEdit=false;
+    //-
+    if(m_pThread!=NULL && m_pParentTable!=NULL)
+    {
+        if(m_pThread->m_pWidgets!=NULL)
+        {
+            if(m_iArticleId>0)
+                bEdit=true;
+            //-
+            m_pThread->m_pWidgets->article_update_row_wareslist(m_pParentTable,sData,bEdit,true);
+        }
+    }
+    //-
+    return b;
 }

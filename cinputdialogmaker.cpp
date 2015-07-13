@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,9 +25,17 @@ CInputDialogMaker::CInputDialogMaker(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->lineEditName->setFocus();
+    ui->pushButtonOk->setEnabled(false);
     m_pThread=NULL;
-    ui->buttonBox->setEnabled(false);
+    m_iMarkId=-1;
+
+    //disable auto default buttons
+    ui->pushButtonCancel->setAutoDefault(false);
+    ui->pushButtonOk->setAutoDefault(false);
+    //-
     connect(ui->lineEditName,SIGNAL(textChanged(QString)),this,SLOT(check_user_input(QString)));
+    connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
+    connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -36,19 +44,6 @@ CInputDialogMaker::CInputDialogMaker(QWidget *parent) :
 CInputDialogMaker::~CInputDialogMaker()
 {
     delete ui;
-}
-
-
-void CInputDialogMaker::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
 }
 
 bool CInputDialogMaker::get_data(CMaker & mk)
@@ -61,11 +56,16 @@ bool CInputDialogMaker::get_data(CMaker & mk)
     mk.set_homepage(ui->lineEditHomepage->text());
     mk.set_contectperson(ui->lineEditContect->text());
     mk.set_comment(ui->lineEditComment->text());
+    mk.set_id(m_iMarkId);
     return true;
 }
 
 bool CInputDialogMaker::set_data(CMaker & mk)
 {
+    //for edit
+    m_iMarkId=mk.get_id();
+    m_sMarkName=mk.get_name();
+
     ui->lineEditName->setText(mk.get_name());
     ui->lineEditAdress->setText(mk.get_adress());
     ui->lineEditCallnumbers->setText(mk.get_callnumber());
@@ -74,7 +74,8 @@ bool CInputDialogMaker::set_data(CMaker & mk)
     ui->lineEditHomepage->setText(mk.get_homepage());
     ui->lineEditContect->setText(mk.get_contectperson());
     ui->lineEditComment->setText(mk.get_comment());
-    m_sMarkName=mk.get_name();
+    ui->pushButtonOk->setText(QString::fromUtf8("Änderung(en) anwenden"));
+    ui->pushButtonOk->setEnabled(true);
     return true;
 }
 
@@ -86,26 +87,84 @@ bool CInputDialogMaker::check_user_input(QString s)
     CPointerMemory memory;
     memory.set_string(&condition);
     memory.set_int(&count);
-    if(s.length()<=0)
+
+    if(m_pThread!=NULL)
     {
-        text=QString("Fehler: Herstellername fehlt");
-        b=false;
-    }
-    else
-    {
-        if(m_pThread!=NULL)
+        if(m_pThread->m_pDbInterface!=NULL)
         {
-            m_pThread->set_work(WORK_MAKER_GET_COUNT,&memory);
-            if(count>0 && m_sMarkName!=s)//check give maker = name?
+            if(s.length()<=0)
             {
-                text=QString("Fehler: Hersteller gibt es schon");
+                text=QString("Fehler: Herstellername fehlt");
                 b=false;
+            }
+            else
+            {
+                m_pThread->set_work(WORK_MAKER_GET_COUNT,&memory);
+                if(count>0 && m_sMarkName!=s)//check give maker = name?
+                {
+                    text=QString("Fehler: Hersteller gibt es schon");
+                    b=false;
+                }
+            }
+            //-
+            ui->pushButtonOk->setEnabled(b);
+            ui->labelNameError->setText(text);//set comment
+        }
+    }
+    return b;
+}
+
+void CInputDialogMaker::press_ok(void)
+{
+    int i,iReturn=1;
+    QString s;
+    CMaker mk;
+    QMessageBox msg(QMessageBox::Question,"","");
+    QPushButton * yesButton=msg.addButton(QString("Ja"),QMessageBox::YesRole);
+    msg.addButton(QString("Nein"),QMessageBox::NoRole);
+    msg.setWindowTitle("?");
+    msg.setText(s);
+    msg.setInformativeText(QString::fromUtf8("Der Datensatz wurde von einer anderen Programminstanz gelöscht!\nSoll dieser Hersteller neu angelegt werden?"));
+    //-
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pDbInterface!=NULL)
+        {
+            //another client create a record with this name?
+            if(!check_user_input(ui->lineEditName->text()))
+                iReturn=-1;//error
+            else
+            {
+                //check by edit-mode, another client delete record?
+                if(m_iMarkId>0)//edit-mode?
+                {
+                    s=QString("id = %1").arg(m_iMarkId);
+                    s+=QString(" AND name = '%1'").arg(m_sMarkName);
+                    i=m_pThread->m_pDbInterface->maker_get_count(s);
+                    if(i<=0)//record delete?
+                    {
+                        msg.exec();
+                        if(msg.clickedButton()!=yesButton)
+                            iReturn=0;
+                        else
+                        {
+                            get_data(mk);
+                            m_pThread->m_pDbInterface->maker_add(mk);
+                            m_iMarkId=mk.get_id();//mark new id
+                            iReturn=1;
+                        }
+                    }
+                }
             }
         }
     }
     //-
-    ui->buttonBox->setEnabled(b); // button on/off
-    ui->labelNameError->setText(text);//set comment
-    return true;
+    if(iReturn>=0)
+        done(iReturn);
+}
+
+void CInputDialogMaker::press_cancel(void)
+{
+    close();
 }
 

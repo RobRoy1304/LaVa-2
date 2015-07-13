@@ -16,39 +16,31 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CINPUTDIALOGMAKER_H
-#define CINPUTDIALOGMAKER_H
+#ifndef CINPUTDIALOGEXPORT_H
+#define CINPUTDIALOGEXPORT_H
 
 #include <QtGui/QDialog>
-#include "cworkthread.h"
+#include "csettings.h"
 
 namespace Ui {
-    class CInputDialogMaker;
+class CInputDialogExport;
 }
 
-class CInputDialogMaker : public QDialog
+class CInputDialogExport : public QDialog
 {
     Q_OBJECT
 
 private:
-    Ui::CInputDialogMaker *ui;
-    CWorkThread * m_pThread;
-
-    //only for edit
-    int m_iMarkId;
-    QString m_sMarkName;
+    Ui::CInputDialogExport *ui;
 
 public:
-    explicit CInputDialogMaker(QWidget *parent = 0);
-    ~CInputDialogMaker();
-    bool get_data(CMaker & mk);
-    bool set_data(CMaker & mk);
-    void set_thread(CWorkThread * pThread){m_pThread=pThread;}
+    explicit CInputDialogExport(QWidget *parent = 0);
+    ~CInputDialogExport();
+    bool settings(bool bUpdate=false);
+    bool get_data(QString & sSplitChar, QString & sSplitText, int & iCodecType);
 
 public slots:
-    bool check_user_input(QString s);
-    void press_ok(void);
-    void press_cancel(void);
+    bool update_data_examble(void);
 };
 
-#endif // CINPUTDIALOGMAKER_H
+#endif // CINPUTDIALOGEXPORT_H

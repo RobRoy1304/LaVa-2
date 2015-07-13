@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,14 @@ CInputDialogTableSetting::CInputDialogTableSetting(QWidget *parent) :
     ui(new Ui::CInputDialogTableSetting)
 {
     ui->setupUi(this);
+
+    //disable auto default buttons
+    ui->pushButtonAligCenter->setAutoDefault(false);
+    ui->pushButtonAligLeft->setAutoDefault(false);
+    ui->pushButtonAligRight->setAutoDefault(false);
+    ui->pushButtonDown->setAutoDefault(false);
+    ui->pushButtonUp->setAutoDefault(false);
+    ui->pushButtonVisible->setAutoDefault(false);
 
     //disable sorting
     ui->tableWidget->setSortingEnabled(false);
@@ -91,10 +99,10 @@ bool CInputDialogTableSetting::check_user_input(void)
         if(ls.count()>2)
         {
             if(m_tcdNewSetting.get_column_visible(row)==false)
-                ui->pushButtonVisible->setText(QString("sichtbar"));
+                ui->pushButtonVisible->setText(QString::fromUtf8("sichtbar"));
             else
             {
-                ui->pushButtonVisible->setText(QString("nicht sichtbar"));
+                ui->pushButtonVisible->setText(QString::fromUtf8("nicht sichtbar"));
                 //min. 2 column must visible
                 if(m_tcdNewSetting.get_table()!=NULL)
                 {
@@ -157,26 +165,26 @@ bool CInputDialogTableSetting::fill_table(void)
                 ui->tableWidget->insertRow(row);
                 for(j=0;j<3;j++)
                 {
-                    s=QString("");
+                    s=QString::fromUtf8("");
                     if(j==0)//column name
                         s=pTable->horizontalHeaderItem(i)->text();//get header text
                     if(j==1)//alignment
                     {
                         ali=m_tcdNewSetting.get_column_alignment(i);
                         if(ali==TABLE_ALIGNMENT_LEFT)
-                            s=QString("links");
+                            s=QString::fromUtf8("links");
                         else if(ali==TABLE_ALIGNMENT_RIGHT)
-                            s=QString("rechts");
+                            s=QString::fromUtf8("rechts");
                         else
-                            s=QString("mitte");
+                            s=QString::fromUtf8("mitte");
                     }
                     if(j==2)//visible
                     {
                         vis=m_tcdNewSetting.get_column_visible(i);
                         if(vis==true)
-                            s=QString("sichtbar");
+                            s=QString::fromUtf8("sichtbar");
                         else
-                            s=QString("nicht sichtbar");
+                            s=QString::fromUtf8("nicht sichtbar");
                     }
                     //-
                     if(s.length()<=0)
@@ -302,7 +310,7 @@ bool CInputDialogTableSetting::button_left(void)
         row=ls[1]->row();//row == column
         if(row>=0 && row<m_tcdNewSetting.get_columns_count())
         {
-            ls[1]->setText(QString("links"));
+            ls[1]->setText(QString::fromUtf8("links"));
             m_tcdNewSetting.set_column_alignment(row,TABLE_ALIGNMENT_LEFT);
             check_user_input();
         }
@@ -320,7 +328,7 @@ bool CInputDialogTableSetting::button_center(void)
         row=ls[1]->row();//row == column
         if(row>=0 && row<m_tcdNewSetting.get_columns_count())
         {
-            ls[1]->setText(QString("mitte"));
+            ls[1]->setText(QString::fromUtf8("mitte"));
             m_tcdNewSetting.set_column_alignment(row,TABLE_ALIGNMENT_CENTER);
             check_user_input();
         }
@@ -338,7 +346,7 @@ bool CInputDialogTableSetting::button_right(void)
         row=ls[1]->row();//row == column
         if(row>=0 && row<m_tcdNewSetting.get_columns_count())
         {
-            ls[1]->setText(QString("rechts"));
+            ls[1]->setText(QString::fromUtf8("rechts"));
             m_tcdNewSetting.set_column_alignment(row,TABLE_ALIGNMENT_RIGHT);
             check_user_input();
         }
@@ -360,12 +368,12 @@ bool CInputDialogTableSetting::button_visible(void)
         {
             if(m_tcdNewSetting.get_column_visible(row)==true)
             {
-                s=QString("nicht sichtbar");
+                s=QString::fromUtf8("nicht sichtbar");
                 bVis=false;
             }
             else
             {
-                s=QString("sichtbar");
+                s=QString::fromUtf8("sichtbar");
                 bVis=true;
             }
             ls[2]->setText(s);

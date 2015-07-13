@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -95,35 +95,35 @@ bool CWidgetInterface::load_icons(void)
     //-article icons-
     for(int i=1;i<=7;i++)
     {
-        sIconDir=QString(":/images/res/%1.png").arg(i);
+        sIconDir=QString::fromUtf8(":/images/res/%1.png").arg(i);
         icon=QIcon(sIconDir);
         m_lsIconsArticle.push_back(icon);
     }
-    sIconDir=QString(":/images/res/unknow.png");
+    sIconDir=QString::fromUtf8(":/images/res/unknow.png");
     m_lsIconsArticle.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/empty.png");
+    sIconDir=QString::fromUtf8(":/images/res/empty.png");
     m_lsIconsArticle.push_back(QIcon(sIconDir));
 
     //-trade icons-
-    sIconDir=QString(":/images/res/incoming.png");
+    sIconDir=QString::fromUtf8(":/images/res/incoming.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/outgoing.png");
+    sIconDir=QString::fromUtf8(":/images/res/outgoing.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/ordering.png");
+    sIconDir=QString::fromUtf8(":/images/res/ordering.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/customer.png");
+    sIconDir=QString::fromUtf8(":/images/res/customer.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/incoming_cross.png");
+    sIconDir=QString::fromUtf8(":/images/res/incoming_cross.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/outgoing_cross.png");
+    sIconDir=QString::fromUtf8(":/images/res/outgoing_cross.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/ordering_cross.png");
+    sIconDir=QString::fromUtf8(":/images/res/ordering_cross.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
-    sIconDir=QString(":/images/res/customer_cross.png");
+    sIconDir=QString::fromUtf8(":/images/res/customer_cross.png");
     m_lsIconsTrade.push_back(QIcon(sIconDir));
 
     //warning icon
-    sIconDir=QString(":/images/res/warning.png");
+    sIconDir=QString::fromUtf8(":/images/res/warning.png");
     m_icoWarning=QIcon(sIconDir);
     //-
     return true;
@@ -147,7 +147,7 @@ bool CWidgetInterface::insert_list_element(QListWidget * pList, QString & sItem,
     if(sData.length()!=0)
         pList->addItem(sData);
     if(bSpaceRow)
-        pList->addItem(QString(""));
+        pList->addItem(QString::fromUtf8(""));
     return true;
 }
 
@@ -228,15 +228,15 @@ QString CWidgetInterface::check_date(QString s)
     }
     if(b)
     {
-        sFormat=QString("%1-").arg(y);
+        sFormat=QString::fromUtf8("%1-").arg(y);
         if(m<10)
-            sFormat+=QString("0%1-").arg(m);
+            sFormat+=QString::fromUtf8("0%1-").arg(m);
         else
-            sFormat+=QString("%1-").arg(m);
+            sFormat+=QString::fromUtf8("%1-").arg(m);
         if(d<10)
-            sFormat+=QString("0%1").arg(d);
+            sFormat+=QString::fromUtf8("0%1").arg(d);
         else
-            sFormat+=QString("%1").arg(d);
+            sFormat+=QString::fromUtf8("%1").arg(d);
     }
     //-
     return sFormat;
@@ -318,7 +318,7 @@ bool CWidgetInterface::remove_row(QTableWidget * pTable,int iId,int iIdColumn)
 {
     if(iId<0)
         return false;
-    QString s=QString("%1").arg(iId);
+    QString s=QString::fromUtf8("%1").arg(iId);
     bool b=remove_row(pTable,s,iIdColumn);
     return b;
 }
@@ -344,7 +344,7 @@ int CWidgetInterface::find_row(QTableWidget * pTable,int iId,int iIdColumn)
 {
     if(iId<0)
         return -1;
-    QString s=QString("%1").arg(iId);
+    QString s=QString::fromUtf8("%1").arg(iId);
     int iReturn=find_row(pTable,s,iIdColumn);
     return iReturn;
 }
@@ -378,7 +378,7 @@ bool CWidgetInterface::find_and_select_row(QTableWidget * pTable, int iId, int i
 {
     if(iId<0)
         return false;
-    QString s=QString("%1").arg(iId);
+    QString s=QString::fromUtf8("%1").arg(iId);
     bool b=find_and_select_row(pTable,s,iColumn);
     return b;
 }
@@ -394,7 +394,7 @@ bool CWidgetInterface::find_and_select_row(QTableWidget * pTable, QString sValue
 
 bool CWidgetInterface::select_row(QTableWidget * pTable,int iId,int iIdColumn)
 {
-    QString s=QString("%1").arg(iId);
+    QString s=QString::fromUtf8("%1").arg(iId);
     bool b=select_row(pTable,s,iIdColumn);
     return b;
 }
@@ -452,7 +452,7 @@ bool CWidgetInterface::mod_row(QTableWidget * pTable, QList<CTableItemData> & ls
 {
     QString s;
     if(iSelectId>=0)
-        s=QString("%1").arg(iSelectId);
+        s=QString::fromUtf8("%1").arg(iSelectId);
     bool b=mod_row(pTable,lsData,iPosition,bBlock,bUpdate,s,iIdColumn);
     return b;
 }
@@ -589,7 +589,7 @@ bool CWidgetInterface::waregroup_update_treewidget(QTreeWidget * pTree, int iSel
     bool b=true;
     CWaregroup wg;
     QTreeWidgetItem * pItem=NULL;
-    QString s=QString("parent_id=-1");//all root dir items
+    QString s=QString::fromUtf8("parent_id=-1");//all root dir items
     QList<int> lsIds;
     //-
     if(m_pDb->waregroup_get_all(s,lsIds))
@@ -611,9 +611,9 @@ bool CWidgetInterface::waregroup_update_treewidget(QTreeWidget * pTree, int iSel
             //-
             pItem->setText(0,wg.get_name());
             pItem->setText(1,wg.get_comment());
-            s=QString("%1").arg(wg.get_id());
+            s=QString::fromUtf8("%1").arg(wg.get_id());
             pItem->setText(2,s);
-            s=QString("%1").arg(wg.get_parent_id());
+            s=QString::fromUtf8("%1").arg(wg.get_parent_id());
             pItem->setText(3,s);
             pTree->addTopLevelItem(pItem);
             //-
@@ -643,7 +643,7 @@ bool CWidgetInterface::waregroup_insert_children_treeitems(QTreeWidget * pTree, 
     CWaregroup wg;
     QTreeWidgetItem * pItem=NULL;
     QTreeWidgetItem * pMarkItem=NULL;
-    QString s("parent_id=");
+    QString s=QString::fromUtf8("parent_id=");
     s+=pParent->text(2);
     QList<int> lsIds;
     //-
@@ -665,9 +665,9 @@ bool CWidgetInterface::waregroup_insert_children_treeitems(QTreeWidget * pTree, 
             }
             pItem->setText(0,wg.get_name());
             pItem->setText(1,wg.get_comment());
-            s=QString("%1").arg(wg.get_id());
+            s=QString::fromUtf8("%1").arg(wg.get_id());
             pItem->setText(2,s);
-            s=QString("%1").arg(wg.get_parent_id());
+            s=QString::fromUtf8("%1").arg(wg.get_parent_id());
             pItem->setText(3,s);
             pParent->addChild(pItem);
             //-
@@ -766,7 +766,7 @@ bool CWidgetInterface::maker_insert_row(QTableWidget * pTable, CMaker & mk, int 
     return b;
 }
 
-bool CWidgetInterface::maker_update_row(QTableWidget * pTable, CMaker & mk, bool bSelect)
+bool CWidgetInterface::maker_update_row(QTableWidget * pTable, CMaker & mk, bool bSelect, bool bAddIfNotExis)
 {
     if(pTable==NULL)
         return false;
@@ -782,6 +782,8 @@ bool CWidgetInterface::maker_update_row(QTableWidget * pTable, CMaker & mk, bool
     int row=find_row(pTable,mk.get_id());
     if(row>=0 && row<pTable->rowCount())//found?
         b=mod_row(pTable,ls,row,true,true,iSelect);
+    else if(bAddIfNotExis)
+        b=maker_insert_row(pTable,mk,-2,bSelect);
     //-
     ls.clear();
     return b;
@@ -799,7 +801,7 @@ bool CWidgetInterface::maker_format(CMaker & mk, QList<CTableItemData> & lsData)
     ti.set_text(mk.get_comment());
     lsData.push_back(ti);
     //column 2
-    s=QString("%1").arg(mk.get_id());
+    s=QString::fromUtf8("%1").arg(mk.get_id());
     ti.set_text(s);
     lsData.push_back(ti);
     //-
@@ -828,35 +830,35 @@ bool CWidgetInterface::maker_update_list(QListWidget * pList, int iID)
         pList->blockSignals(true);//faster insert
         pList->clear();
 
-        s=QString("Firma:");
+        s=QString::fromUtf8("Firma:");
         s2=mk.get_name();
         insert_list_element(pList,s,s2);
 
-        s=QString("Adresse:");
+        s=QString::fromUtf8("Adresse:");
         s2=mk.get_adress();
         insert_list_element(pList,s,s2);
 
-        s=QString("Telefonnummer(n):");
+        s=QString::fromUtf8("Telefonnummer(n):");
         s2=mk.get_callnumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("Faxnummer(n):");
+        s=QString::fromUtf8("Faxnummer(n):");
         s2=mk.get_faxnumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("email-Adresse(n):");
+        s=QString::fromUtf8("email-Adresse(n):");
         s2=mk.get_email();
         insert_list_element(pList,s,s2);
 
-        s=QString("homepage:");
+        s=QString::fromUtf8("homepage:");
         s2=mk.get_homepage();
         insert_list_element(pList,s,s2);
 
-        s=QString("Kontaktperson(en):");
+        s=QString::fromUtf8("Kontaktperson(en):");
         s2=mk.get_contectperson();
         insert_list_element(pList,s,s2);
 
-        s=QString("Kommentar:");
+        s=QString::fromUtf8("Kommentar:");
         s2=mk.get_comment();
         insert_list_element(pList,s,s2);
         //-
@@ -876,8 +878,8 @@ bool CWidgetInterface::maker_fill_combobox(QComboBox * pCombobox)
     int count;
     QList<int> ls;
     //-
-    s=QString("LOWER (name)");
-    b=m_pDb->maker_get_all(QString(""),ls,s);
+    s=QString::fromUtf8("LOWER (name)");
+    b=m_pDb->maker_get_all(QString::fromUtf8(""),ls,s);
     //-
     if(b)//no break?
     {
@@ -960,7 +962,7 @@ bool CWidgetInterface::dealer_insert_row(QTableWidget * pTable, CDealer & de, in
     return b;
 }
 
-bool CWidgetInterface::dealer_update_row(QTableWidget * pTable, CDealer & de, bool bSelect)
+bool CWidgetInterface::dealer_update_row(QTableWidget * pTable, CDealer & de, bool bSelect, bool bAddIfNotExis)
 {
     if(pTable==NULL)
         return false;
@@ -976,6 +978,8 @@ bool CWidgetInterface::dealer_update_row(QTableWidget * pTable, CDealer & de, bo
     int row=find_row(pTable,de.get_id());
     if(row>=0 && row<pTable->rowCount())//found?
         b=mod_row(pTable,ls,row,true,true,iSelect);
+    else if(bAddIfNotExis)
+        b=dealer_insert_row(pTable,de,-2,bSelect);
     //-
     ls.clear();
     return b;
@@ -993,7 +997,7 @@ bool CWidgetInterface::dealer_format(CDealer &de, QList<CTableItemData> & lsData
     ti.set_text(de.get_comment());
     lsData.push_back(ti);
     //column 2
-    s=QString("%1").arg(de.get_id());
+    s=QString::fromUtf8("%1").arg(de.get_id());
     ti.set_text(s);
     lsData.push_back(ti);
     //-
@@ -1022,39 +1026,39 @@ bool CWidgetInterface::dealer_update_list(QListWidget * pList, int iID)
         pList->blockSignals(true);//faster insert
 
         pList->clear();
-        s=QString("Firma:");
+        s=QString::fromUtf8("Firma:");
         s2=de.get_name();
         insert_list_element(pList,s,s2);
 
-        s=QString("Adresse:");
+        s=QString::fromUtf8("Adresse:");
         s2=de.get_adress();
         insert_list_element(pList,s,s2);
 
-        s=QString("Kundennummer:");
+        s=QString::fromUtf8("Kundennummer:");
         s2=de.get_customernumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("Telefonnummer(n):");
+        s=QString::fromUtf8("Telefonnummer(n):");
         s2=de.get_callnumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("Faxnummer(n):");
+        s=QString::fromUtf8("Faxnummer(n):");
         s2=de.get_faxnumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("email-Adresse(n):");
+        s=QString::fromUtf8("email-Adresse(n):");
         s2=de.get_email();
         insert_list_element(pList,s,s2);
 
-        s=QString("homepage:");
+        s=QString::fromUtf8("homepage:");
         s2=de.get_homepage();
         insert_list_element(pList,s,s2);
 
-        s=QString("Kontaktperson(en):");
+        s=QString::fromUtf8("Kontaktperson(en):");
         s2=de.get_contectperson();
         insert_list_element(pList,s,s2);
 
-        s=QString("Kommentar:");
+        s=QString::fromUtf8("Kommentar:");
         s2=de.get_comment();
         insert_list_element(pList,s,s2);
         //-
@@ -1073,8 +1077,8 @@ bool CWidgetInterface::dealer_fill_combobox(QComboBox * pCombobox)
     int count;
     QList<int> ls;
     //-
-    s=QString("LOWER (name)");
-    b=m_pDb->dealer_get_all(QString(""),ls,s);
+    s=QString::fromUtf8("LOWER (name)");
+    b=m_pDb->dealer_get_all(QString::fromUtf8(""),ls,s);
     //-
     if(b)//no break?
     {
@@ -1157,7 +1161,7 @@ bool CWidgetInterface::customer_insert_row(QTableWidget * pTable, CCustomer & cu
     return b;
 }
 
-bool CWidgetInterface::customer_update_row(QTableWidget * pTable, CCustomer & cu, bool bSelect)
+bool CWidgetInterface::customer_update_row(QTableWidget * pTable, CCustomer & cu, bool bSelect, bool bAddIfNotExis)
 {
     if(pTable==NULL)
         return false;
@@ -1173,6 +1177,8 @@ bool CWidgetInterface::customer_update_row(QTableWidget * pTable, CCustomer & cu
     int row=find_row(pTable,cu.get_id());
     if(row>=0 && row<pTable->rowCount())//found?
         b=mod_row(pTable,ls,row,true,true,iSelect);
+    else if(bAddIfNotExis)
+        b=customer_insert_row(pTable,cu,-2,bSelect);
     //-
     ls.clear();
     return b;
@@ -1190,18 +1196,18 @@ bool CWidgetInterface::customer_format(CCustomer & cu, QList<CTableItemData> & l
     s=cu.get_name();
     s2=cu.get_first_name();
     if(s2.length()>0)
-        s+=QString(", %1").arg(s2);
+        s+=QString::fromUtf8(", %1").arg(s2);
     ti.set_text(s);
     lsData.push_back(ti);
     //column 2
-    s=QString("%1, %2 %3").arg(cu.get_street(), cu.get_postcode(),cu.get_city());
+    s=QString::fromUtf8("%1, %2 %3").arg(cu.get_street(), cu.get_postcode(),cu.get_city());
     ti.set_text(s);
     lsData.push_back(ti);
     //column 3
     ti.set_text(cu.get_comment());
     lsData.push_back(ti);
     //column 4
-    s=QString("%1").arg(cu.get_id());
+    s=QString::fromUtf8("%1").arg(cu.get_id());
     ti.set_text(s);
     lsData.push_back(ti);
     //-
@@ -1231,34 +1237,34 @@ bool CWidgetInterface::customer_update_list(QListWidget * pList, int iID)
 
         pList->clear();
 
-        s=QString("Kundennummer:");
+        s=QString::fromUtf8("Kundennummer:");
         s2=cu.get_customernumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("Name, Vorname:");
+        s=QString::fromUtf8("Name, Vorname:");
         s2=cu.get_name();
         s3=cu.get_first_name();
         if(s3.length()>0)
-            s2+=QString(", %1").arg(s3);
+            s2+=QString::fromUtf8(", %1").arg(s3);
         insert_list_element(pList,s,s2);
 
-        s=QString("Adresse:");
-        s2=QString("%1, %2 %3").arg(cu.get_street(),cu.get_postcode(),cu.get_city());
+        s=QString::fromUtf8("Adresse:");
+        s2=QString::fromUtf8("%1, %2 %3").arg(cu.get_street(),cu.get_postcode(),cu.get_city());
         insert_list_element(pList,s,s2);
 
-        s=QString("Telefonnummer(n):");
+        s=QString::fromUtf8("Telefonnummer(n):");
         s2=cu.get_callnumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("Faxnummer(n):");
+        s=QString::fromUtf8("Faxnummer(n):");
         s2=cu.get_faxnumber();
         insert_list_element(pList,s,s2);
 
-        s=QString("email-Adresse(n):");
+        s=QString::fromUtf8("email-Adresse(n):");
         s2=cu.get_email();
         insert_list_element(pList,s,s2);
 
-        s=QString("Kommentar:");
+        s=QString::fromUtf8("Kommentar:");
         s2=cu.get_comment();
         insert_list_element(pList,s,s2);
         //-
@@ -1474,9 +1480,9 @@ bool CWidgetInterface::article_update_tablewidget_wares_list(QTableWidget * pTab
             {
                 if(iFormatType==FORMAT_ONE)
                 {
-                    s=QString("%1").arg(iCount);
+                    s=QString::fromUtf8("%1").arg(iCount);
                     if(ar.get_unit().length()>0)
-                        s+=QString(" %1").arg(ar.get_unit());
+                        s+=QString::fromUtf8(" %1").arg(ar.get_unit());
                     ti.set_text(s);
                     ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
                     lsData.push_back(ti);
@@ -1489,19 +1495,19 @@ bool CWidgetInterface::article_update_tablewidget_wares_list(QTableWidget * pTab
                     //-
                     s=ar.get_articlenumber();
                     if(ar.get_articlenumber2().length()>0)
-                        s+=QString("|%1").arg(ar.get_articlenumber2());
+                        s+=QString::fromUtf8("|%1").arg(ar.get_articlenumber2());
                     ti.set_text(s);
                     lsData.push_back(ti);
                     //-
                     for(int i=0;i<2;i++)
                     {
-                        s=QString("%1").arg(iCount);
+                        s=QString::fromUtf8("%1").arg(iCount);
                         ti.set_text(s);
                         ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
                         lsData.push_back(ti);
                     }
                     //-
-                    s=QString("%1").arg(iArticleId);
+                    s=QString::fromUtf8("%1").arg(iArticleId);
                     ti.set_text(s);
                     ti.set_alignment(TABLE_ALIGNMENT_LEFT);
                     lsData.push_back(ti);
@@ -1541,7 +1547,7 @@ bool CWidgetInterface::article_insert_row(QTableWidget * pTable, CArticle & ar, 
     return b;
 }
 
-bool CWidgetInterface::article_update_row(QTableWidget * pTable, CArticle & ar, int iFormatType, bool bSelect)
+bool CWidgetInterface::article_update_row(QTableWidget * pTable, CArticle & ar, int iFormatType, bool bSelect, bool bAddIfNotExis)
 {
     if(pTable==NULL)
         return false;
@@ -1557,6 +1563,8 @@ bool CWidgetInterface::article_update_row(QTableWidget * pTable, CArticle & ar, 
     int row=find_row(pTable,ar.get_id());
     if(row>=0 && row<pTable->rowCount())//found?
         b=mod_row(pTable,ls,row,true,true,iSelect);
+    else if(bAddIfNotExis)
+        b=article_insert_row(pTable,ar,iFormatType,-2,bSelect);
     //-
     ls.clear();
     return b;
@@ -1602,12 +1610,12 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
                 }
                 if(lsOrder[j]==5)//d.column 5
                 {
-                    s=QString("");
+                    s=QString::fromUtf8("");
                     if(ar.get_warning_limit()>=0)
                     {
-                        s=QString("%1").arg(ar.get_warning_limit());
+                        s=QString::fromUtf8("%1").arg(ar.get_warning_limit());
                         if(ar.get_unit().length()>0)//unit set?
-                            s+=QString(" %1").arg(ar.get_unit());
+                            s+=QString::fromUtf8(" %1").arg(ar.get_unit());
                     }
                     ti.set_text(s);
                 }
@@ -1616,9 +1624,10 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
                     f1=ar.get_base_price();
                     if(f1>0.0)
                     {
-                        s=QString("%1").arg(f1);
+                        s=QString::fromUtf8("%1").arg(QString::number(f1,'f',2));
+                        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
                         if(ar.get_valuta().length()>0)//valuta set?
-                            s+=QString(" %1").arg(ar.get_valuta());
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
                     }
                     ti.set_text(s);
                 }
@@ -1627,9 +1636,10 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
                     f1=ar.get_sales_price();
                     if(f1>0.0)
                     {
-                        s=QString("%1").arg(f1);
+                        s=QString::fromUtf8("%1").arg(QString::number(f1,'f',2));
+                        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
                         if(ar.get_valuta().length()>0)//valuta set?
-                            s+=QString(" %1").arg(ar.get_valuta());
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
                     }
                     ti.set_text(s);
                 }
@@ -1639,7 +1649,8 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
                     f2=ar.get_sales_price();
                     if(f1>0.0 && f2>0.0)
                     {
-                        s=QString("%1 ").arg(f2-f1);
+                        s=QString::fromUtf8("%1 ").arg(QString::number(f2-f1,'f',2));
+                        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
                         if(ar.get_valuta().length()>0)//valuta set?
                             s+=ar.get_valuta();
                     }
@@ -1651,7 +1662,7 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
                     ti.set_text(ar.get_comment());
                 if(lsOrder[j]==11)//d.column 11
                 {
-                    s=QString("%1").arg(ar.get_id());
+                    s=QString::fromUtf8("%1").arg(ar.get_id());
                     ti.set_text(s);
                 }
                 //-
@@ -1659,7 +1670,7 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
                 lsData.push_back(ti);//add
                 //-
                 ti.clear();
-                s=QString("");
+                s=QString::fromUtf8("");
             }
         }
     }
@@ -1669,14 +1680,14 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
         if(iFormatType==FORMAT_TWO)
         {
             ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
-            s=QString("%1 / ").arg(ar.get_inventory());
+            s=QString::fromUtf8("%1 / ").arg(ar.get_inventory());
             i=m_pDb->ordering_get_count_by_article(ar.get_id());//count of article by wares
             if(i<0)
                 i=0;
-            s+=QString("%1 ").arg(i);
-            s+=QString("/ %1").arg(ar.get_max_inventory());
+            s+=QString::fromUtf8("%1 ").arg(i);
+            s+=QString::fromUtf8("/ %1").arg(ar.get_max_inventory());
             if(ar.get_unit().length()>0)
-                s+=QString(" %1").arg(ar.get_unit());
+                s+=QString::fromUtf8(" %1").arg(ar.get_unit());
             ti.set_text(s);
             lsData.push_back(ti);
         }
@@ -1690,7 +1701,7 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
         {
             s=ar.get_articlenumber();
             if(ar.get_articlenumber2().length()>0)
-                s+=QString(" | %1").arg(ar.get_articlenumber2());
+                s+=QString::fromUtf8(" | %1").arg(ar.get_articlenumber2());
             ti.set_text(s);
             lsData.push_back(ti);
         }
@@ -1716,7 +1727,7 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
         ti.set_text(s);
         lsData.push_back(ti);
         //-
-        s=QString("%1").arg(ar.get_id());
+        s=QString::fromUtf8("%1").arg(ar.get_id());
         ti.set_text(s);
         lsData.push_back(ti);
     }
@@ -1755,7 +1766,7 @@ bool CWidgetInterface::article_update_row_wareslist(QTableWidget * pTable,QStrin
         if(row<0)
         {//not found
             //-insert new at table-
-            s=QString("%1").arg(iCount);
+            s=QString::fromUtf8("%1").arg(iCount);
             ti.set_text(s);
             ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
             lsData.push_back(ti);
@@ -1774,7 +1785,7 @@ bool CWidgetInterface::article_update_row_wareslist(QTableWidget * pTable,QStrin
                     if(b)//cast ok?
                         iCount+=i;//new+old count
                 }
-                s=QString("%1").arg(iCount);
+                s=QString::fromUtf8("%1").arg(iCount);
                 if(b)
                     pTable->item(row,0)->setText(s);//only update count
             }
@@ -1872,7 +1883,7 @@ bool CWidgetInterface::ordering_insert_row(QTableWidget * pTable, COrdering & or
     return b;
 }
 
-bool CWidgetInterface::ordering_update_row(QTableWidget * pTable, COrdering & ord, int iFormatType, bool bSelect)
+bool CWidgetInterface::ordering_update_row(QTableWidget * pTable, COrdering & ord, int iFormatType, bool bSelect, bool bAddIfNotExis)
 {
     if(pTable==NULL)
         return false;
@@ -1888,6 +1899,8 @@ bool CWidgetInterface::ordering_update_row(QTableWidget * pTable, COrdering & or
     int row=find_row(pTable,ord.get_id());
     if(row>=0 && row<pTable->rowCount())//found?
         b=mod_row(pTable,ls,row,true,true,iSelect);
+    else if(bAddIfNotExis)
+        b=ordering_insert_row(pTable,ord,-2,bSelect);
     //-
     ls.clear();
     return b;
@@ -1910,7 +1923,7 @@ bool CWidgetInterface::ordering_format(COrdering & ord, QList<CTableItemData> & 
     {//all
         //column 0
         s=dt.toString("yyyy-MM-dd");
-        s+=QString(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
+        s+=QString::fromUtf8(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
         ti.set_text(s);
         lsData.push_back(ti);
         //-column 1
@@ -1928,7 +1941,7 @@ bool CWidgetInterface::ordering_format(COrdering & ord, QList<CTableItemData> & 
         ti.set_text(s);
         lsData.push_back(ti);
         //-column 5
-        s=QString("%1").arg(ord.get_id());
+        s=QString::fromUtf8("%1").arg(ord.get_id());
         ti.set_text(s);
         lsData.push_back(ti);
     }
@@ -1941,7 +1954,7 @@ bool CWidgetInterface::ordering_format(COrdering & ord, QList<CTableItemData> & 
         lsData.push_back(ti);
         //column 1
         s=dt.toString("yyyy-MM-dd");
-        s+=QString(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
+        s+=QString::fromUtf8(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
         ti.set_text(s);
         lsData.push_back(ti);
         //column 2
@@ -1951,7 +1964,7 @@ bool CWidgetInterface::ordering_format(COrdering & ord, QList<CTableItemData> & 
         ti.set_text(ord.get_comment());
         lsData.push_back(ti);
         //column 4
-        s=QString("%1").arg(ord.get_id());
+        s=QString::fromUtf8("%1").arg(ord.get_id());
         ti.set_text(s);
         lsData.push_back(ti);
     }
@@ -1984,7 +1997,7 @@ bool CWidgetInterface::trade_update_tablewidget(QTableWidget * pTable, QList<QSt
         else
         {
             trade_format(trade,ls);
-            if(!mod_row(pTable,ls,ITEM_POSITION_BOTTOM,false,false,QString(""),2))
+            if(!mod_row(pTable,ls,ITEM_POSITION_BOTTOM,false,false,QString::fromUtf8(""),2))
             {
                 b=false;
                 break;
@@ -2042,7 +2055,7 @@ bool CWidgetInterface::trade_insert_row(QTableWidget * pTable, CTrade & trade, i
     return b;
 }
 
-bool CWidgetInterface::trade_update_row(QTableWidget * pTable, CTrade & trade, bool bSelect)
+bool CWidgetInterface::trade_update_row(QTableWidget * pTable, CTrade & trade, bool bSelect, bool bAddIfNotExis)
 {
     if(pTable==NULL)
         return false;
@@ -2058,6 +2071,8 @@ bool CWidgetInterface::trade_update_row(QTableWidget * pTable, CTrade & trade, b
     int row=find_row(pTable,trade.get_booking_number(),2);
     if(row>=0 && row<pTable->rowCount())//found?
         b=mod_row(pTable,ls,row,true,true,sSelect,2);
+    else if(bAddIfNotExis)
+        b=trade_insert_row(pTable,trade,-2,bSelect);
     //-
     ls.clear();
     return b;
@@ -2083,9 +2098,9 @@ bool CWidgetInterface::trade_format(CTrade & trade, QList<CTableItemData> & lsDa
     ti.clear();
     //-column 1
     if(trade.get_canceled())
-        s=QString("ja");
+        s=QString::fromUtf8("ja");
     else
-        s=QString("nein");
+        s=QString::fromUtf8("nein");
     ti.set_text(s);
     lsData.push_back(ti);
     //-column2
@@ -2093,7 +2108,7 @@ bool CWidgetInterface::trade_format(CTrade & trade, QList<CTableItemData> & lsDa
     lsData.push_back(ti);
     //-column 3
     s=dt.toString("yyyy-MM-dd");
-    s+=QString(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
+    s+=QString::fromUtf8(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
     ti.set_text(s);
     lsData.push_back(ti);
     //-column 4
@@ -2104,7 +2119,7 @@ bool CWidgetInterface::trade_format(CTrade & trade, QList<CTableItemData> & lsDa
     if(trade.get_type()==TYPE_ORDERING_INCOMING || trade.get_type()==TYPE_CUSTOMER_OUTGOING)
         s=trade.get_info_2();
     else
-        s=QString("");
+        s=QString::fromUtf8("");
     ti.set_text(s);
     lsData.push_back(ti);
     //-column 6
@@ -2121,22 +2136,22 @@ void CWidgetInterface::trade_get_icon(CTrade & trade, CTableItemData & ti, int i
     i=trade.get_type();
     if(i==TYPE_INCOMING)
     {
-        s=QString("Wareneingang");
+        s=QString::fromUtf8("Wareneingang");
         icon_index=0;
     }
     else if(i==TYPE_OUTGOING)
     {
-        s=QString("Warenausgang");
+        s=QString::fromUtf8("Warenausgang");
         icon_index=1;
     }
     else if(i==TYPE_ORDERING_INCOMING)
     {
-        s=QString("Wareneingang(Bestellung)");
+        s=QString::fromUtf8("Wareneingang(Bestellung)");
         icon_index=2;
     }
     else
     {
-        s=QString("Warenausgang(Kunde)");
+        s=QString::fromUtf8("Warenausgang(Kunde)");
         icon_index=3;
     }
 
@@ -2161,33 +2176,33 @@ bool CWidgetInterface::trade_update_list_info(QListWidget * pList, CTrade & tr)
     //fill list
     QString s,s2;
     if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-        s=QString("Kundennummer:");
+        s=QString::fromUtf8("Kundennummer:");
     else if(tr.get_type()==TYPE_ORDERING_INCOMING)
-        s=QString("Bestellnummer:");
+        s=QString::fromUtf8("Bestellnummer:");
     s2=tr.get_info_1();
     if(s2.length()>0)
         insert_list_element(pList,s,s2,false);
     //-
     if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-        s=QString("Name, Vorname:");
+        s=QString::fromUtf8("Name, Vorname:");
     else if(tr.get_type()==TYPE_ORDERING_INCOMING)
-        s=QString("Händler:");
+        s=QString::fromUtf8("Händler:");
     s2=tr.get_info_2();
     if(s2.length()>0)
         insert_list_element(pList,s,s2,false);
     //-
     if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-        s=QString("Strasse:");
+        s=QString::fromUtf8("Strasse:");
     else if(tr.get_type()==TYPE_ORDERING_INCOMING)
-        s=QString("Bestelldatum:");
+        s=QString::fromUtf8("Bestelldatum:");
     s2=tr.get_info_3();
     if(s2.length()>0)
         insert_list_element(pList,s,s2,false);
     //-
     if(tr.get_type()==TYPE_CUSTOMER_OUTGOING)
-        s=QString("Postleitzahl, Ort:");
+        s=QString::fromUtf8("Postleitzahl, Ort:");
     else if(tr.get_type()==TYPE_ORDERING_INCOMING)
-        s=QString("sonstiges:");
+        s=QString::fromUtf8("sonstiges:");
     s2=tr.get_info_4();
     if(s2.length()>0)
         insert_list_element(pList,s,s2,false);
@@ -2210,7 +2225,7 @@ bool CWidgetInterface::trade_update_list_date(QListWidget * pList, int iYear, in
     QListWidgetItem * pItem=NULL;
     //-
     slWeekDay<<"Mo"<<"Di"<<"Mi"<<"Do"<<"Fr"<<"Sa"<<"So";
-    slMonths<<"Januar"<<"Februar"<<"März"<<"April"<<"Mai"<<"Juni"<<"July"<<"August"<<"September"<<"Oktober"<<"November"<<"Dezember";
+    slMonths<<"Januar"<<"Februar"<<QString::fromUtf8("März")<<"April"<<"Mai"<<"Juni"<<"July"<<"August"<<"September"<<"Oktober"<<"November"<<"Dezember";
     QDate dtCurrentDate=QDate().currentDate();
     QDate dt,dt2,dtFromDate,dtToDate,dtMark;
     //-
@@ -2240,8 +2255,8 @@ bool CWidgetInterface::trade_update_list_date(QListWidget * pList, int iYear, in
             if(dt==dtSelect)//mark index for select
                 j=i;
             //-
-            s=dt.toString(QString("dd.MM.yyyy"));
-            s+=QString(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
+            s=dt.toString(QString::fromUtf8("dd.MM.yyyy"));
+            s+=QString::fromUtf8(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
             //-
             dtMark=dt;
             dt2=dt;
@@ -2256,13 +2271,13 @@ bool CWidgetInterface::trade_update_list_date(QListWidget * pList, int iYear, in
             if(dtSelect >= dt && dtSelect <= dt2)//mark index for select
                 j=i;
             //-
-            s=dt.toString(QString("dd.MM.yyyy"));
-            s+=QString("-%1").arg(dt2.toString(QString("dd.MM.yyyy")));
+            s=dt.toString(QString::fromUtf8("dd.MM.yyyy"));
+            s+=QString::fromUtf8("-%1").arg(dt2.toString(QString::fromUtf8("dd.MM.yyyy")));
             k=dt.weekNumber();
             if(k<10)
-                s+=QString(" (0%1.KW)").arg(k);
+                s+=QString::fromUtf8(" (0%1.KW)").arg(k);
             else
-                s+=QString(" (%1.KW)").arg(k);
+                s+=QString::fromUtf8(" (%1.KW)").arg(k);
             //-
             dtMark=dt;
             dt=dt.addDays(7);
@@ -2278,9 +2293,9 @@ bool CWidgetInterface::trade_update_list_date(QListWidget * pList, int iYear, in
                 j=i;
             //-
             s=slMonths[dt.month()-1];
-            s2=dt.toString(QString("dd.MM.yyyy"));
-            s2+=QString("-%1").arg(dt2.toString(QString("dd.MM.yyyy")));
-            s+=QString(" (%1)").arg(s2);
+            s2=dt.toString(QString::fromUtf8("dd.MM.yyyy"));
+            s2+=QString::fromUtf8("-%1").arg(dt2.toString(QString::fromUtf8("dd.MM.yyyy")));
+            s+=QString::fromUtf8(" (%1)").arg(s2);
             //-
             dtMark=dt;
             dt=dt.addMonths(1);
@@ -2295,9 +2310,9 @@ bool CWidgetInterface::trade_update_list_date(QListWidget * pList, int iYear, in
             if(dtSelect >= dt && dtSelect <= dt2)//mark index for select
                 j=i;
             //-
-            s=dt.toString(QString("dd.MM.yyyy"));
-            s+=QString("-%1").arg(dt2.toString(QString("dd.MM.yyyy")));
-            s+=QString(" (%1.Quartal)").arg(i);
+            s=dt.toString(QString::fromUtf8("dd.MM.yyyy"));
+            s+=QString::fromUtf8("-%1").arg(dt2.toString(QString::fromUtf8("dd.MM.yyyy")));
+            s+=QString::fromUtf8(" (%1.Quartal)").arg(i);
             //-
             dtMark=dt;
             dt=dt.addMonths(3);
@@ -2308,7 +2323,7 @@ bool CWidgetInterface::trade_update_list_date(QListWidget * pList, int iYear, in
         {
             count=trade_get_count_by_date_and_mask(dtMark,dt2,iIndexMask,sTextMask);
             if(count>0)
-                s+=QString(" |%1").arg(count);
+                s+=QString::fromUtf8(" |%1").arg(count);
         }
         //-
         sl.push_back(s);
@@ -2359,9 +2374,9 @@ bool CWidgetInterface::trade_refresh_list_date(QListWidget * pList, int iIndex, 
                 {
                     s2=sl[0];
                     if(count>0 && sl.count()<2)
-                        s2+=QString(" |%1").arg(count);
+                        s2+=QString::fromUtf8(" |%1").arg(count);
                     else if(count>0 && sl.count()==2)
-                        s2+=QString("|%1").arg(count);
+                        s2+=QString::fromUtf8("|%1").arg(count);
                     if(s!=s2)//update?
                         pItem->setText(s2);
                 }
@@ -2384,9 +2399,9 @@ int CWidgetInterface::trade_get_count_by_date_and_mask(QDate dtFrom, QDate dtTo,
     //dates
     QString sCondition;
     if(dtTo>dtFrom)
-        sCondition=QString("date >= '%1' AND date <= '%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
+        sCondition=QString::fromUtf8("date >= '%1' AND date <= '%2'").arg(dtFrom.toString("yyyy-MM-dd"),dtTo.toString("yyyy-MM-dd"));
     else
-        sCondition=QString("date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
+        sCondition=QString::fromUtf8("date = '%1'").arg(dtFrom.toString("yyyy-MM-dd"));
     //-
     int count=-1;
     //-
@@ -2397,30 +2412,30 @@ int CWidgetInterface::trade_get_count_by_date_and_mask(QDate dtFrom, QDate dtTo,
         if(iIndexMask<2 || iIndexMask>6)
         {
             if(iIndexMask==0)//booking number
-                sCondition+=QString(" AND booking_number like '%%1%'").arg(sTextMask);
+                sCondition+=QString::fromUtf8(" AND booking_number like '%%1%'").arg(sTextMask);
 
             if(iIndexMask==1)//comment
-                sCondition+=QString(" AND comment like '%%1%'").arg(sTextMask);
+                sCondition+=QString::fromUtf8(" AND comment like '%%1%'").arg(sTextMask);
 
             if(iIndexMask==7)//dealer
             {
-                sCondition+=QString(" AND info_2 like '%%1%'").arg(sTextMask);
-                sCondition+=QString(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
+                sCondition+=QString::fromUtf8(" AND info_2 like '%%1%'").arg(sTextMask);
+                sCondition+=QString::fromUtf8(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
             }
             if(iIndexMask==8)//ordering number
             {
-                sCondition+=QString(" AND info_1 like '%%1%'").arg(sTextMask);
-                sCondition+=QString(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
+                sCondition+=QString::fromUtf8(" AND info_1 like '%%1%'").arg(sTextMask);
+                sCondition+=QString::fromUtf8(" AND type = %1").arg(TYPE_ORDERING_INCOMING);
             }
             if(iIndexMask==9)//customer name
             {
-                sCondition+=QString(" AND info_2 like '%%1%'").arg(sTextMask);
-                sCondition+=QString(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
+                sCondition+=QString::fromUtf8(" AND info_2 like '%%1%'").arg(sTextMask);
+                sCondition+=QString::fromUtf8(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
             }
             if(iIndexMask==10)//customer number
             {
-                sCondition+=QString(" AND info_1 like '%%1%'").arg(sTextMask);
-                sCondition+=QString(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
+                sCondition+=QString::fromUtf8(" AND info_1 like '%%1%'").arg(sTextMask);
+                sCondition+=QString::fromUtf8(" AND type = %1").arg(TYPE_CUSTOMER_OUTGOING);
             }
             //-
             count=m_pDb->trade_get_count(sCondition);
@@ -2749,7 +2764,7 @@ bool CWidgetInterface::inventory_insert_row(QTableWidget * pTable, CArticle & ar
     return b;
 }
 
-bool CWidgetInterface::inventory_update_row(QTableWidget * pTable, CArticle & ar, bool bSelect)
+bool CWidgetInterface::inventory_update_row(QTableWidget * pTable, CArticle & ar, bool bSelect, bool bAddIfNotExis)
 {
     if(pTable==NULL)
         return false;
@@ -2765,6 +2780,8 @@ bool CWidgetInterface::inventory_update_row(QTableWidget * pTable, CArticle & ar
     int row=find_row(pTable,ar.get_id());
     if(row>=0 && row<pTable->rowCount())//found?
         b=mod_row(pTable,ls,row,true,true,iSelect);
+    else if(bAddIfNotExis)
+        b=inventory_insert_row(pTable,ar,-2,bSelect);
     //-
     ls.clear();
     return b;
@@ -2795,9 +2812,9 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
                 inventory_get_icon_and_warning_limit(ar,ti);
             if(lsOrder[j]==2)//d.column 2
             {
-                s=QString("%1").arg(ar.get_inventory());
+                s=QString::fromUtf8("%1").arg(ar.get_inventory());
                 if(ar.get_unit().length()>0)//unit set?
-                    s+=QString(" %1").arg(ar.get_unit());
+                    s+=QString::fromUtf8(" %1").arg(ar.get_unit());
                 ti.set_text(s);
             }
             if(lsOrder[j]==3)//d.column 3
@@ -2805,12 +2822,12 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
                 i=m_pDb->ordering_get_count_by_article(ar.get_id());
                 if(i>0)
                 {
-                    s=QString("%1").arg(i);
+                    s=QString::fromUtf8("%1").arg(i);
                     if(ar.get_unit().length()>0)
-                        s+=QString(" %1").arg(ar.get_unit());
+                        s+=QString::fromUtf8(" %1").arg(ar.get_unit());
                     i=m_pDb->ordering_get_ordering_count_by_article(ar.get_id());
                     if(i>0)
-                        s+=QString(" / %1").arg(i);
+                        s+=QString::fromUtf8(" / %1").arg(i);
                 }
                 ti.set_text(s);
             }
@@ -2818,9 +2835,9 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
             {
                 if(ar.get_max_inventory()>0)
                 {
-                    s=QString("%1").arg(ar.get_max_inventory());
+                    s=QString::fromUtf8("%1").arg(ar.get_max_inventory());
                     if(ar.get_unit().length()>0)//unit set?
-                        s+=QString(" %1").arg(ar.get_unit());
+                        s+=QString::fromUtf8(" %1").arg(ar.get_unit());
                 }
                 ti.set_text(s);
             }
@@ -2846,7 +2863,7 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
                 ti.set_text(ar.get_comment());
             if(lsOrder[j]==12)//d.column 12
             {
-                s=QString("%1").arg(ar.get_id());
+                s=QString::fromUtf8("%1").arg(ar.get_id());
                 ti.set_text(s);
             }
             //-
@@ -2854,7 +2871,7 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
             lsData.push_back(ti);//add
             //-
             ti.clear();
-            s=QString("");
+            s=QString::fromUtf8("");
         }
     }
     //-
@@ -2865,7 +2882,7 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
 
 void CWidgetInterface::inventory_get_icon_and_warning_limit(CArticle & ar, CTableItemData & ti, int iAlignment)
 {
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     bool bIcon=false;
     int iLimit=ar.get_warning_limit();
     int inv=ar.get_inventory();
@@ -2874,7 +2891,7 @@ void CWidgetInterface::inventory_get_icon_and_warning_limit(CArticle & ar, CTabl
         if(inv<iLimit)
         {
             bIcon=true;
-            s=QString("Bst.<%1").arg(ar.get_warning_limit());
+            s=QString::fromUtf8("Bst.<%1").arg(ar.get_warning_limit());
         }
     }
     if(!bIcon)
@@ -2898,7 +2915,7 @@ void CWidgetInterface::inventory_get_icon_and_precent(CArticle & ar, CTableItemD
     if(ar.get_max_inventory()>0)
     {
         i=(int)((float)ar.get_inventory())/((float)ar.get_max_inventory())*((float)100);
-        sText=QString("%1 %").arg(i);
+        sText=QString::fromUtf8("%1 %").arg(i);
     }
     //-
     if(icon_index==0)
@@ -3033,11 +3050,11 @@ bool CWidgetInterface::logbook_get_mask_condition(QDate dt,int iIndex,QString & 
     else
         return false;//index out of range
     //-
-    sCondition=QString("date_time like '%1%'").arg(dt.toString("yyyy-MM-dd"));
+    sCondition=QString::fromUtf8("date_time like '%1%'").arg(dt.toString("yyyy-MM-dd"));
     if(typeF!=-1)
     {
-        sCondition+=QString(" AND type >= %1").arg(typeF);
-        sCondition+=QString(" AND type <= %1").arg(typeT);
+        sCondition+=QString::fromUtf8(" AND type >= %1").arg(typeF);
+        sCondition+=QString::fromUtf8(" AND type <= %1").arg(typeT);
     }
     //-
     return true;
@@ -3074,8 +3091,8 @@ bool CWidgetInterface::logbook_update_list_date(QListWidget * pList, int iYear, 
         if(dt==dtSelect)//mark index for select
             j=i;
         //-
-        s=dt.toString(QString("dd.MM.yyyy"));
-        s+=QString(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
+        s=dt.toString(QString::fromUtf8("dd.MM.yyyy"));
+        s+=QString::fromUtf8(" (%1.)").arg(slWeekDay[dt.dayOfWeek()-1]);
         //-
         dtMark=dt;
         dt=dt.addDays(1);
@@ -3090,7 +3107,7 @@ bool CWidgetInterface::logbook_update_list_date(QListWidget * pList, int iYear, 
             }
             count=m_pDb->logbook_get_count(sCondition);
             if(count>0)
-                s+=QString(" |%1").arg(count);
+                s+=QString::fromUtf8(" |%1").arg(count);
         }
         //-
         sl.push_back(s);
@@ -3145,13 +3162,13 @@ bool CWidgetInterface::logbook_refresh_list_date(QListWidget * pList, int iIndex
                 }
                 //-
                 count=m_pDb->logbook_get_count(sCondition);
-                s2=QString("%1").arg(count);
+                s2=QString::fromUtf8("%1").arg(count);
                 sl=s.split("|");
                 if(sl.count()==2)
                 {
                     if(s2!=sl[1] && count>0)//count update?
                     {
-                        s=QString("%1|%2").arg(sl[0],s2);
+                        s=QString::fromUtf8("%1|%2").arg(sl[0],s2);
                         pItem->setText(s);
                     }
                     if(count<=0)
@@ -3159,7 +3176,7 @@ bool CWidgetInterface::logbook_refresh_list_date(QListWidget * pList, int iIndex
                 }
                 if(sl.count()==1 && count>0)
                 {
-                    s+=QString(" |%1").arg(s2);
+                    s+=QString::fromUtf8(" |%1").arg(s2);
                     pItem->setText(s);
                 }
             }
@@ -3203,6 +3220,7 @@ bool CWidgetInterface::balancelist_update_tablewidget(QTableWidget * pTable, QDa
     QList<QString> lssTrades;
     QString sUnit,s,sCondition;
     int k=0,count,i,count_in=0,count_out=0,row=0;
+    double d1,d2;
     CTrade trade;
     QColor colRed(170,0,0);
     QTableWidgetItem * pItem=NULL;
@@ -3219,8 +3237,8 @@ bool CWidgetInterface::balancelist_update_tablewidget(QTableWidget * pTable, QDa
     while(dt<=dtTo)
     {
         //get all records by condition
-        sCondition=QString("date = '%1' ").arg(dt.toString(QString("yyyy-MM-dd")));
-        sCondition+=QString(" AND wares like '%x%1|%' AND canceled=0").arg(iArticleId);
+        sCondition=QString::fromUtf8("date = '%1' ").arg(dt.toString(QString::fromUtf8("yyyy-MM-dd")));
+        sCondition+=QString::fromUtf8(" AND wares like '%x%1|%' AND canceled=0").arg(iArticleId);
         m_pDb->trade_get_all(sCondition,lssTrades);//get all records by trade nummer
         if(lssTrades.count()>0)//found?
         {
@@ -3239,28 +3257,28 @@ bool CWidgetInterface::balancelist_update_tablewidget(QTableWidget * pTable, QDa
             }
             //-
             pTable->insertRow(row);//new row
-            for(i=0;i<6;i++)
+            for(i=0;i<9;i++)
             {
                 if(i==0)//date
                 {
-                    s=QString("%1").arg(dt.toString(QString("yyyy-MM-dd")));
-                    s+=QString(" , (%1)").arg(sDays[dt.dayOfWeek()-1]);
+                    s=QString::fromUtf8("%1").arg(dt.toString(QString::fromUtf8("yyyy-MM-dd")));
+                    s+=QString::fromUtf8(" , (%1)").arg(sDays[dt.dayOfWeek()-1]);
                     pItem=new QTableWidgetItem(s);
                 }
                 if(i==1)//count in
                 {
-                    s=QString("%1").arg(count_in);
+                    s=QString::fromUtf8("%1").arg(count_in);
                     if(sUnit.length()>0)//unit set?
-                        s+=QString(" %1").arg(sUnit);
+                        s+=QString::fromUtf8(" %1").arg(sUnit);
                     pItem=new QTableWidgetItem(s);
                     if(pItem!=NULL)
                         pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
                 }
                 if(i==2)//count out
                 {
-                    s=QString("%1").arg(count_out);
+                    s=QString::fromUtf8("%1").arg(count_out);
                     if(sUnit.length()>0)//unit set?
-                        s+=QString(" %1").arg(sUnit);
+                        s+=QString::fromUtf8(" %1").arg(sUnit);
                     pItem=new QTableWidgetItem(s);
                     if(pItem!=NULL)
                         pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
@@ -3268,9 +3286,9 @@ bool CWidgetInterface::balancelist_update_tablewidget(QTableWidget * pTable, QDa
                 if(i==3)//diff
                 {
                     k=count_in-count_out;
-                    s=QString("%1").arg(k);
+                    s=QString::fromUtf8("%1").arg(k);
                     if(sUnit.length()>0)//unit set?
-                        s+=QString(" %1").arg(sUnit);
+                        s+=QString::fromUtf8(" %1").arg(sUnit);
                     pItem=new QTableWidgetItem(s);
                     if(pItem!=NULL)
                     {
@@ -3281,21 +3299,66 @@ bool CWidgetInterface::balancelist_update_tablewidget(QTableWidget * pTable, QDa
                 }
                 if(i==4)//count before
                 {
-                    s=QString("%1").arg(count_before);
+                    s=QString::fromUtf8("%1").arg(count_before);
                     if(sUnit.length()>0)//unit set?
-                        s+=QString(" %1").arg(sUnit);
+                        s+=QString::fromUtf8(" %1").arg(sUnit);
                     pItem=new QTableWidgetItem(s);
                     if(pItem!=NULL)
                         pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
                 }
                 if(i==5)//count behind
                 {
-                    s=QString("%1").arg(count_before+k);
+                    s=QString::fromUtf8("%1").arg(count_before+k);
                     if(sUnit.length()>0)//unit set?
-                        s+=QString(" %1").arg(sUnit);
+                        s+=QString::fromUtf8(" %1").arg(sUnit);
                     pItem=new QTableWidgetItem(s);
                     if(pItem!=NULL)
                         pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                }
+                if(i==6)
+                {
+                    if(ar.get_base_price()>0.0)
+                    {
+                        d1=count_in*ar.get_base_price();
+                        s=QString::fromUtf8("%1").arg(QString::number(d1,'f',2));
+                        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
+                        if(ar.get_valuta()!=QString::fromUtf8(""))
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
+                        pItem=new QTableWidgetItem(s);
+                        if(pItem!=NULL)
+                            pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                    }
+                }
+                if(i==7)
+                {
+                    if(ar.get_sales_price()>0.0)
+                    {
+                        d2=count_out*ar.get_sales_price();
+                        s=QString::fromUtf8("%1").arg(QString::number(d2,'f',2));
+                        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
+                        if(ar.get_valuta()!=QString::fromUtf8(""))
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
+                        pItem=new QTableWidgetItem(s);
+                        if(pItem!=NULL)
+                            pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                    }
+                }
+                if(i==8)
+                {
+                    if(ar.get_base_price()>0.0 && ar.get_sales_price()>0.0)
+                    {
+                        s=QString::fromUtf8("%1").arg(QString::number(d2-d1,'f',2));
+                        s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
+                        if(ar.get_valuta()!=QString::fromUtf8(""))
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
+                        pItem=new QTableWidgetItem(s);
+                        if(pItem!=NULL)
+                        {
+                            pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                            if(d2-d1<0.0)
+                                pItem->setTextColor(colRed);
+                        }
+                    }
                 }
                 if(pItem==NULL)
                 {
@@ -3326,11 +3389,11 @@ bool CWidgetInterface::warnlist_update_tablewidget(QTableWidget * pTable)
 
     set_block_signal_and_sort(pTable,true,false);//faster
 
-    QString s2,s,sCondition=QString("inventory < warning_limit");
+    QString s2,s,sCondition=QString::fromUtf8("inventory < warning_limit");
     QList<int> lsArtIds;
     int i,row=0;
     CArticle ar;
-    QTableWidgetItem * pItem=NULL;
+    CMyTableWidgetItem * pItem=NULL;
 
     m_pDb->article_get_all(sCondition,lsArtIds);
     while(lsArtIds.count()>0)
@@ -3340,7 +3403,7 @@ bool CWidgetInterface::warnlist_update_tablewidget(QTableWidget * pTable)
             pTable->insertRow(row);
             for(i=0;i<pTable->columnCount();i++)
             {
-                s=QString("");
+                s=QString::fromUtf8("");
                 if(i==0)//name
                     s=ar.get_name();
                 if(i==1)//1.art.nr
@@ -3353,22 +3416,23 @@ bool CWidgetInterface::warnlist_update_tablewidget(QTableWidget * pTable)
                     s=m_pDb->waregroup_get_path(ar.get_waregroup_id());
                 if(i==5)//inventory
                 {
-                    s=QString("%1").arg(ar.get_inventory());
+                    s=QString::fromUtf8("%1").arg(ar.get_inventory());
                     s2=ar.get_unit();
                     if(s2.length()>0)//set?
-                        s+=QString(" %1").arg(s2);
+                        s+=QString::fromUtf8(" %1").arg(s2);
                 }
                 if(i==6)//warnlimit
                 {
-                    s=QString("%1").arg(ar.get_warning_limit());
+                    s=QString::fromUtf8("%1").arg(ar.get_warning_limit());
                     s2=ar.get_unit();
                     if(s2.length()>0)//set?
-                        s+=QString(" %1").arg(s2);
+                        s+=QString::fromUtf8(" %1").arg(s2);
                 }
                 //-
-                pItem=new QTableWidgetItem(s);
+                pItem=new CMyTableWidgetItem;
                 if(pItem!=NULL)
                 {
+                    pItem->setText(s);
                     if(i>=5)
                         pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
                     pTable->setItem(row,i,pItem);
@@ -3401,9 +3465,9 @@ bool CWidgetInterface::inventorys_on_date_update_tablewidget(QTableWidget * pTab
     QList<int> lsArtIds;
     int i,count=0,row=0;
     CArticle ar;
-    QTableWidgetItem * pItem=NULL;
+    CMyTableWidgetItem * pItem=NULL;
 
-    m_pDb->article_get_all(QString(""),lsArtIds);
+    m_pDb->article_get_all(QString::fromUtf8(""),lsArtIds);
     while(lsArtIds.count()>0)
     {
         if(m_pDb->article_get(lsArtIds[0],ar))//art found?
@@ -3411,17 +3475,17 @@ bool CWidgetInterface::inventorys_on_date_update_tablewidget(QTableWidget * pTab
             pTable->insertRow(row);
             for(i=0;i<pTable->columnCount();i++)
             {
-                s=QString("");
+                s=QString::fromUtf8("");
 
                 if(i==0)//inventory on date
                 {
                     count=(int)m_pDb->article_get_inventory_on_date(ar.get_id(),dt);
                     if(count>=0)
                     {
-                        s=QString("%1").arg(count);
+                        s=QString::fromUtf8("%1").arg(count);
                         s2=ar.get_unit();
                         if(s2.length()>0)//set?
-                            s+=QString(" %1").arg(s2);
+                            s+=QString::fromUtf8(" %1").arg(s2);
                     }
                 }
                 if(i==1)//name
@@ -3435,9 +3499,10 @@ bool CWidgetInterface::inventorys_on_date_update_tablewidget(QTableWidget * pTab
                 if(i==5)//waregroup
                     s=m_pDb->waregroup_get_path(ar.get_waregroup_id());
                 //-
-                pItem=new QTableWidgetItem(s);
+                pItem=new CMyTableWidgetItem;
                 if(pItem!=NULL)
                 {
+                    pItem->setText(s);
                     if(i==0)
                         pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
                     pTable->setItem(row,i,pItem);
@@ -3453,5 +3518,266 @@ bool CWidgetInterface::inventorys_on_date_update_tablewidget(QTableWidget * pTab
 
     set_block_signal_and_sort(pTable,false,true);
 
+    return true;
+}
+
+bool CWidgetInterface::inventorylist_update_tablewidget(QTableWidget * pTable)
+{
+    if(m_pDb==NULL && pTable!=NULL)
+        return false;
+
+    set_block_signal_and_sort(pTable,true,false);//faster
+
+    QString s;
+    QList<int> lsArtIds;
+    int i,row=0;
+    CArticle ar;
+    QTableWidgetItem * pItem=NULL;
+
+    m_pDb->article_get_all(QString::fromUtf8(""),lsArtIds);
+    while(lsArtIds.count()>0)
+    {
+        if(m_pDb->article_get(lsArtIds[0],ar))//art found?
+        {
+            pTable->insertRow(row);
+            for(i=0;i<pTable->columnCount();i++)
+            {
+                s=QString::fromUtf8("");
+                if(i==0)//inv/max.inv
+                {
+                    s=QString::fromUtf8("%1").arg(ar.get_inventory());
+                    if(ar.get_max_inventory()>0)
+                        s+=QString::fromUtf8(" / %1").arg(ar.get_max_inventory());
+                    if(ar.get_unit().length()>0)
+                        s+=QString::fromUtf8(" %1").arg(ar.get_unit());
+                }
+                if(i==1)//art.name
+                    s=ar.get_name();
+                if(i==2)//1/2.art.nr
+                {
+                    if(ar.get_articlenumber().length()>0)
+                        s+=QString::fromUtf8("'%1'").arg(ar.get_articlenumber());
+                    s+=QString::fromUtf8(" | ");
+                    if(ar.get_articlenumber2().length()>0)
+                        s+=QString::fromUtf8("'%1'").arg(ar.get_articlenumber2());
+                }
+                if(i==3)//maker
+                    s=m_pDb->maker_get_name(ar.get_maker_id());
+                if(i==4)//waregroup
+                    s=m_pDb->waregroup_get_path(ar.get_waregroup_id());
+                if(i==5)//location / comment
+                {
+                    if(ar.get_location().length()>0)
+                        s+=ar.get_location();
+                    s+=QString::fromUtf8(" | ");
+                    if(ar.get_comment().length()>0)
+                        s+=ar.get_comment();
+                }
+                //-
+                pItem=new QTableWidgetItem(s);
+                if(pItem!=NULL)
+                {
+                    if(i>=5)
+                        pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                    pTable->setItem(row,i,pItem);
+                }
+            }
+        }
+        //-
+        lsArtIds.removeFirst();
+        row++;
+    }
+    //-
+    lsArtIds.clear();
+
+    set_block_signal_and_sort(pTable,false,true);
+
+    return true;
+}
+
+bool CWidgetInterface::list_value_of_goods(QTableWidget * pTable, QDate dt)
+{
+    if(m_pDb==NULL && pTable!=NULL)
+        return false;
+
+    //delete old rows
+    remove_all_rows(pTable);
+
+    bool b,bFirst=true,bLastRecordFromValuta=false;
+    QString s,markValuta;
+    QList<int> lsArtIds;
+    int i,mark_row=0,r;
+    CArticle ar;
+    unsigned int count;
+    float f,f2,sum,p;
+    QStringList ls;
+    QTableWidgetItem * pItem=NULL;
+
+    //-
+    m_pDb->article_get_all(QString::fromUtf8("valuta != ''"),lsArtIds,false,QString::fromUtf8("article.valuta"));
+    while(lsArtIds.count()>0)
+    {
+        if(m_pDb->article_get(lsArtIds[0],ar))//art found?
+        {
+            //first -> mark
+            if(bFirst)
+            {
+                bFirst=false;
+                markValuta=ar.get_valuta();
+            }
+
+            //column text
+            if(markValuta!=ar.get_valuta())
+                bLastRecordFromValuta=true;//mark
+            else
+            {
+                pTable->insertRow(pTable->rowCount());
+
+                for(i=0;i<pTable->columnCount();i++)
+                {
+                    s=QString::fromUtf8("");
+
+                    if(i==0)//name
+                        s=ar.get_name();
+                    if(i==1)//maker
+                        s=m_pDb->maker_get_name(ar.get_maker_id());
+                    if(i==2)//waregroup
+                        s=m_pDb->waregroup_get_path(ar.get_waregroup_id());
+                    if(i==3)//current inventory
+                    {
+                        count=m_pDb->article_get_inventory_on_date(ar.get_id(),dt);
+                        s=QString::fromUtf8("%1 ").arg(count)+ar.get_unit();
+                    }
+                    if(i==4)//base & sale price
+                    {
+                        if(ar.get_base_price()>0.0 && ar.get_sales_price()>0.0)
+                        {
+                            f=ar.get_base_price();
+                            s=QString::fromUtf8("%1").arg(QString::number(f,'f',2));
+                            f=ar.get_sales_price();
+                            s+=QString::fromUtf8(" / %1").arg(QString::number(f,'f',2));
+                            if(ar.get_valuta()!=QString::fromUtf8(""))
+                                s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
+                        }
+                    }
+                    if(i==5)//value of goods(base)
+                    {
+                        f=count*ar.get_base_price();        
+                        if(f>0.0)
+                            s=QString::fromUtf8("%1").arg(QString::number(f,'f',2));
+                        else
+                            s=QString::fromUtf8("0,00");
+                        if(ar.get_valuta()!=QString::fromUtf8(""))
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
+                    }
+                    if(i==6)//value of goods(base)
+                    {
+                        f2=count*ar.get_sales_price();
+                        if(f2>0.0)
+                            s=QString::fromUtf8("%1").arg(QString::number(f2,'f',2));
+                        else
+                            s=QString::fromUtf8("0,00");
+                        if(ar.get_valuta()!=QString::fromUtf8(""))
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
+                    }
+                    if(i==7)//marge
+                    {
+                        if(f>=0.0 && f2>=0.0)
+                            s=QString::fromUtf8("%1").arg(QString::number(f2-f,'f',2));
+                        else
+                            s=QString::fromUtf8("0,00");
+                        if(ar.get_valuta()!=QString::fromUtf8(""))
+                            s+=QString::fromUtf8(" %1").arg(ar.get_valuta());
+                    }
+                    //-
+                    pItem=new QTableWidgetItem(s);
+                    if(pItem!=NULL)
+                    {
+                        if(i>2)
+                            pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                        pTable->setItem(pTable->rowCount()-1,i,pItem);
+                    }
+                }
+            }
+
+            //change valuta or last article -> calc sum
+            if(markValuta!=ar.get_valuta() || lsArtIds.count()==1)
+            {
+                //empty row
+                pTable->insertRow(pTable->rowCount());
+
+                //calc
+                for(i=5;i<pTable->columnCount();i++)
+                {
+                    for(r=mark_row,sum=0.0;r<pTable->rowCount();r++)
+                    {
+                        pItem=pTable->item(r,i);
+                        if(pItem!=NULL)
+                        {
+                           s=pItem->text();
+                           s.replace(QString::fromUtf8(","),QString::fromUtf8("."));//for german format
+                           ls=s.split(QString::fromUtf8(" "));
+                           if(ls.count()>0)
+                           {
+                               p=ls[0].toFloat(&b);
+                               if(b)
+                                   sum+=p;
+                           }
+                        }
+                    }
+                    ls.clear();
+
+                    //text sum
+                    pItem=new QTableWidgetItem(QString::fromUtf8("Summe:"));
+                    if(pItem!=NULL)
+                    {
+                        pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                        pTable->setItem(pTable->rowCount()-1,4,pItem);
+                    }
+
+                    //value's of sum
+                    s=QString::fromUtf8("%1").arg(QString::number(sum,'f',2));
+                    if(markValuta!=QString::fromUtf8(""))
+                        s+=QString::fromUtf8(" %1").arg(markValuta);
+                    pItem=new QTableWidgetItem(s);
+                    if(pItem!=NULL)
+                    {
+                        pItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);//right alignment
+                        pTable->setItem(pTable->rowCount()-1,i,pItem);
+                    }
+                }
+
+                //empty row
+                if(lsArtIds.count()>1)
+                    pTable->insertRow(pTable->rowCount());
+
+                //mark - for calc next records with other valuta
+                mark_row=pTable->rowCount();
+                markValuta=ar.get_valuta();
+            }
+        }
+        //-
+        if(bLastRecordFromValuta)
+            bLastRecordFromValuta=false;
+        else
+            lsArtIds.removeFirst();
+    }
+
+    //for german style, replace text sum values . to ,
+    for(r=0;r<pTable->rowCount();r++)
+    {
+        for(i=4;i<pTable->columnCount();i++)
+        {
+            pItem=pTable->item(r,i);
+            if(pItem!=NULL)
+            {
+                s=pItem->text();
+                s.replace(QString::fromUtf8("."),QString::fromUtf8(","));//format german style
+                pItem->setText(s);
+            }
+        }
+    }
+    //-
+    lsArtIds.clear();
     return true;
 }

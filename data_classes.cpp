@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,294 @@
  */
 
 #include "data_classes.h"
+
+//-CEan-----------------------------------------------------------------
+CEan::CEan()
+{
+    set_const();
+}
+
+CEan::CEan(QString sBarcode)
+{
+    set_const();
+    set_barcode(sBarcode);
+}
+
+CEan::~CEan()
+{
+}
+
+void CEan::set_const(void)
+{
+    //const
+    m_saCodeA[0]="0001101";
+    m_saCodeA[1]="0011001";
+    m_saCodeA[2]="0010011";
+    m_saCodeA[3]="0111101";
+    m_saCodeA[4]="0100011";
+    m_saCodeA[5]="0110001";
+    m_saCodeA[6]="0101111";
+    m_saCodeA[7]="0111011";
+    m_saCodeA[8]="0110111";
+    m_saCodeA[9]="0001011";
+
+    m_saCodeB[0]="0100111";
+    m_saCodeB[1]="0110011";
+    m_saCodeB[2]="0011011";
+    m_saCodeB[3]="0100001";
+    m_saCodeB[4]="0011101";
+    m_saCodeB[5]="0111001";
+    m_saCodeB[6]="0000101";
+    m_saCodeB[7]="0010001";
+    m_saCodeB[8]="0001001";
+    m_saCodeB[9]="0010111";
+
+    m_saCodeC[0]="1110010";
+    m_saCodeC[1]="1100110";
+    m_saCodeC[2]="1101100";
+    m_saCodeC[3]="1000010";
+    m_saCodeC[4]="1011100";
+    m_saCodeC[5]="1001110";
+    m_saCodeC[6]="1010000";
+    m_saCodeC[7]="1000100";
+    m_saCodeC[8]="1001000";
+    m_saCodeC[9]="1110100";
+
+    m_saParity[0]="000000";
+    m_saParity[1]="001011";
+    m_saParity[2]="001101";
+    m_saParity[3]="001110";
+    m_saParity[4]="010011";
+    m_saParity[5]="011001";
+    m_saParity[6]="011100";
+    m_saParity[7]="010101";
+    m_saParity[8]="010110";
+    m_saParity[9]="011010";
+
+    m_sSeperator=QString::fromUtf8("01010");
+
+    m_sLeadTail=QString::fromUtf8("101");
+
+    m_iType=TYPE_EAN_UNKNOW;
+}
+
+bool CEan::set_barcode(QString sBarcode)
+{
+    int i,checksum;
+    bool b=false;
+    QString s;
+    //-
+    if(sBarcode.length()>0)
+    {
+        //to short?
+        for(i=1; i+sBarcode.length()<8; i++)// 8 numbers
+        {
+            s+=QString::fromUtf8("0");
+        }
+        if(sBarcode.length()>8)//no 8 numbers
+        {
+            for(i=1; i+sBarcode.length()<13; i++)// 13 numbers
+            {
+                s+=QString::fromUtf8("0");
+            }
+        }
+        if(s.length()>0)//was to short
+        {
+            sBarcode=s+sBarcode;
+        }
+
+        //set
+        m_sBarcode=sBarcode;
+
+        //checksum
+        checksum=get_checksum();
+        if(checksum>=0)//checksum ok?
+        {
+            //get last number from barcode & check checksum
+            i=get_barcode_number(sBarcode.length()-1);
+            if(i>=0)
+            {
+                if(i==checksum)//checksum right?
+                {
+                    b=true;
+                    if(m_sBarcode.length()==8)//ean-8
+                        m_iType=TYPE_EAN_8;
+                    else if(m_sBarcode.length()==13)//ean-13
+                        m_iType=TYPE_EAN_13;
+                }
+            }
+        }
+    }
+    //-
+    if(!b)//error
+    {
+        m_sBarcode=QString::fromUtf8("");
+        m_iType=TYPE_EAN_UNKNOW;
+    }
+    //-
+    return b;
+}
+
+int CEan::get_type(void)
+{
+    return m_iType;
+}
+
+bool CEan::is_ean_barcode(void)
+{
+    bool b=false;
+    if(get_type()==TYPE_EAN_8 || get_type()==TYPE_EAN_13)
+        b=true;
+    return b;
+}
+
+int CEan::get_checksum(void)
+{
+    bool b=true;
+    int c,i,checksum=0;
+
+    //generate checksum
+    if(m_sBarcode.length()>=7)
+    {
+        for(i=0; i<m_sBarcode.length()-1 && b==true ; i++)//lenght -1 -> last number is check number
+        {
+            //get number of index & check
+            c=get_barcode_number(i);
+            if(c<0)
+                b=false;//error
+            else
+            {
+                //EAN 8
+                if(m_sBarcode.length()==8)
+                {
+                    if(i%2!=0)
+                        checksum+=c;
+                    else
+                        checksum+=(c*3);
+                }
+
+                //EAN 13
+                if(m_sBarcode.length()==13)
+                {
+                    if(i%2==0)
+                        checksum+=c;
+                    else
+                        checksum+=(c*3);
+                }
+            }
+        }
+    }
+    if(!b)
+        checksum=-1;//error
+    else
+    {
+        checksum=10-(checksum%10);
+        if(checksum==10)
+            checksum=0;
+    }
+    //-
+    return checksum;
+}
+
+int CEan::get_barcode_number(int index)
+{
+    int i=-1;
+    bool b;
+    QString s;
+    //-
+    if(index>=0 && index<m_sBarcode.length())
+    {
+        s=m_sBarcode[index];
+        i=s.toInt(&b);
+        if(!b)
+            i=-1;
+    }
+    //-
+    return i;
+}
+
+QString CEan::get_barcode_number_string(int index, int length)
+{
+    QString sReturn;
+    if(index>=0 && index <m_sBarcode.length() && index+length>=0 && index+length<=m_sBarcode.length())
+        sReturn=m_sBarcode.mid(index,length);
+    return sReturn;
+}
+
+bool CEan::get_digital_struct(QString & sDigitalStruct)
+{
+    QString sParity;
+    bool bReturn=false;
+    int i,index,part_count;
+    //-
+    if(is_ean_barcode())
+    {
+        //part count (left & right site of barcode)
+        if(get_type()==TYPE_EAN_8)
+            part_count=3;
+        else if(get_type()==TYPE_EAN_13)
+            part_count=6;
+
+        //clear
+        sDigitalStruct=QString::fromUtf8("");
+
+        //first number -> get parity
+        i=get_barcode_number(0);
+        if(i>=0 && i<=9)
+        {
+            //left lead tail
+            sDigitalStruct+=m_sLeadTail;
+
+            //parity
+            if(get_type()==TYPE_EAN_13)
+                sParity=m_saParity[i];//only for ean-13 , first number set parity (mix code a & b)
+            else
+                sDigitalStruct+=m_saCodeA[i];//ean 8 -> first number code a
+
+            //left part of barcode
+            for(index=1;index <= part_count;index++)
+            {
+                i=get_barcode_number(index);
+                if(i>=0 && i<=9)
+                {
+                    if(get_type()==TYPE_EAN_8)//ean-8, left part only Code A
+                    {
+                        sDigitalStruct+=m_saCodeA[i];
+                    }
+                    if(get_type()==TYPE_EAN_13)//ean-13, left part Code A or Code B (parity)
+                    {
+                        if(index-1 < sParity.length())
+                        {
+                            if(sParity.mid(index-1,1)==QString::fromUtf8("0"))//code A
+                                sDigitalStruct+=m_saCodeA[i];
+                            else if(sParity.mid(index-1,1)==QString::fromUtf8("1"))//code B
+                                sDigitalStruct+=m_saCodeB[i];
+                        }
+                    }
+                }
+            }
+
+            //seperator
+            sDigitalStruct+=m_sSeperator;
+
+            //right part of barcode
+            for(;index<m_sBarcode.length();index++)
+            {
+                i=get_barcode_number(index);
+                if(i>=0 && i<=9)
+                    sDigitalStruct+=m_saCodeC[i];
+            }
+
+            //right lead tail
+            sDigitalStruct+=m_sLeadTail;
+
+            //-
+            bReturn=true;
+        }
+    }
+    //-
+    return bReturn;
+}
 
 //-ctableitemdata-------------------------------------------------------
 CTableItemData::CTableItemData()
@@ -95,7 +383,7 @@ void CTableItemData::set(QString sText, int iAlignment, QIcon * pIcon)
 
 void CTableItemData::clear(void)
 {
-    m_sText=QString("");
+    m_sText=QString::fromUtf8("");
     m_iAlignment=TABLE_ALIGNMENT_LEFT;
     m_icon=QIcon();
 }
@@ -566,7 +854,13 @@ void CPointerMemory::set_date_time(QDateTime * p_dt_tiDateTime)
 //basic------------------------------------------------------------------------------------------------------------
 CBasicData::CBasicData()
 {
-    m_sName=m_sComment=QString("");
+    m_sName=m_sComment=QString::fromUtf8("");
+    m_iId=-1;
+}
+
+void CBasicData::clear(void)
+{
+    m_sName=m_sComment=QString::fromUtf8("");
     m_iId=-1;
 }
 
@@ -605,7 +899,14 @@ void CBasicData::set_comment(QString sComment)
 CWaregroup::CWaregroup()
 {
     m_iParentId=-1;
-    m_sName=m_sComment=QString("");
+    m_sName=m_sComment=QString::fromUtf8("");
+    m_iId=-1;
+}
+
+void CWaregroup::clear(void)
+{
+    m_iParentId=-1;
+    m_sName=m_sComment=QString::fromUtf8("");
     m_iId=-1;
 }
 
@@ -638,7 +939,13 @@ int CWaregroup::operator != (CWaregroup & wg)
 //maker----------------------------------------------------------------------------------------------------------------
 CMaker::CMaker()
 {
-    m_sName=m_sComment=m_sAdress=m_sCallnumber=m_sFaxnumber=m_sEmail=m_sHomepage=m_sContectperson=QString("");
+    m_sName=m_sComment=m_sAdress=m_sCallnumber=m_sFaxnumber=m_sEmail=m_sHomepage=m_sContectperson=QString::fromUtf8("");
+    m_iId=-1;
+}
+
+void CMaker::clear(void)
+{
+    m_sName=m_sComment=m_sAdress=m_sCallnumber=m_sFaxnumber=m_sEmail=m_sHomepage=m_sContectperson=QString::fromUtf8("");
     m_iId=-1;
 }
 
@@ -719,7 +1026,13 @@ void CMaker::set(CMaker & mk)
 //dealer-------------------------------------------------------------------------------------------------------------------------------------
 CDealer::CDealer()
 {
-    m_sName=m_sComment=m_sCustomernumber=m_sAdress=m_sCallnumber=m_sFaxnumber=m_sEmail=m_sHomepage=m_sContectperson=QString("");
+    m_sName=m_sComment=m_sCustomernumber=m_sAdress=m_sCallnumber=m_sFaxnumber=m_sEmail=m_sHomepage=m_sContectperson=QString::fromUtf8("");
+    m_iId=-1;
+}
+
+void CDealer::clear(void)
+{
+    m_sName=m_sComment=m_sCustomernumber=m_sAdress=m_sCallnumber=m_sFaxnumber=m_sEmail=m_sHomepage=m_sContectperson=QString::fromUtf8("");
     m_iId=-1;
 }
 
@@ -751,7 +1064,13 @@ void CDealer::set(CDealer & de)
 //customer-------------------------------------------------------------------------------------------------------------------------
 CCustomer::CCustomer()
 {
-    m_sCallnumber=m_sFaxnumber=m_sEmail=m_sName=m_sComment=m_sCustomerNumber=m_sFirstName=m_sStreet=m_sCity=m_sPostcode=QString("");
+    m_sCallnumber=m_sFaxnumber=m_sEmail=m_sName=m_sComment=m_sCustomerNumber=m_sFirstName=m_sStreet=m_sCity=m_sPostcode=QString::fromUtf8("");
+    m_iId=-1;
+}
+
+void CCustomer::clear(void)
+{
+    m_sCallnumber=m_sFaxnumber=m_sEmail=m_sName=m_sComment=m_sCustomerNumber=m_sFirstName=m_sStreet=m_sCity=m_sPostcode=QString::fromUtf8("");
     m_iId=-1;
 }
 
@@ -860,9 +1179,9 @@ CArticle::CArticle()
 bool CArticle::clear(void)
 {
     m_bDelete=false;
-    m_sName=m_sComment=QString("");
+    m_sName=m_sComment=QString::fromUtf8("");
     m_iId=-1;
-    m_sUnit=m_sArticlenumber=m_sArticlenumber2=m_sLocation=m_sName=m_sComment=m_sValuta=QString("");
+    m_sUnit=m_sArticlenumber=m_sArticlenumber2=m_sLocation=m_sName=m_sComment=m_sValuta=QString::fromUtf8("");
     m_iWarningLimit=m_iWaregroupId=m_iMakerId=m_iId=-1;
     m_uiInventory=m_uiMaxInventory=0;
     m_fBaseprice=m_fSalesprice=0.0;
@@ -1029,7 +1348,7 @@ bool COrdering::clear(void)
 {
     m_iId=m_iDealerId=-1;
     m_dtDate=QDate(0,0,0);
-    m_sComment=m_sOrdernumber=m_sWares=QString("");
+    m_sComment=m_sOrdernumber=m_sWares=QString::fromUtf8("");
     return true;
 }
 
@@ -1130,11 +1449,11 @@ void COrdering::set_wares(QString s)
 void COrdering::set_wares(QList<QString> & ls)
 {
     int count=ls.count();
-    QString s=QString("");
+    QString s=QString::fromUtf8("");
     for(int i=0;i<count;i++)
     {
         s+=ls[i];
-        s+=QString("|");
+        s+=QString::fromUtf8("|");
     }
     m_sWares=s;
 }
@@ -1154,9 +1473,18 @@ void COrdering::set(COrdering & ord)
 CTrade::CTrade()
 {
     m_iType=-1;
-    m_sInfo1=m_sInfo2=m_sInfo3=m_sInfo4=m_sInfo5=m_sBookingNumber=m_sComment=m_sWares=QString("");
+    m_sInfo1=m_sInfo2=m_sInfo3=m_sInfo4=m_sInfo5=m_sBookingNumber=m_sComment=m_sWares=QString::fromUtf8("");
     m_dtDate=QDate(0,0,0);
     m_bCanceled=false;
+}
+
+bool CTrade::clear(void)
+{
+    m_bCanceled=false;
+    m_iType=-1;
+    m_dtDate=QDate(0,0,0);
+    m_sComment=m_sBookingNumber=m_sWares=m_sInfo1=m_sInfo2=m_sInfo3=m_sInfo4=m_sInfo5=QString::fromUtf8("");
+    return true;
 }
 
 bool CTrade::get_canceled(void)
@@ -1314,7 +1642,7 @@ void CTrade::set_wares(QList<QString> & ls)
     for(int i=0;i<count;i++)
     {
         s+=ls[i];
-        s+=QString("|");
+        s+=QString::fromUtf8("|");
     }
     m_sWares=s;
 }
@@ -1390,13 +1718,21 @@ void CTrade::set(CTrade & trade)
 //---logbook-------------------------------------------------------------------------------------
 CLogbook::CLogbook()
 {
-    m_sText=QString("");
+    m_sText=QString::fromUtf8("");
     m_iType=-1;
     m_dt_tiDateTime=QDateTime(QDate(0,0,0),QTime(0,0,0,0));
 }
 
 CLogbook::~CLogbook()
 {
+}
+
+bool CLogbook::clear(void)
+{
+    m_sText=QString::fromUtf8("");
+    m_iType=-1;
+    m_dt_tiDateTime=QDateTime(QDate(0,0,0),QTime(0,0,0,0));
+    return true;
 }
 
 QString CLogbook::get_text(void)
@@ -1434,60 +1770,59 @@ QString CLogbook::get_output_string(void)
     QString s,sType;
     //-
     if(m_iType==LOGBOOK_TYPE_IMPORT)
-        sType=QString("Import");
+        sType=QString::fromUtf8("Import");
     else if(m_iType==LOGBOOK_TYPE_TRADE_IN)
-        sType=QString("Wareneingang");
+        sType=QString::fromUtf8("Wareneingang");
     else if(m_iType==LOGBOOK_TYPE_TRADE_OUT)
-        sType=QString("Warenausgang");
+        sType=QString::fromUtf8("Warenausgang");
     else if(m_iType==LOGBOOK_TYPE_TRADE_ORD_IN)
-        sType=QString("Wareneingang(Bestellung)");
+        sType=QString::fromUtf8("Wareneingang(Bestellung)");
     else if(m_iType==LOGBOOK_TYPE_TRADE_CUS_OUT)
-        sType=QString("Warenausgang(Kunde)");
+        sType=QString::fromUtf8("Warenausgang(Kunde)");
     else if(m_iType==LOGBOOK_TYPE_TRADE_CANCEL)
-        sType=QString("Warengang storniert");
+        sType=QString::fromUtf8("Warengang storniert");
     else if(m_iType==LOGBOOK_TYPE_ORDERING_NEW)
-        sType=QString("Bestellung hinzugefügt");
+        sType=QString::fromUtf8("Bestellung hinzugefügt");
     else if(m_iType==LOGBOOK_TYPE_ORDERING_EDIT)
-        sType=QString("Bestellung bearbeitet");
+        sType=QString::fromUtf8("Bestellung bearbeitet");
     else if(m_iType==LOGBOOK_TYPE_ORDERING_REMOVE)
-        sType=QString("Bestellung gelöscht");
+        sType=QString::fromUtf8("Bestellung gelöscht");
     else if(m_iType==LOGBOOK_TYPE_ARTICLE_NEW)
-        sType=QString("Artikel hinzugefügt");
+        sType=QString::fromUtf8("Artikel hinzugefügt");
     else if(m_iType==LOGBOOK_TYPE_ARTICLE_EDIT)
-        sType=QString("Artikel bearbeitet");
+        sType=QString::fromUtf8("Artikel bearbeitet");
     else if(m_iType==LOGBOOK_TYPE_ARTICLE_COPY)
-        sType=QString("Artikel kopiert");
+        sType=QString::fromUtf8("Artikel kopiert");
     else if(m_iType==LOGBOOK_TYPE_ARTICLE_REMOVE)
-        sType=QString("Artikel gelöscht");
+        sType=QString::fromUtf8("Artikel gelöscht");
     else if(m_iType==LOGBOOK_TYPE_WAREGROUP_NEW)
-        sType=QString("Warengruppe hinzugefügt");
+        sType=QString::fromUtf8("Warengruppe hinzugefügt");
     else if(m_iType==LOGBOOK_TYPE_WAREGROUP_EDIT)
-        sType=QString("Warengruppe bearbeitet");
+        sType=QString::fromUtf8("Warengruppe bearbeitet");
     else if(m_iType==LOGBOOK_TYPE_WAREGROUP_REMOVE)
-        sType=QString("Warengruppe gelöscht");
+        sType=QString::fromUtf8("Warengruppe gelöscht");
     else if(m_iType==LOGBOOK_TYPE_MAKER_NEW)
-        sType=QString("Hersteller hinzugefügt");
+        sType=QString::fromUtf8("Hersteller hinzugefügt");
     else if(m_iType==LOGBOOK_TYPE_MAKER_EDIT)
-        sType=QString("Hersteller bearbeitet");
+        sType=QString::fromUtf8("Hersteller bearbeitet");
     else if(m_iType==LOGBOOK_TYPE_MAKER_REMOVE)
-        sType=QString("Hersteller gelöscht");
+        sType=QString::fromUtf8("Hersteller gelöscht");
     else if(m_iType==LOGBOOK_TYPE_DEALER_NEW)
-        sType=QString("Händler hinzugefügt");
+        sType=QString::fromUtf8("Händler hinzugefügt");
     else if(m_iType==LOGBOOK_TYPE_DEALER_EDIT)
-        sType=QString("Händler bearbeitet");
+        sType=QString::fromUtf8("Händler bearbeitet");
     else if(m_iType==LOGBOOK_TYPE_DEALER_REMOVE)
-        sType=QString("Händler gelöscht");
+        sType=QString::fromUtf8("Händler gelöscht");
     else if(m_iType==LOGBOOK_TYPE_CUSTOMER_NEW)
-        sType=QString("Kunde hinzugefügt");
+        sType=QString::fromUtf8("Kunde hinzugefügt");
     else if(m_iType==LOGBOOK_TYPE_CUSTOMER_EDIT)
-        sType=QString("Kunde bearbeitet");
+        sType=QString::fromUtf8("Kunde bearbeitet");
     else if(m_iType==LOGBOOK_TYPE_CUSTOMER_REMOVE)
-        sType=QString("Kunde gelöscht");
+        sType=QString::fromUtf8("Kunde gelöscht");
     else if(m_iType==LOGBOOK_TYPE_OTHER)
-        sType=QString("sonstiges");
+        sType=QString::fromUtf8("sonstiges");
     //-
-    s=QString("%1 Uhr - %2 - %3").arg(m_dt_tiDateTime.time().toString("hh:mm:ss"),sType,m_sText);
+    s=QString::fromUtf8("%1 Uhr - %2 - %3").arg(m_dt_tiDateTime.time().toString("hh:mm:ss"),sType,get_text());
     //-
     return s;
 }
-

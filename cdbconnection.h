@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,16 +33,23 @@ public:
     //basic----------------------------------
     CDbConnection();
     ~CDbConnection();
-    bool open_db(QString sDbName, QString sHost=QString("localhost"));
+    bool open_db(QString sDbName, QString sHost=QString::fromUtf8("localhost"));
     bool close_db(void);
+    bool clear(void);
     QString last_error(void);
     bool is_db_connect(void);
     QString get_db_version(void);
     QDateTime get_last_session(void);
-    bool set_last_session(QDateTime dtTi);
+    bool write_last_session(QDateTime dtTi);
     bool check_database_file(bool bCheckDbVersion=false);
     bool check_and_update_db_version(void);
     bool exec_sql(QString s);
+    QString get_last_change(void);
+    bool write_last_change(QString sLastChange);
+    int get_logbook_count(void);
+    bool write_logbook_count(int iNewCount);
+    //-
+    bool check_article_at_wares(QString sWares, QString & sWaresFound, bool bWithDeleteArticle=false);
 
     //waregroups-----------------------------
     bool waregroup_add(CWaregroup & wg);
@@ -52,8 +59,10 @@ public:
     bool waregroup_get(int iId, CWaregroup & wg);
     QString waregroup_get_name(int iId);
     int waregroup_get_id(QString sName,int iParent);
+    int waregroup_get_id(QString sPath);
     QString waregroup_get_path(int id,int iMaxLevel=-1);
     int waregroup_get_count(QString sCondition);
+    int waregroup_get_unknow_count(QString & sPath, int & iParent_id); //sPath -> format "root_waregroup/sub_waregroup/sub_sub_waregroup/..."
     bool waregroup_get_all(QString sCondition, QList<int> & lsIds);
     bool waregroup_get_all_subwaregroup(int iId,QList<int> & lsSubWaregroupIds);
     bool waregroup_all_change_parent(int iOldParentId,int iNewParentId);
@@ -67,7 +76,7 @@ public:
     QString maker_get_name(int iId);
     int maker_get_id(QString & sName);
     int maker_get_count(QString sCondition);
-    bool maker_get_all(QString sCondition, QList<int> & lsIds,QString sOrderBy=QString(""));
+    bool maker_get_all(QString sCondition, QList<int> & lsIds,QString sOrderBy=QString::fromUtf8(""));
 
     //dealer---------------------------------------
     bool dealer_add(CDealer & de);
@@ -78,7 +87,7 @@ public:
     QString dealer_get_name(int iId);
     int dealer_get_id(QString & sName);
     int dealer_get_count(QString sCondition);
-    bool dealer_get_all(QString sCondition, QList<int> & lsIds,QString sOrderBy=QString(""));
+    bool dealer_get_all(QString sCondition, QList<int> & lsIds,QString sOrderBy=QString::fromUtf8(""));
 
     //customer--------------------------------------
     bool customer_add(CCustomer & cu);
@@ -98,9 +107,9 @@ public:
     bool article_get(QString sCondition, CArticle & ar, bool bWithDeleteArticle=false);
     bool article_get(int iId,CArticle & ar, bool bWithDeleteArticle=false);
     QString article_get_name(int iId, bool bWithDeleteArticle=false);
-    int article_get_id(QString sName, bool bWithDeleteArticle=false);
     int article_get_count(QString sCondition, bool bWithDeleteArticle=false);
-    bool article_get_all(QString sCondition, QList<int> & lsIds, bool bWithDeleteArticle=false);
+    bool article_get_all(QString sCondition, QList<int> & lsIds, bool bWithDeleteArticle=false, QString sOrderBy=QString::fromUtf8("name ASC"));
+    bool article_get_all_with_barcode(QList<int> & lsArticleIds);
     bool article_get_all_by_maker(QString sName,QList <int> & lsIds,bool bLike, bool bWithDeleteArticle=false);
     bool article_get_all_by_waregroup(QString sName,QList <int> & lsIds, bool bLike, bool bWithDeleteArticle=false);
     bool article_get_all_by_percent(QList<int> & lsIds, int iPercent,bool bLess=true);

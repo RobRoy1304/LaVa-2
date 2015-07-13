@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,23 +30,25 @@ class CInputDialogDealer : public QDialog
 {
     Q_OBJECT
 
+private:
+    Ui::CInputDialogDealer *ui;
+    CWorkThread * m_pThread;
+
+    //only for edit
+    int m_iMarkId;
+    QString m_sMarkName;
+
 public:
     explicit CInputDialogDealer(QWidget *parent = 0);
     ~CInputDialogDealer();
-    CWorkThread * m_pThread;
     bool get_data(CDealer & de);
     bool set_data(CDealer & de);
     void set_thread(CWorkThread * pThread){m_pThread=pThread;}
 
-protected:
-    void changeEvent(QEvent *e);
-
-private:
-    Ui::CInputDialogDealer *ui;
-    QString m_sMarkName;
-
 public slots:
     bool check_user_input(QString s);
+    void press_ok(void);
+    void press_cancel(void);
 };
 
 #endif // CINPUTDIALOGDEALER_H

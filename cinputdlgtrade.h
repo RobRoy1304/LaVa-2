@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include "cworkthread.h"
 #include "cinputdialogarticleallowance.h"
 #include "csettings.h"
+#include "clastdbchange.h"
+#include "cinputdlgbarcode.h"
 
 namespace Ui {
     class CInputDlgTrade;
@@ -30,31 +32,26 @@ namespace Ui {
 
 class CInputDlgTrade : public QDialog {
     Q_OBJECT
-public:
-    CInputDlgTrade(QWidget *parent = 0);
-    ~CInputDlgTrade();
-
-protected:
-    void changeEvent(QEvent *e);
-
 private:
     Ui::CInputDlgTrade *ui;
     QMenu * m_pContextMenu; //table context menu
     QDate m_dtMark;//to check is booking number handmake or not
-
-protected://overload's
-    virtual void keyPressEvent(QKeyEvent * event);
-
-public:
+    int m_iTimerId;
+    CLastDbChange m_LastDbChange;//class to check-> db change from another client
     CWorkThread * m_pThread;
     bool m_bOutgoing;
 
-    void set_db(CWorkThread * pThread);
+public:
+    CInputDlgTrade(QWidget *parent = 0);
+    ~CInputDlgTrade();
+    virtual void keyPressEvent(QKeyEvent * event);
+    void timerEvent(QTimerEvent *event);
+    void set(CWorkThread * pThread,bool bOutgoing);
     bool insert_ware_at_table(QString sData,bool bEdit, bool bSelect);
     bool get_data(CTrade & tr);
-    void set_outgoing(void);
     bool check_article_counts_on_date(void);
     bool settings(bool bUpdate=false);
+    bool update_wares_table(void);
 
 public slots:
     //context menu
@@ -63,11 +60,14 @@ public slots:
 
     //-
     bool add_ware(void);
+    bool add_ware_barcode(void);
     bool delete_ware(void);
     bool edit_ware(void);
     bool check_user_input(void);
     bool date_changed(QDate dtNew);
     bool set_booking_number_nomination(void);
+    void press_ok(void);
+    void press_cancel(void);
 };
 
 #endif // CINPUTDLGTRADE_H

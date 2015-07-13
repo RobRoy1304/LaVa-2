@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <QInputDialog>
 #include <QTreeWidgetItem>
 #include <QMessageBox>
+#include <QPrintPreviewDialog>
 
 #include "cworkthread.h"
 #include "cdbconnection.h"
@@ -43,6 +44,8 @@
 #include "cdlgunilist.h"
 #include "cinputdialogtablesetting.h"
 #include "cexportcsv.h"
+#include "cinputdialogimport.h"
+#include "clastdbchange.h"
 
 namespace Ui
 {
@@ -75,6 +78,8 @@ public:
     QMenu * m_pContextMenuTrade; //table context menu (incoming,outgoing,ordering incoming,customer outgoing,canceled
     QMenu * m_pContextMenuArticle; //table context menu article(new,edit,copy,remove)
     QString m_sDbPath;//path for database-file
+    QString m_sUser;//user name
+    CLastDbChange m_LastDbChange;//class to check-> db change from another client
 
     //mark for update
     bool m_bUpdateTableInventory;
@@ -95,10 +100,12 @@ protected://overload's
 
 public:
     //basic
+    void set_db_path(QString s){m_sDbPath=s;}
+    void set_user(QString s);
     bool init(void);
     bool widgets_position(QSize szScreen);
-    bool open_db(void);
     bool fill_all_table(bool bFillArticleAndInvTableNew=false);
+    bool fill_logbook_count(void);
     bool update_table_by_current_tab(int index);
     bool fill_date_lists(void);
     bool settings(bool bUpdate=false);
@@ -109,7 +116,7 @@ public:
     //waregroup
     bool waregroup_update_tree(int iIdSelect=-1);
     bool waregroup_check_user_input(void);
-    bool waregroup_update_count(QString sCondition=QString(""));
+    bool waregroup_update_count(QString sCondition=QString::fromUtf8(""));
 
     //maker
     bool maker_update_info(void);
@@ -259,7 +266,6 @@ public slots:
     //menu
     bool menu_db_backup_create(void);
     bool menu_db_backup_load(void);
-    bool menu_db_import_from_lava1(void);
     bool menu_db_clear(void);
     bool menu_tool_close(void);
     bool menu_about(void);
@@ -267,6 +273,8 @@ public slots:
     bool menu_balance_list(void);
     bool menu_article_under_warnlimit(void);
     bool menu_inventorys_on_date(void);
+    bool menu_inventorys_list(void);
+    bool menu_list_value_of_goods(void);
     bool menu_print_logbook(void);
     bool menu_print_maker_selection(void);
     bool menu_print_maker_overview(void);
@@ -292,6 +300,8 @@ public slots:
     bool menu_export_dealer(void);
     bool menu_export_customer(void);
     bool menu_export_logbook(void);
+    bool menu_import_from_csv(void);
+    bool menu_barcode_overview(void);
 
     //print
     bool print(QPrinter * printer);

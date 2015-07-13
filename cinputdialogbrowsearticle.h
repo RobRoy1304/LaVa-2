@@ -1,6 +1,6 @@
 /*  LaVa 2, a inventory managment tool
-    Copyright (C) 2011 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
-    created with QtCreator(Qt 4.7.0)
+    Copyright (C) 2015 - Robert Ewert - robert.ewert@gmail.com - www.robert.ewert.de.vu
+    created with QtCreator(Qt 4.8)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ class CInputDialogBrowseArticle : public QDialog
 private:
     Ui::CInputDialogBrowseArticle *ui;
     CWorkThread * m_pThread;
+    bool m_bMaskDisable;
 
 public:
     explicit CInputDialogBrowseArticle(QWidget *parent = 0);
@@ -43,6 +44,8 @@ public:
     bool get_data(int & iArticleId);
     bool set_data(int iArticleId);
     bool settings(bool bUpdate=false);
+    bool set_mask_and_disable_change(QString sMask, int iArticlenumberSelect);
+    bool select_first_row(void);
 
 public slots:
     bool update_table(void);
