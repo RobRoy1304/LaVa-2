@@ -44,6 +44,7 @@ CInputDialogBrowseArticle::CInputDialogBrowseArticle(QWidget *parent) :
     connect(ui->tableWidgetArticle,SIGNAL(itemSelectionChanged()),this,SLOT(check_user_input()));
     connect(ui->buttonBox,SIGNAL(accepted()),this,SLOT(accept()));
     connect(ui->buttonBox,SIGNAL(rejected()),this,SLOT(close()));
+    connect(ui->tableWidgetArticle,SIGNAL(itemDoubleClicked(QTableWidgetItem*)),this,SLOT(table_doubleclick()));
 }
 
 CInputDialogBrowseArticle::~CInputDialogBrowseArticle()
@@ -277,4 +278,32 @@ bool CInputDialogBrowseArticle::select_first_row(void)
 {
     ui->tableWidgetArticle->selectRow(0);
     return true;
+}
+
+void CInputDialogBrowseArticle::table_doubleclick(void)
+{
+    int iId=-1;
+    QString sPath;
+    CArticle ar;
+    CPictureViewDialog dlg(this);
+    //-
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pWidgets!=NULL && m_pThread->m_pDbInterface!=NULL)
+        {
+            //open dialog & draw picture
+            if(m_pThread->m_pWidgets->get_selected_table_item_value(ui->tableWidgetArticle,iId))//select?
+            {
+                if(m_pThread->m_pDbInterface->article_get(iId,ar))
+                {
+                    sPath=ar.get_path_picture();
+                    if(sPath.length()>0)
+                    {
+                        if(dlg.set_data(sPath))
+                            dlg.exec();
+                    }
+                }
+            }
+        }
+    }
 }

@@ -771,6 +771,11 @@
         <string>Standort</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>id</string>
+       </property>
+      </column>
      </widget>
      <widget class="QComboBox" name="comboBoxTradeMaskYear">
       <property name="geometry">
@@ -1118,6 +1123,11 @@
       <column>
        <property name="text">
         <string>Standort</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>id</string>
        </property>
       </column>
      </widget>
@@ -2621,7 +2631,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuInfo">

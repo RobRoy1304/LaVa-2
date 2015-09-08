@@ -1049,6 +1049,7 @@ bool CInputDialogImport::update_allocation_table(void)
             lsMember.push_back(QString::fromUtf8("Währung"));
             lsMember.push_back("Standort");
             lsMember.push_back("Kommentar");
+            lsMember.push_back("Dateipfad-Artikelbild");
             break;
         case 1:
         case 2:
@@ -1888,6 +1889,8 @@ bool CInputDialogImport::import_button_clicked(void)
                                     ar.set_location(s);
                                 if(c==13)//comment
                                     ar.set_comment(s);
+                                if(c==14)//picture filepath
+                                    ar.set_path_picture(s);
                                 break;
 
                             //dealer

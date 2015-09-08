@@ -1228,6 +1228,11 @@ QString CArticle::get_location(void)
     return m_sLocation;
 }
 
+QString CArticle::get_path_picture(void)
+{
+    return m_sPathPicture;
+}
+
 int CArticle::get_maker_id(void)
 {
     return m_iMakerId;
@@ -1286,6 +1291,11 @@ void CArticle::set_sales_price(float f)
 void CArticle::set_location(QString s)
 {
     m_sLocation=s;
+}
+
+void CArticle::set_path_picture(QString sPath)
+{
+    m_sPathPicture=sPath;
 }
 
 void CArticle::set_unit(QString s)

@@ -35,7 +35,8 @@ SOURCES += main.cpp \
     cinputdialogtablesetting.cpp \
     clastdbchange.cpp \
     cinputdlgbarcode.cpp \
-    cinputdialogexport.cpp
+    cinputdialogexport.cpp \
+    cpictureviewdialog.cpp
 HEADERS += mainwindow.h \
     data_classes.h \
     cinputdialogbrowsewaregroup.h \
@@ -64,7 +65,8 @@ HEADERS += mainwindow.h \
     cinputdialogimport.h \
     clastdbchange.h \
     cinputdlgbarcode.h \
-    cinputdialogexport.h
+    cinputdialogexport.h \
+    cpictureviewdialog.h
 FORMS += mainwindow.ui \
     cinputdialogbrowsewaregroup.ui \
     cinputdialogcustomer.ui \
@@ -84,7 +86,8 @@ FORMS += mainwindow.ui \
     cinputdialogtablesetting.ui \
     cinputdlgbarcode.ui \
     cinputdlgtrade.ui \
-    cinputdialogexport.ui
+    cinputdialogexport.ui \
+    cpictureviewdialog.ui
 
 RESOURCES += \
     lava2res.qrc

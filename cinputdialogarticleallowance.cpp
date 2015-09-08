@@ -53,6 +53,7 @@ CInputDialogArticleAllowance::CInputDialogArticleAllowance(QWidget *parent) :
     connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(count_changed()));
     connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
     connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
+    connect(ui->tableWidgetArticle,SIGNAL(itemDoubleClicked(QTableWidgetItem*)),this,SLOT(table_doubleclick()));
     //-
     setMaximumSize(width(),height());
     setMinimumSize(width(),height());
@@ -549,4 +550,32 @@ bool CInputDialogArticleAllowance::insert_ware_at_parent_table(QString sData)
     }
     //-
     return b;
+}
+
+void CInputDialogArticleAllowance::table_doubleclick(void)
+{
+    int iId=-1;
+    QString sPath;
+    CArticle ar;
+    CPictureViewDialog dlg(this);
+    //-
+    if(m_pThread!=NULL)
+    {
+        if(m_pThread->m_pWidgets!=NULL && m_pThread->m_pDbInterface!=NULL)
+        {
+            //open dialog & draw picture
+            if(m_pThread->m_pWidgets->get_selected_table_item_value(ui->tableWidgetArticle,iId))//select?
+            {
+                if(m_pThread->m_pDbInterface->article_get(iId,ar))
+                {
+                    sPath=ar.get_path_picture();
+                    if(sPath.length()>0)
+                    {
+                        if(dlg.set_data(sPath))
+                            dlg.exec();
+                    }
+                }
+            }
+        }
+    }
 }

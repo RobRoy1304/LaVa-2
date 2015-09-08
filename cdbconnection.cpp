@@ -319,6 +319,20 @@ bool CDbConnection::check_and_update_db_version(void)
                     }
                 }
             }
+
+            if(sDbVersion==QString::fromUtf8("1,03"))//update to 1,04
+            {
+                //new column in article -> picture path
+                s=QString::fromUtf8("ALTER TABLE article ADD COLUMN path_picture TEXT");
+                bReturn=exec_sql(s);
+
+                if(bReturn)
+                {
+                    //update db_version text
+                    s=QString::fromUtf8("UPDATE info SET version = '1,04'");
+                    bReturn=exec_sql(s);
+                }
+            }
         }
     }
     return bReturn;
@@ -1237,8 +1251,8 @@ bool CDbConnection::article_add(CArticle & ar)
     int id=-1;
     bool b;
     QSqlQuery query;
-    QString s=QString::fromUtf8("INSERT INTO article (name,comment,location,articlenumber,unit,articlenumber2,valuta,inventory,max_inventory,maker_id,waregroup_id,baseprice,salesprice,warning_limit)"
-                      "VALUES ('%1','%2','%3','%4','%5','%6','%7',").arg(ar.get_name(),ar.get_comment(),ar.get_location(),ar.get_articlenumber(),ar.get_unit(),ar.get_articlenumber2(),ar.get_valuta());
+    QString s=QString::fromUtf8("INSERT INTO article (name,comment,location,articlenumber,unit,articlenumber2,valuta,path_picture,inventory,max_inventory,maker_id,waregroup_id,baseprice,salesprice,warning_limit)"
+                          "VALUES ('%1','%2','%3','%4','%5','%6','%7','%8',").arg(ar.get_name(),ar.get_comment(),ar.get_location(),ar.get_articlenumber(),ar.get_unit(),ar.get_articlenumber2(),ar.get_valuta(),ar.get_path_picture());
     s+=QString::fromUtf8("%1,").arg(ar.get_inventory());
     s+=QString::fromUtf8("%1,").arg(ar.get_max_inventory());
     s+=QString::fromUtf8("%1,").arg(ar.get_maker_id());
@@ -1255,6 +1269,44 @@ bool CDbConnection::article_add(CArticle & ar)
     }
     //-
     return b;
+
+    /*
+    if(!m_bConnect)//db open?
+        return false;
+    //-
+    int id=-1;
+    bool b;
+    QSqlQuery query;
+
+    QString s=QString::fromUtf8("INSERT INTO article (name,comment,location,articlenumber,unit,articlenumber2,valuta,path_picture,"
+                                "inventory,max_inventory,maker_id,waregroup_id,baseprice,salesprice,warning_limit) "
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+    query.prepare(s);
+    query.bindValue(0,QVariant(ar.get_name()));
+    query.bindValue(1,QVariant(ar.get_comment()));
+    query.bindValue(2,QVariant(ar.get_location()));
+    query.bindValue(3,QVariant(ar.get_articlenumber()));
+    query.bindValue(4,QVariant(ar.get_unit()));
+    query.bindValue(5,QVariant(ar.get_articlenumber2()));
+    query.bindValue(6,QVariant(ar.get_valuta()));
+    query.bindValue(7,QVariant(ar.get_path_picture()));
+    query.bindValue(8,QVariant(ar.get_inventory()));
+    query.bindValue(9,QVariant(ar.get_max_inventory()));
+    query.bindValue(10,QVariant(ar.get_maker_id()));
+    query.bindValue(11,QVariant(ar.get_waregroup_id()));
+    query.bindValue(12,QVariant(ar.get_base_price()));
+    query.bindValue(13,QVariant(ar.get_sales_price()));
+    query.bindValue(14,QVariant(ar.get_warning_limit()));
+    b=query.exec();//add ok?
+    if(b)
+    {
+        id=query.lastInsertId().toInt();//get id
+        ar.set_id(id);
+    }
+    //-
+    return b;
+    */
 }
 
 bool CDbConnection::article_remove(int id)
@@ -1292,6 +1344,7 @@ bool CDbConnection::article_update(CArticle & ar)
     s+=QString::fromUtf8("unit='%1',").arg(ar.get_unit());
     s+=QString::fromUtf8("articlenumber2='%1',").arg(ar.get_articlenumber2());
     s+=QString::fromUtf8("valuta='%1',").arg(ar.get_valuta());
+    s+=QString::fromUtf8("path_picture='%1',").arg(ar.get_path_picture());
     s+=QString::fromUtf8("inventory=%1,").arg(ar.get_inventory());
     s+=QString::fromUtf8("max_inventory=%1,").arg(ar.get_max_inventory());
     s+=QString::fromUtf8("maker_id=%1,").arg(ar.get_maker_id());
@@ -1304,6 +1357,41 @@ bool CDbConnection::article_update(CArticle & ar)
 
     bool b=query.exec(s);
     return b;
+
+    /*
+    if(!m_bConnect)//db open?
+        return false;
+
+    bool b;
+    QSqlQuery query;
+    QString s=QString::fromUtf8("UPDATE OR REPLACE article SET name=?,comment=?,location=?,articlenumber=?,"
+                                "unit=?,articlenumber2=?,valuta=?,path_picture=?,inventory=?,max_inventory=?,"
+                                "maker_id=?,baseprice=?,salesprice=?,waregroup_id=?,warning_limit=?,delete_status=? "
+                                "WHERE id=?");
+    query.prepare(s);
+    query.bindValue(0,QVariant(ar.get_name()));
+    query.bindValue(1,QVariant(ar.get_comment()));
+    query.bindValue(2,QVariant(ar.get_location()));
+    query.bindValue(3,QVariant(ar.get_articlenumber()));
+    query.bindValue(4,QVariant(ar.get_unit()));
+    query.bindValue(5,QVariant(ar.get_articlenumber2()));
+    query.bindValue(6,QVariant(ar.get_valuta()));
+    query.bindValue(7,QVariant(ar.get_path_picture()));
+    query.bindValue(8,QVariant(ar.get_inventory()));
+    query.bindValue(9,QVariant(ar.get_max_inventory()));
+    query.bindValue(10,QVariant(ar.get_maker_id()));
+    query.bindValue(11,QVariant(ar.get_base_price()));
+    query.bindValue(12,QVariant(ar.get_sales_price()));
+    query.bindValue(13,QVariant(ar.get_waregroup_id()));
+    query.bindValue(14,QVariant(ar.get_warning_limit()));
+    if(!ar.get_delete())//delete status
+        query.bindValue(15,QVariant(0));
+    else
+        query.bindValue(15,QVariant(1));
+    query.bindValue(16,QVariant(ar.get_id()));
+    b=query.exec();
+    return b;
+    */
 }
 
 bool CDbConnection::article_get(QString sCondition, CArticle & ar, bool bWithDeleteArticle)
@@ -1337,6 +1425,7 @@ bool CDbConnection::article_get(QString sCondition, CArticle & ar, bool bWithDel
             ar.set_articlenumber(query.value( record.indexOf("articlenumber")).toString());
             ar.set_articlenumber2(query.value( record.indexOf("articlenumber2")).toString());
             ar.set_location(query.value( record.indexOf("location")).toString());
+            ar.set_path_picture(query.value( record.indexOf("path_picture")).toString());
             ar.set_inventory(query.value( record.indexOf("inventory")).toUInt());
             ar.set_max_inventory(query.value( record.indexOf("max_inventory")).toUInt());
             ar.set_maker_id(query.value( record.indexOf("maker_id")).toInt());

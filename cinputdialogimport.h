@@ -29,7 +29,7 @@
 #include "csettings.h"
 
 
-#define ARTICLE_MEMBER_TYPE {0,1,1,0,0,0,0,0,1,2,2,0,0,0} //0=text 1=int 2=double
+#define ARTICLE_MEMBER_TYPE {0,1,1,0,0,0,0,0,1,2,2,0,0,0,0} //0=text 1=int 2=double
 
 namespace Ui {
 class CInputDialogImport;

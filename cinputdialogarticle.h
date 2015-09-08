@@ -22,6 +22,7 @@
 #include <QtGui/QDialog>
 #include "cworkthread.h"
 #include "cinputdialogbrowsewaregroup.h"
+#include "cpictureviewdialog.h"
 
 namespace Ui {
     class CInputDialogArticle;
@@ -45,6 +46,7 @@ private:
     QString m_sMarkArticleName;
     QString m_sMarkArticleNumber1;
     QString m_sMarkArticleNumber2;
+    QString m_sMarkPicturePath;
 
 public:
     explicit CInputDialogArticle(QWidget *parent = 0);
@@ -61,6 +63,9 @@ public slots:
     bool check_user_input(void);
     void press_ok(void);
     void press_cancel(void);
+    void press_button_picture(void);
+    void press_button_browse_picture(void);
+    bool check_picture_path(void);
 };
 
 #endif // CINPUTDIALOGARTICLE_H

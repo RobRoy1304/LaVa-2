@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     {
         m_pContextMenuDefault->addAction(QString::fromUtf8("neu"));
         m_pContextMenuDefault->addAction(QString::fromUtf8("bearbeiten"));
-        m_pContextMenuDefault->addAction(QString::fromUtf8("loeschen"));
+        m_pContextMenuDefault->addAction(QString::fromUtf8("löschen"));
     }
     m_pContextMenuTrade=new QMenu(QString::fromUtf8("context_trade"),this);
     if(m_pContextMenuTrade!=NULL)
@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
         m_pContextMenuArticle->addAction(QString::fromUtf8("neu"));
         m_pContextMenuArticle->addAction(QString::fromUtf8("bearbeiten"));
         m_pContextMenuArticle->addAction(QString::fromUtf8("kopieren"));
-        m_pContextMenuArticle->addAction(QString::fromUtf8("loeschen"));
+        m_pContextMenuArticle->addAction(QString::fromUtf8("löschen"));
     }
 
     //connects context menus
@@ -170,6 +170,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->checkBoxAutoSearchOrdering,SIGNAL(clicked()),this,SLOT(ordering_checkbox_auto_clicked()));
     connect(ui->lineEditOrderingMask,SIGNAL(textChanged(QString)),this,SLOT(ordering_mask_edit()));
     connect(ui->comboBoxMaskOrdering,SIGNAL(currentIndexChanged(QString)),this,SLOT(ordering_mask_edit()));
+    connect(ui->tableWidgetOrderingWareslist,SIGNAL(itemDoubleClicked(QTableWidgetItem*)),this,SLOT(ordering_table_warelist_doubleclick()));
 
     //trade
     connect(ui->pushButtonTradeIncoming,SIGNAL(clicked()),this,SLOT(trade_incoming()));
@@ -185,6 +186,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->lineEditTradeMask,SIGNAL(textChanged(QString)),this,SLOT(trade_mask_edit()));
     connect(ui->comboBoxMaskTrade,SIGNAL(currentIndexChanged(QString)),this,SLOT(trade_mask_edit()));
     connect(ui->pushButtonMaskSetTrade,SIGNAL(clicked()),this,SLOT(trade_mask_set()));
+    connect(ui->tableWidgetTradeWareslist,SIGNAL(itemDoubleClicked(QTableWidgetItem*)),this,SLOT(trade_table_warelist_doubleclick()));
 
     //inventory
     connect(ui->pushButtonMaskSetInventory,SIGNAL(clicked()),this,SLOT(inventory_mask_set()));
@@ -192,6 +194,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->lineEditInventoryMask,SIGNAL(textChanged(QString)),this,SLOT(inventory_mask_edit()));
     connect(ui->comboBoxMaskInventory,SIGNAL(currentIndexChanged(QString)),this,SLOT(inventory_mask_edit()));
     connect(ui->tableWidgetInventory,SIGNAL(itemSelectionChanged()),this,SLOT(inventory_widgetitem_clicked()));
+    connect(ui->tableWidgetInventory,SIGNAL(itemDoubleClicked(QTableWidgetItem*)),this,SLOT(inventory_table_doubleclick()));
 
     //logbook
     connect(ui->comboBoxLogbookMaskYear,SIGNAL(currentIndexChanged(QString)),this,SLOT(logbook_date_mask_year_changed()));
@@ -1429,6 +1432,37 @@ void MainWindow::timerEvent(QTimerEvent *event)
     {
         close();
     }
+}
+
+bool MainWindow::open_picture_view(QTableWidget * pTable)
+{
+    int iId=-1;
+    QString sPath;
+    CArticle ar;
+    CPictureViewDialog dlg(this);
+    bool bReturn=false;
+    //-
+    if(pTable!=NULL)
+    {
+        //open dialog & draw picture
+        if(m_widgets.get_selected_table_item_value(pTable,iId))//select?
+        {
+            if(m_db.article_get(iId,ar))
+            {
+                sPath=ar.get_path_picture();
+                if(sPath.length()>0)
+                {
+                    if(dlg.set_data(sPath))
+                    {
+                        dlg.exec();
+                        bReturn=true;
+                    }
+                }
+            }
+        }
+
+    }
+    return bReturn;
 }
 
 
@@ -3372,6 +3406,12 @@ bool MainWindow::ordering_delete(void)
     return b;
 }
 
+bool MainWindow::ordering_table_warelist_doubleclick(void)
+{
+    open_picture_view(ui->tableWidgetOrderingWareslist);
+    return true;
+}
+
 
 //trade----------------------------------------------------------------------------------------------------------------------------------
 
@@ -4184,6 +4224,12 @@ bool MainWindow::trade_canceled(void)
     return b;
 }
 
+bool MainWindow::trade_table_warelist_doubleclick(void)
+{
+    open_picture_view(ui->tableWidgetTradeWareslist);
+    return true;
+}
+
 //inventory--------------------------------------
 
 bool MainWindow::inventory_update_count(void)
@@ -4354,6 +4400,11 @@ bool MainWindow::inventory_mask_set(void)
     return b;
 }
 
+bool MainWindow::inventory_table_doubleclick(void)
+{
+    open_picture_view(ui->tableWidgetInventory);
+    return true;
+}
 
 //logbook------------------------------------------------------------------------------------------------------
 

@@ -23,6 +23,7 @@
 #include "cworkthread.h"
 #include "csettings.h"
 #include "clastdbchange.h"
+#include "cpictureviewdialog.h"
 
 #define ARTICLE_DLG_TYPE_INCOMING 0
 #define ARTICLE_DLG_TYPE_OUTGOING 1
@@ -73,6 +74,7 @@ public slots:
     void count_changed(void);
     void press_ok(void);
     void press_cancel(void);
+    void table_doubleclick(void);
 };
 
 #endif // CINPUTDIALOGARTICLEALLOWANCE_H

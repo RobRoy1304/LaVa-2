@@ -30,12 +30,16 @@ CInputDialogArticle::CInputDialogArticle(QWidget *parent) :
     m_sMarkArticleName=QString::fromUtf8("");
     m_sMarkArticleNumber1=QString::fromUtf8("");
     m_sMarkArticleNumber2=QString::fromUtf8("");
+    m_sMarkPicturePath=QString::fromUtf8("");
 
     //disable auto default buttons
     ui->pushButtonWaregroup->setAutoDefault(false);
     ui->pushButtonCancel->setAutoDefault(false);
     ui->pushButtonOk->setAutoDefault(false);
-    //-
+    ui->pushButtonPicture->setAutoDefault(false);
+    ui->pushButtonBrowsePic->setAutoDefault(false);
+
+    //set focus & max.length
     ui->lineEditName->setFocus();
     ui->pushButtonOk->setEnabled(false);
     ui->lineEditInventory->setMaxLength(9);
@@ -56,6 +60,9 @@ CInputDialogArticle::CInputDialogArticle(QWidget *parent) :
     connect(ui->lineEditArticlenumber_2,SIGNAL(textChanged(QString)),this,SLOT(check_user_input()));
     connect(ui->pushButtonOk,SIGNAL(clicked()),this,SLOT(press_ok()));
     connect(ui->pushButtonCancel,SIGNAL(clicked()),this,SLOT(press_cancel()));
+    connect(ui->pushButtonPicture,SIGNAL(clicked()),this,SLOT(press_button_picture()));
+    connect(ui->pushButtonBrowsePic,SIGNAL(clicked()),this,SLOT(press_button_browse_picture()));
+    connect(ui->lineEditPathPicture,SIGNAL(textChanged(QString)),this,SLOT(check_picture_path()));
     //-
     setMinimumSize(width(),height());
     setMaximumSize(width(),height());
@@ -149,20 +156,24 @@ bool CInputDialogArticle::get_data(CArticle & ar)
     ar.set_location(ui->lineEditLocation->text());
     ar.set_comment(ui->lineEditComment->text());
     ar.set_unit(ui->lineEditUnit->text());
+
     //inv
     uiI=ui->lineEditInventory->text().toUInt(&b,10);
     if(!b)
         uiI=0;
     ar.set_inventory(uiI);
+
     //max.inv
     uiI=ui->lineEditMaxInventory->text().toUInt(&b,10);
     if(!b)
         uiI=0;
     ar.set_max_inventory(uiI);
+
     //-maker data-
     name=ui->comboBox->itemText(ui->comboBox->currentIndex());
     maker_id=m_pThread->m_pDbInterface->maker_get_id(name);
     ar.set_maker_id(maker_id);
+
     //waregroup
     if(ui->lineEditWaregroup->text().length()<=0)//warergroup not set?
         ar.set_waregroup_id(-1);
@@ -177,6 +188,7 @@ bool CInputDialogArticle::get_data(CArticle & ar)
         }
         ar.set_waregroup_id(waregroup_id);
     }
+
     //baseprice
     s=ui->lineEditBaseprice->text();
     s.replace(QString::fromUtf8(","),QString::fromUtf8("."));//format german style
@@ -184,6 +196,7 @@ bool CInputDialogArticle::get_data(CArticle & ar)
     if(!b)
         fBaseprice=0.0;
     ar.set_base_price(fBaseprice);
+
     //salesprice
     s=ui->lineEditSalesprice->text();
     s.replace(QString::fromUtf8(","),QString::fromUtf8("."));//format german style
@@ -191,6 +204,7 @@ bool CInputDialogArticle::get_data(CArticle & ar)
     if(!b)
         fSalesprice=0.0;
     ar.set_sales_price(fSalesprice);
+
     //warning limit
     if(!ui->checkBoxWarning->isChecked())//not enable?
         ar.set_warning_limit(-1);
@@ -203,7 +217,12 @@ bool CInputDialogArticle::get_data(CArticle & ar)
         else
             ar.set_warning_limit(i);
     }
-    //-
+
+    //article picture
+    s=ui->lineEditPathPicture->text();
+    ar.set_path_picture(s);
+
+    //id
     ar.set_id(m_iMarkId);
     //-
     return true;
@@ -279,6 +298,7 @@ bool CInputDialogArticle::set_data(CArticle & ar)
     //waregroup
     m_dlgWaregroup.get_selected_waregroup(s,id);
     ui->lineEditWaregroup->setText(s);
+
     //warning limit
     if(ar.get_warning_limit()>=0)
     {//set?
@@ -292,6 +312,11 @@ bool CInputDialogArticle::set_data(CArticle & ar)
         ui->lineEditWarningLimit->setEnabled(false);
         ui->checkBoxWarning->setChecked(false);
     }
+
+    //article picture
+    s=ar.get_path_picture();
+    ui->lineEditPathPicture->setText(s);
+
     //-
     ui->pushButtonOk->setText(QString::fromUtf8("Änderung(en) anwenden"));
     ui->pushButtonOk->setEnabled(true);
@@ -321,6 +346,7 @@ bool CInputDialogArticle::check_user_input(void)
     CPointerMemory memory;
     memory.set_string(&s);
     memory.set_int(&count);
+
 
     //article-name
     if(m_pThread!=NULL)
@@ -641,4 +667,106 @@ void CInputDialogArticle::press_ok(void)
 void CInputDialogArticle::press_cancel(void)
 {
     close();
+}
+
+void CInputDialogArticle::press_button_picture(void)
+{
+    //open dialog & draw picture
+    CPictureViewDialog dlg(this);
+    QString sPath=ui->lineEditPathPicture->text();
+    //-
+    if(sPath.length()>0)
+    {
+        if(dlg.set_data(sPath))
+            dlg.exec();
+    }
+}
+
+void CInputDialogArticle::press_button_browse_picture(void)
+{
+    int i;
+    CSettings settings;
+    QString file,sPath,s;
+
+    //load settings -> picture path
+    settings.load(QString::fromUtf8("PICTURE_PATH"),sPath);
+
+    //path
+    if(m_sMarkPicturePath.length()>0)
+        sPath=m_sMarkPicturePath;
+    else if(sPath.length()<=0)
+        sPath=QDir::currentPath();
+
+    //get selected file by user
+    file=QFileDialog::getOpenFileName(this,QString::fromUtf8("Bilddatei wählen"),sPath);
+    if(file.length()>0)
+    {
+        //set path in line edit
+        ui->lineEditPathPicture->setText(file);//set path in line edit
+
+        //path change -> write settings
+        s=file;
+        for(i=s.length()-1;i>=0;i--)//search last / -> Dir
+        {
+            if(s[i]=='/')
+                    break;
+        }
+        s.resize(i);
+
+        if(s!=sPath)
+            settings.write(QString::fromUtf8("PICTURE_PATH"),s);//update settings
+    }
+}
+
+bool CInputDialogArticle::check_picture_path(void)
+{
+    QString sPath=ui->lineEditPathPicture->text();
+    QSize sz=ui->pushButtonPicture->rect().size();
+    QIcon ico;
+    QPixmap pix,pix2;
+    bool bReturn=false,bFileExits=false;
+    //-
+    if(sPath.length()>0)
+    {
+        //file exits
+        QFile file(sPath);
+        bFileExits=file.exists();
+
+        //load pic
+        if(pix.load(sPath))
+        {//ok file exites & file is picture
+            bReturn=true;
+
+            //mark path
+            m_sMarkPicturePath=sPath;
+
+            //set scaled picture on push button
+            sz.setHeight(sz.height()-20);
+            sz.setWidth(sz.width()-20);
+            pix2=pix.scaled(QSize(280,280),Qt::KeepAspectRatio);
+            ico=QIcon(pix2);
+            ui->pushButtonPicture->setIcon(ico);
+            ui->pushButtonPicture->setIconSize(sz);
+
+            //delete push button text
+            ui->pushButtonPicture->setText(QString(""));
+        }
+    }
+    //-
+    if(!bReturn)
+    {//error file not exites or file no picture
+
+        //delete picture on button
+        ui->pushButtonPicture->setIcon(QIcon());
+
+        //set text button
+        if(sPath.length()<=0)//no path
+            ui->pushButtonPicture->setText(QString::fromUtf8("kein Bild hinterlegt"));
+        else if(bFileExits)
+            ui->pushButtonPicture->setText(QString::fromUtf8("die Datei (Dateipfad) ist keine Bilddatei"));
+        else
+            ui->pushButtonPicture->setText(QString::fromUtf8("die Datei (Dateipfad) existiert nicht"));
+    }
+    //-
+    return bReturn;
 }

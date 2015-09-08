@@ -62,7 +62,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toLatin1());
         s=QString::fromUtf8("SORT_ORDER_TRADE_OVIEW#3,0\n");
         file.write(s.toLatin1());
-        s=QString::fromUtf8("TRADE_TABLE_COLUMNS_WIDTHS_WARES#90,170,130,130,130,130,130\n");
+        s=QString::fromUtf8("TRADE_TABLE_COLUMNS_WIDTHS_WARES#90,170,130,130,130,130,130,0\n");
         file.write(s.toLatin1());
         s=QString::fromUtf8("SORT_ORDER_TRADE_WARES#1,0\n");
         file.write(s.toLatin1());
@@ -77,7 +77,7 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toLatin1());
         s=QString::fromUtf8("SORT_ORDER_ORDERING_OVIEW#0,0\n");
         file.write(s.toLatin1());
-        s=QString::fromUtf8("ORDERING_TABLE_COLUMNS_WIDTHS_WARES#100,200,180,180,180,180,180\n");
+        s=QString::fromUtf8("ORDERING_TABLE_COLUMNS_WIDTHS_WARES#100,200,180,180,180,180,180,0\n");
         file.write(s.toLatin1());
         s=QString::fromUtf8("SORT_ORDER_ORDERING_WARES#1,0\n");
         file.write(s.toLatin1());
@@ -291,6 +291,9 @@ bool CSettings::create_default_setting_file(void)
         file.write(s.toLatin1());
 
         s=QString::fromUtf8("DB_PATH#\n");
+        file.write(s.toLatin1());
+
+        s=QString::fromUtf8("PICTURE_PATH#\n");
         file.write(s.toLatin1());
 
         //users

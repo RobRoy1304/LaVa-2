@@ -125,6 +125,12 @@ bool CWidgetInterface::load_icons(void)
     //warning icon
     sIconDir=QString::fromUtf8(":/images/res/warning.png");
     m_icoWarning=QIcon(sIconDir);
+
+    //picture icon
+    sIconDir=QString::fromUtf8(":/images/res/pic.png");
+    m_icoPicture=QIcon(sIconDir);
+    sIconDir=QString::fromUtf8(":/images/res/nothing.png");
+    m_icoNothing=QIcon(sIconDir);
     //-
     return true;
 }
@@ -1570,7 +1576,7 @@ bool CWidgetInterface::article_update_row(QTableWidget * pTable, CArticle & ar, 
     return b;
 }
 
-bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsData, int iFormatType)
+bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsData, int iFormatType,bool bIconPicIfPathAv)
 {
     if(m_pDb==NULL)
         return false;
@@ -1593,7 +1599,19 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
             for(j=0;j<pTable->columnCount();j++)
             {
                 if(lsOrder[j]==0)//default column 0
-                    ti.set_text(ar.get_name());
+                {
+                    if(!bIconPicIfPathAv)
+                        ti.set_text(ar.get_name());
+                    else
+                    {
+                        //set icon picture if picture path in article
+                        s=ar.get_path_picture();
+                        if(s.length()>0)
+                            ti.set(ar.get_name(),TABLE_ALIGNMENT_LEFT,&m_icoPicture);
+                        else
+                            ti.set(ar.get_name(),TABLE_ALIGNMENT_LEFT,&m_icoNothing);
+                    }
+                }
                 if(lsOrder[j]==1)//d.column 1
                     ti.set_text(ar.get_articlenumber());
                 if(lsOrder[j]==2)//d.column 2
@@ -1693,9 +1711,24 @@ bool CWidgetInterface::article_format(CArticle & ar, QList<CTableItemData> & lsD
         }
         //-
         ti.set_alignment(TABLE_ALIGNMENT_LEFT);
-        //-
-        ti.set_text(ar.get_name());
-        lsData.push_back(ti);
+
+        if(!bIconPicIfPathAv)
+        {
+            ti.set_text(ar.get_name());
+            lsData.push_back(ti);
+        }
+        else
+        {
+            //set icon picture if picture path in article
+            s=ar.get_path_picture();
+            if(s.length()>0)
+                ti.set(ar.get_name(),TABLE_ALIGNMENT_LEFT,&m_icoPicture);
+            else
+                ti.set(ar.get_name(),TABLE_ALIGNMENT_LEFT,&m_icoNothing);
+            lsData.push_back(ti);
+            ti.clear();
+            ti.set_alignment(TABLE_ALIGNMENT_LEFT);
+        }
         //-
         if(iFormatType==FORMAT_TWO || iFormatType==FORMAT_THREE)
         {
@@ -1770,7 +1803,7 @@ bool CWidgetInterface::article_update_row_wareslist(QTableWidget * pTable,QStrin
             ti.set_text(s);
             ti.set_alignment(TABLE_ALIGNMENT_RIGHT);
             lsData.push_back(ti);
-            b=article_format(ar,lsData,FORMAT_THREE);
+            b=article_format(ar,lsData,FORMAT_THREE,false);
             if(b)
                 b=mod_row(pTable,lsData,ITEM_POSITION_BOTTOM,false,false,-1);
             else{}
@@ -2842,7 +2875,14 @@ bool CWidgetInterface::inventory_format(CArticle & ar, QList<CTableItemData> & l
                 ti.set_text(s);
             }
             if(lsOrder[j]==5)//d.column 5
-                ti.set_text(ar.get_name());
+            {
+                //set icon picture if picture path in article
+                s=ar.get_path_picture();
+                if(s.length()>0)
+                    ti.set(ar.get_name(),TABLE_ALIGNMENT_LEFT,&m_icoPicture);
+                else
+                    ti.set(ar.get_name(),TABLE_ALIGNMENT_LEFT,&m_icoNothing);
+            }
             if(lsOrder[j]==6)//d.column 6
                 ti.set_text(ar.get_articlenumber());
             if(lsOrder[j]==7)//d.column 7

@@ -88,6 +88,8 @@ private:
     QList<QIcon> m_lsIconsArticle;
     QList<QIcon> m_lsIconsTrade;
     QIcon m_icoWarning;
+    QIcon m_icoPicture;
+    QIcon m_icoNothing;
 
 public:
     CTableColumnsData m_tcInventory;
@@ -167,7 +169,7 @@ public:
     bool article_update_tablewidget_wares_list(QTableWidget * pTable,QList<QString> & lsWares,int iFormatType);
     bool article_insert_row(QTableWidget * pTable, CArticle & ar, int iFormatType, int iPosition=ITEM_POSITION_BOTTOM, bool bSelect=false);
     bool article_update_row(QTableWidget * pTable, CArticle & ar, int iFormatType, bool bSelect=false, bool bAddIfNotExis=true);
-    bool article_format(CArticle & ar, QList<CTableItemData> & lsData, int iFormatType);
+    bool article_format(CArticle & ar, QList<CTableItemData> & lsData, int iFormatType,bool bIconPicIfPathAv=true);
     bool article_update_row_wareslist(QTableWidget * pTable,QString sData,bool bEdit, bool bSelect);
 
 

@@ -171,10 +171,10 @@ bool CInputDialogExport::update_data_examble(void)
     get_data(sCharSplit,sTextSplit,i);
 
     //examble text
-    s=QString::fromUtf8("%1Beispiel_Tabelle_1%2%3").arg(sTextSplit,sTextSplit,sCharSplit);
-    s+=QString::fromUtf8("%1Beispiel_Tabelle_2%2%3").arg(sTextSplit,sTextSplit,sCharSplit);
+    s=QString::fromUtf8("Beispiel: %1Spalte_1%2%3").arg(sTextSplit,sTextSplit,sCharSplit);
+    s+=QString::fromUtf8("%1Spalte_2%2%3").arg(sTextSplit,sTextSplit,sCharSplit);
     s+=QString::fromUtf8("%1...%2%3").arg(sTextSplit,sTextSplit,sCharSplit);
-    s+=QString::fromUtf8("%1Beispiel_Tabelle_n%2").arg(sTextSplit,sTextSplit);
+    s+=QString::fromUtf8("%1Spalte_n%2").arg(sTextSplit,sTextSplit);
 
     //update line
     ui->lineEditExamble->setText(s);

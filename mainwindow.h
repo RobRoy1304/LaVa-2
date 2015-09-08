@@ -46,6 +46,7 @@
 #include "cexportcsv.h"
 #include "cinputdialogimport.h"
 #include "clastdbchange.h"
+#include "cpictureviewdialog.h"
 
 namespace Ui
 {
@@ -112,6 +113,8 @@ public:
     bool check_first_start(void);
     bool check_run_the_program(void);
     void timerEvent(QTimerEvent *event);
+    bool open_picture_view(QTableWidget * pTable);
+
 
     //waregroup
     bool waregroup_update_tree(int iIdSelect=-1);
@@ -236,6 +239,7 @@ public slots:
     bool ordering_new(void);
     bool ordering_edit(void);
     bool ordering_delete(void);
+    bool ordering_table_warelist_doubleclick(void);
 
     //trade
     bool trade_mask_edit(void);
@@ -249,12 +253,14 @@ public slots:
     bool trade_ordering_incoming(void);
     bool trade_outgoing_customer(void);
     bool trade_canceled(void);
+    bool trade_table_warelist_doubleclick(void);
 
     //inventory
     bool inventory_mask_edit(void);
     bool inventory_checkbox_auto_clicked();
     bool inventory_mask_set(void);
     bool inventory_widgetitem_clicked();
+    bool inventory_table_doubleclick(void);
 
     //logbook
     bool logbook_mask_set(void);

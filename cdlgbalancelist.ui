@@ -86,9 +86,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>160</y>
+     <y>170</y>
      <width>961</width>
-     <height>341</height>
+     <height>331</height>
     </rect>
    </property>
    <property name="alternatingRowColors">
@@ -147,7 +147,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>140</y>
+     <y>150</y>
      <width>171</width>
      <height>17</height>
     </rect>
@@ -224,7 +224,7 @@
      <x>230</x>
      <y>30</y>
      <width>591</width>
-     <height>91</height>
+     <height>111</height>
     </rect>
    </property>
   </widget>

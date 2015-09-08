@@ -30,7 +30,6 @@ bool CExportCSV::write(QString sFile, QList<QString> & ls)
 
     bool b=false;
     QFile file(sFile);
-    QByteArray ba;
     //-
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
         file.close();
@@ -46,13 +45,7 @@ bool CExportCSV::write(QString sFile, QList<QString> & ls)
         //write
         while(ls.count()>0)
         {
-            if(m_iCodec==0)//UTF-8
-                ba=ls[0].toUtf8();
-            else if(m_iCodec==1)//Local(Windows 1252)
-                ba=ls[0].toLocal8Bit();
-            //-
-            stream<<ba;
-            //-
+            stream<<ls[0];
             ls.removeFirst();
         }
         file.close();
@@ -944,7 +937,7 @@ bool CExportCSV::write_data_article(QWidget * pParent, QTableWidget * pTable, CD
 
     //header
     ls.push_back(QString::fromUtf8("\"Artikelbezeichnung\";\"1.Artikelnummer\";\"2.Artikelnummer\";\"Hersteller\";\"Warengruppe\";\"Warnung\";"
-                         "\"Bestand\";\"max.Lagerkapazität\";\"Einheit\";\"EK\";\"VK\";\"Marge\";\"Währung\";\"Standort\";\"Kommentar\"\n"));
+                         "\"Bestand\";\"max.Lagerkapazität\";\"Einheit\";\"EK\";\"VK\";\"Marge\";\"Währung\";\"Standort\";\"Kommentar\";\"Dateipfad-Artikelbild\"\n"));
 
     //get maker info
     id_column=pTable->columnCount()-1;
@@ -1025,7 +1018,11 @@ bool CExportCSV::write_data_article(QWidget * pParent, QTableWidget * pTable, CD
                             else
                                 sLine+=QString::fromUtf8("\"\";");
                             //-
-                            sLine+=QString::fromUtf8("\"%1\";\"%2\";\"%3\"\n").arg(ar.get_valuta(),ar.get_location(),ar.get_comment());
+                            sLine+=QString::fromUtf8("\"%1\";\"%2\";\"%3\";").arg(ar.get_valuta(),ar.get_location(),ar.get_comment());
+
+                            //filepath-articlepicture
+                            sLine+=QString::fromUtf8("\"%1\"\n").arg(ar.get_path_picture());
+                            //-
                             ls.push_back(sLine);
                         }
                     }

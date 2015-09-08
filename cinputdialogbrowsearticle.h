@@ -22,6 +22,7 @@
 #include <QDialog>
 #include "cworkthread.h"
 #include "csettings.h"
+#include "cpictureviewdialog.h"
 
 namespace Ui {
     class CInputDialogBrowseArticle;
@@ -52,6 +53,7 @@ public slots:
     void checkbox_auto_clicked(void);
     void mask_edit(void);
     bool check_user_input(void);
+    void table_doubleclick(void);
 };
 
 #endif // CINPUTDIALOGBROWSEARTICLE_H

@@ -37,9 +37,6 @@ CLogoDialog::CLogoDialog(QWidget *parent) :
     ui->label_user->setPalette(palette);
     ui->label_path->setPalette(palette);
 
-    //setWindowFlags(Qt::FramelessWindowHint);//no border
-    //setWindowFlags(Qt::SplashScreen);
-
     connect(ui->pushButtonStart,SIGNAL(clicked()),this,SLOT(push_start()));
     connect(ui->pushButtonBrowseFile,SIGNAL(clicked()),this,SLOT(browse_file()));
     connect(ui->pushButtonHelp,SIGNAL(clicked()),this,SLOT(help()));

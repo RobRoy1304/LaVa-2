@@ -22,8 +22,8 @@
 #include <QtGui>
 
 //version
-#define VERSION "Version 0.32"
-#define CURRENT_DB_VERSION "1,03"
+#define VERSION "Version 0.33"
+#define CURRENT_DB_VERSION "1,04"
 
 //trade
 #define TYPE_INCOMING 1
@@ -369,6 +369,7 @@ class CArticle : public CBasicData
     QString m_sArticlenumber2;
     QString m_sLocation;
     QString m_sValuta;
+    QString m_sPathPicture;
     int m_iMakerId;
     int m_iWaregroupId;
     int m_iWarningLimit;
@@ -389,6 +390,7 @@ class CArticle : public CBasicData
     QString get_articlenumber(void);
     QString get_articlenumber2(void);
     QString get_location(void);
+    QString get_path_picture(void);
     int get_maker_id(void);
     int get_warning_limit(void);
     int get_waregroup_id(void);
@@ -402,6 +404,7 @@ class CArticle : public CBasicData
     void set_articlenumber2(QString s);
     void set_unit(QString s);
     void set_location(QString s);
+    void set_path_picture(QString sPath);
     void set_maker_id(int id);
     void set_warning_limit(int iLimit);
     void set_waregroup_id(int id);
